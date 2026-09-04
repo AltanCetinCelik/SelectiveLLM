@@ -1,0 +1,63 @@
+schema_version: "1.0.0"
+registry_version: "qwen25-lori-real-1.0.0"
+components:
+  - id: base
+    name: Qwen2.5 1.5B Instruct
+    type: base_model
+    domain: [general]
+    description: Pinned Apache-2.0 shared base model and tokenizer.
+    memory_mb: 2944.5
+    backend: transformers-peft
+    model_path: Qwen/Qwen2.5-1.5B-Instruct
+    supported_tasks: [generation, reasoning]
+    priority: 100
+    dependencies: []
+    metadata:
+      revision: 989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+      license: apache-2.0
+      capacity_semantics: safetensors_file_size_not_runtime_memory
+  - id: code_expert
+    name: LoRI Python and software expert
+    type: lora
+    domain: [python, programming, software_engineering]
+    description: Code generation, Python implementation, APIs, validation, and testing.
+    memory_mb: 140.92
+    backend: transformers-peft
+    model_path: uditjain/lori-qwen2.5-1.5b-code
+    supported_tasks: [code_generation, python, testing, fastapi]
+    priority: 50
+    dependencies: [base]
+    metadata:
+      revision: e937bbd728f28a441163f94b60ea5a119513e351
+      license: apache-2.0
+      base_model: Qwen/Qwen2.5-1.5B-Instruct
+  - id: math_expert
+    name: LoRI mathematics expert
+    type: lora
+    domain: [mathematics]
+    description: Exact arithmetic, probability, derivations, equations, and mathematical proofs.
+    memory_mb: 140.92
+    backend: transformers-peft
+    model_path: uditjain/lori-qwen2.5-1.5b-math
+    supported_tasks: [calculation, proof, probability, derivation]
+    priority: 45
+    dependencies: [base]
+    metadata:
+      revision: f992ab536c07761c67bd46e35c787bb68ea97657
+      license: apache-2.0
+      base_model: Qwen/Qwen2.5-1.5B-Instruct
+  - id: science_expert
+    name: LoRI science and technical expert
+    type: lora
+    domain: [science, electrical_engineering, scientific_reasoning]
+    description: Physical principles, circuits, electronics, MOSFETs, filters, and scientific explanation.
+    memory_mb: 140.92
+    backend: transformers-peft
+    model_path: uditjain/lori-qwen2.5-1.5b-science
+    supported_tasks: [science, electronics, circuit_analysis, explanation]
+    priority: 40
+    dependencies: [base]
+    metadata:
+      revision: 398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f
+      license: apache-2.0
+      base_model: Qwen/Qwen2.5-1.5B-Instruct

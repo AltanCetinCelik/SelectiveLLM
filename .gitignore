@@ -15,6 +15,11 @@ results/*
 !results/README.md
 !results/latest/
 !results/latest/**
+!results/real/
+results/real/*
+!results/real/README.md
+!results/real/latest/
+!results/real/latest/**
 *.safetensors
 *.bin
 *.pt

@@ -210,6 +210,26 @@ def benchmark(
     console.print(f"Report: {path / 'report.md'}" if report else "Report generation disabled.")
 
 
+@app.command("real-benchmark")
+def real_benchmark(
+    config: Annotated[Path, typer.Option("--config", exists=True, dir_okay=False)] = Path(
+        "configs/real_v011.yaml"
+    ),
+    warm_repetitions: Annotated[int, typer.Option("--warm-repetitions", min=1)] = 3,
+    output: Annotated[Path, typer.Option("--output")] = Path("results/real"),
+) -> None:
+    """Run the pinned v0.1.1 Qwen/PEFT validation on real hardware."""
+    from selectivellm.real_validation.runner import RealBenchmarkRunner
+
+    console.print(
+        "[cyan]Running pinned real-model validation. MPS live, Metal driver, and host RSS "
+        "remain separate measurements.[/cyan]"
+    )
+    path = RealBenchmarkRunner(config, results_root=output).run(warm_repetitions=warm_repetitions)
+    console.print(f"[bold green]Completed:[/bold green] {path}")
+    console.print(f"Report: {path / 'report.md'}")
+
+
 @registry_app.command("list")
 def registry_list(
     config: Annotated[Path | None, typer.Option("--config", exists=True, dir_okay=False)] = None,

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "selectivellm"
-version = "0.1.0"
+version = "0.1.1"
 description = "Semantic model paging and dynamic expert routing for memory-constrained LLM inference"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -32,7 +32,9 @@ dependencies = [
 [project.optional-dependencies]
 hf = [
   "accelerate>=0.33",
+  "huggingface-hub>=0.24",
   "peft>=0.12",
+  "safetensors>=0.4",
   "torch>=2.2",
   "transformers>=4.44",
 ]
@@ -87,3 +89,7 @@ markers = ["hf: optional tests requiring user-supplied Hugging Face assets"]
 [tool.coverage.run]
 source = ["selectivellm"]
 branch = true
+omit = [
+  "selectivellm/backends/transformers.py",
+  "selectivellm/real_validation/runner.py",
+]

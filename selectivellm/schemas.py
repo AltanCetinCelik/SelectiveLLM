@@ -8,7 +8,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-METRIC_SCHEMA_VERSION = "1.0.0"
+METRIC_SCHEMA_VERSION = "1.1.0"
 
 
 class ComponentType(StrEnum):
@@ -86,7 +86,17 @@ class PlanDecision(BaseModel):
 
 
 class RuntimeEvent(BaseModel):
-    action: Literal["load", "unload", "hit", "miss", "transfer", "reject"]
+    action: Literal[
+        "load",
+        "unload",
+        "hit",
+        "miss",
+        "transfer",
+        "reject",
+        "activate",
+        "synchronize",
+        "cleanup",
+    ]
     component_id: str
     duration_ms: float = Field(default=0, ge=0)
     from_location: str | None = None
@@ -104,6 +114,9 @@ class MemorySnapshot(BaseModel):
     accelerator_allocated_mb: float | None = Field(default=None, ge=0)
     accelerator_reserved_mb: float | None = Field(default=None, ge=0)
     accelerator_peak_allocated_mb: float | None = Field(default=None, ge=0)
+    mps_current_allocated_mb: float | None = Field(default=None, ge=0)
+    mps_driver_allocated_mb: float | None = Field(default=None, ge=0)
+    mps_recommended_max_mb: float | None = Field(default=None, ge=0)
     accelerator_measurement_available: bool
     unavailable_reason: str | None = None
     model_parameter_memory_mb: float | None = Field(default=None, ge=0)
@@ -118,6 +131,9 @@ class StageMetrics(BaseModel):
     routing_ms: float = Field(default=0, ge=0)
     planning_ms: float = Field(default=0, ge=0)
     loading_ms: float = Field(default=0, ge=0)
+    activation_ms: float = Field(default=0, ge=0)
+    synchronization_ms: float = Field(default=0, ge=0)
+    unloading_ms: float = Field(default=0, ge=0)
     inference_ms: float = Field(default=0, ge=0)
     orchestration_ms: float = Field(default=0, ge=0)
     first_token_ms: float | None = Field(default=None, ge=0)

@@ -1,0 +1,123 @@
+schema_version: "1.0.0"
+benchmark_version: "real-hero-1.0.0"
+evaluation_schema_version: "deterministic-rubric-1.0.0"
+name: SelectiveLLM v0.1.1 real-model hero subset
+description: Fixed quality and systems workload for pinned Qwen2.5/LoRI capacity.
+cases:
+  - id: py_binary_search
+    prompt: Implement binary search in Python and state its time complexity. Keep the answer concise.
+    domain: [python]
+    expected_experts: [code_expert]
+    tags: [code, straightforward, hero-derived]
+    evaluation:
+      type: concept_coverage
+      concept_groups:
+        - ["def binary_search", "def binarysearch"]
+        - ["while", "recursive"]
+        - ["mid"]
+        - ["o(log n)", "logarithmic time"]
+  - id: py_fastapi
+    prompt: Write a FastAPI endpoint with input validation and a unit test. Keep the answer under 180 words.
+    domain: [python, software_engineering]
+    expected_experts: [code_expert]
+    tags: [code, harder, hero-derived]
+    evaluation:
+      type: concept_coverage
+      concept_groups:
+        - ["fastapi"]
+        - ["basemodel", "pydantic"]
+        - ["testclient"]
+        - ["assert", "status_code"]
+  - id: math_probability
+    prompt: Two fair dice are rolled. Compute the probability that their sum is eight. Give the exact fraction.
+    domain: [mathematics]
+    expected_experts: [math_expert]
+    tags: [mathematics, straightforward, hero-derived]
+    evaluation:
+      type: numeric
+      expected_number: 0.1388888888888889
+      tolerance: 0.00001
+  - id: math_proof
+    prompt: Give a concise proof that the square root of two is irrational.
+    domain: [mathematics, reasoning]
+    expected_experts: [math_expert]
+    tags: [mathematics, harder, hero-derived]
+    evaluation:
+      type: concept_coverage
+      concept_groups:
+        - ["assume", "suppose"]
+        - ["lowest terms", "coprime", "reduced fraction"]
+        - ["both even", "p is even"]
+        - ["contradiction"]
+  - id: ee_mosfet
+    prompt: Explain why a MOSFET gate driver must source and sink current quickly. Be technically precise.
+    domain: [electrical_engineering, science]
+    expected_experts: [science_expert]
+    tags: [technical, straightforward, hero-derived]
+    evaluation:
+      type: concept_coverage
+      concept_groups:
+        - ["gate capacitance", "gate charge"]
+        - ["charge and discharge", "source and sink"]
+        - ["switching loss", "switching losses"]
+        - ["rise time", "fall time", "transition time"]
+  - id: ee_filter
+    prompt: Derive the cutoff frequency of a first-order RC low-pass circuit and identify the -3 dB condition.
+    domain: [electrical_engineering, mathematics]
+    expected_experts: [science_expert, math_expert]
+    tags: [technical, mathematics, harder, multi-domain, hero-derived]
+    evaluation:
+      type: concept_coverage
+      concept_groups:
+        - ["1/(2 pi rc)", "1/(2πrc)", "1 / (2 pi rc)"]
+        - ["-3 db", "3 db"]
+        - ["omega rc = 1", "ωrc = 1", "1/sqrt(2)", "1/√2"]
+  - id: general_capital
+    prompt: What is the capital of Japan? Answer with only the city name.
+    domain: [general]
+    expected_experts: []
+    tags: [general, no-specialist-needed, hero-derived]
+    evaluation:
+      type: exact_contains
+      answers: [Tokyo]
+  - id: irrelevant_python
+    prompt: Name one python species found in Southeast Asia. Answer with one species and no programming discussion.
+    domain: [general]
+    expected_experts: []
+    tags: [general, lexical-trap, ambiguous, no-specialist-needed, hero-derived]
+    evaluation:
+      type: exact_contains
+      answers: ["reticulated python", "Burmese python", "Python reticulatus", "Malayopython reticulatus"]
+  - id: rlc_python
+    prompt: Write Python code to numerically simulate a series RLC circuit transient and explain how the damping regime changes the response. Keep the answer under 220 words.
+    domain: [python, electrical_engineering, mathematics]
+    expected_experts: [code_expert, science_expert, math_expert]
+    tags: [harder, multi-domain, three-capability, hero-derived]
+    evaluation:
+      type: concept_coverage
+      concept_groups:
+        - ["solve_ivp", "odeint", "numerical integration"]
+        - ["import matplotlib", "plt.plot", "plot("]
+        - ["differential equation", "state equation", "di/dt"]
+        - ["underdamped", "overdamped", "critically damped", "critical damping"]
+        - ["r/(2l)", "r / (2 l)", "damping coefficient", "damping ratio"]
+high_locality_order:
+  - py_binary_search
+  - py_fastapi
+  - math_probability
+  - math_proof
+  - ee_mosfet
+  - ee_filter
+  - rlc_python
+  - general_capital
+  - irrelevant_python
+low_locality_order:
+  - py_binary_search
+  - math_probability
+  - ee_mosfet
+  - general_capital
+  - py_fastapi
+  - math_proof
+  - ee_filter
+  - irrelevant_python
+  - rlc_python

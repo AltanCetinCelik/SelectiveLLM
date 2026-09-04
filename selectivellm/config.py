@@ -42,6 +42,9 @@ class BackendConfig(BaseModel):
     type: str = "deterministic"
     model_path: str | None = None
     tokenizer_path: str | None = None
+    model_revision: str | None = None
+    tokenizer_revision: str | None = None
+    dtype: str = "auto"
     trust_remote_code: bool = False
     max_new_tokens: int = Field(default=128, ge=1)
     device: str = "auto"

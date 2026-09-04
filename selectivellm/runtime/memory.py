@@ -29,6 +29,9 @@ class MemoryMeter:
         allocated: float | None = None
         reserved: float | None = None
         peak: float | None = None
+        mps_current: float | None = None
+        mps_driver: float | None = None
+        mps_recommended: float | None = None
         available = False
         reason: str | None = "CPU backend has no accelerator-memory measurement"
         try:
@@ -41,7 +44,10 @@ class MemoryMeter:
                 available = True
                 reason = None
             elif self.device == "mps" and hasattr(torch, "mps"):
-                allocated = torch.mps.current_allocated_memory() / (1024 * 1024)
+                mps_current = torch.mps.current_allocated_memory() / (1024 * 1024)
+                mps_driver = torch.mps.driver_allocated_memory() / (1024 * 1024)
+                mps_recommended = torch.mps.recommended_max_memory() / (1024 * 1024)
+                allocated = mps_current
                 self._mps_peak_mb = max(self._mps_peak_mb, allocated)
                 peak = self._mps_peak_mb
                 available = True
@@ -57,6 +63,9 @@ class MemoryMeter:
             accelerator_allocated_mb=allocated,
             accelerator_reserved_mb=reserved,
             accelerator_peak_allocated_mb=peak,
+            mps_current_allocated_mb=mps_current,
+            mps_driver_allocated_mb=mps_driver,
+            mps_recommended_max_mb=mps_recommended,
             accelerator_measurement_available=available,
             unavailable_reason=reason,
         )
