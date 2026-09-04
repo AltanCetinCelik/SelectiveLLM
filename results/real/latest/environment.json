@@ -1,0 +1,43 @@
+{
+  "accelerator": "Apple Metal Performance Shaders",
+  "accelerator_memory_mb": null,
+  "architecture": "arm64",
+  "cpu": "arm",
+  "cuda_version": null,
+  "device": "mps",
+  "device_class": "mps",
+  "hardware_details": {
+    "chip": "Apple M4",
+    "cpu_cores": 10,
+    "disk_available_after_completed_run_gib": 10,
+    "disk_available_before_asset_download_gib": 15,
+    "efficiency_cores": 6,
+    "gpu_cores": 8,
+    "machine_model": "Mac16,12",
+    "machine_name": "MacBook Air",
+    "metal_support": "Metal 4",
+    "mps_available": true,
+    "mps_built": true,
+    "mps_recommended_max_mb": 12124.171875,
+    "performance_cores": 4,
+    "unified_memory_gb": 16
+  },
+  "logical_cpus": 10,
+  "mps_available": true,
+  "os": "Darwin",
+  "os_version": "25.5.0",
+  "packages": {
+    "accelerate": "1.14.0",
+    "huggingface-hub": "1.30.0",
+    "numpy": "2.2.6",
+    "peft": "0.20.0",
+    "safetensors": "0.8.0",
+    "selectivellm": "0.1.1",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "python_version": "3.12.14",
+  "torch_version": "2.14.0",
+  "total_ram_gb": 16.0
+}

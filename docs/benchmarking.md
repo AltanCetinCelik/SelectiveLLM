@@ -16,6 +16,16 @@ Run one method:
 selectivellm benchmark --router semantic --report
 ```
 
+## Real-model experiment
+
+The `real-hero-1.0.0` dataset contains nine fixed cases covering code, mathematics, electrical engineering, general knowledge, no-specialist decisions, a lexical trap, and two multi-domain circuit prompts. The pinned v0.1.1 run uses one cold workload and three warm repetitions for 11 policies, followed by a dedicated RLC composition matrix.
+
+```bash
+selectivellm real-benchmark --config configs/real_v011.yaml --warm-repetitions 3
+```
+
+Real quality uses deterministic exact, numeric, and concept-coverage rubrics. The run preserves raw responses and never substitutes synthetic routing coverage. The 96-token decoding limit is part of this benchmark version and must not be changed without a new comparable run identity.
+
 ## Required baselines
 
 | Method | Purpose |
@@ -52,23 +62,25 @@ Use repeated benchmark runs and independent seeds for stronger uncertainty estim
 
 ## Validity guard
 
-Each run stores two SHA-256 values:
+Deterministic-control runs store two SHA-256 values:
 
 - `benchmark_fingerprint` covers backend and kind, model identity, adapter set, benchmark/registry/router/metric versions, seed policy, device class, and measurement semantics.
 - `configuration_fingerprint` adds the methods and repetition count.
 
 Only runs with compatible benchmark fingerprints may share an undifferentiated table or plot. The method under comparison is intentionally excluded from the compatibility hash. Changes to cases, labels, evaluation logic, registry components, routing semantics, or metric meanings require a version increment.
 
+The v0.1.1 real runner uses one stricter compatibility fingerprint that also includes pinned model/tokenizer/adapter revisions, PEFT config hashes, runtime policies, repetition count, dependency versions, and platform/device details. Its exact registry and benchmark inputs are archived beside the manifest.
+
 ## Quality evaluation
 
 The control backend uses `synthetic_capability_coverage_v1`: a documented score derived from required expert coverage with a base floor. It proves only that the pipeline responds correctly to capacity sufficiency. It is not language-model accuracy.
 
-Real backends use case-declared exact match or token F1 in v0.1. Those simple metrics are insufficient for open-ended generation, so a serious real-model study should add task-specific tests, code execution in an isolated evaluator, human evaluation, or a separately reported judge. LLM-as-judge is optional and never the sole primary metric.
+The v0.1.1 real backend uses case-declared exact containment, numeric tolerance, or concept-group coverage. These simple rubrics are insufficient for open-ended generation, so later studies should add task-specific tests, code execution in an isolated evaluator, human evaluation, or a separately reported judge. LLM-as-judge is optional and never the sole primary metric.
 
 ## Failure analysis
 
-`routing_failures.md` records missing experts, unnecessary activations, low-confidence routes, budget rejections in raw rows, and cases where correct routing does not improve quality. A future report revision should group these by cause and include confidence calibration.
+`failure_analysis.md` records missing experts, unnecessary activations, low-confidence routes, cases where correct routing does not improve quality, random wins, oracle regressions, token-cap diagnostics, evaluator details, and completed-but-degraded multi-adapter composition.
 
 ## Reproducing a run
 
-Use the saved `config.yaml`, match the environment and model/adapter assets recorded in `manifest.json`, and rerun against the same benchmark version. Compare fingerprints before combining results. Model weights are external and remain governed by their own licenses.
+Use the saved `config.yaml`, `registry.yaml`, and `benchmark.yaml`; match the environment and exact model/adapter revisions in `manifest.json`; then rerun. Compare fingerprints before combining results. Model weights are external and remain governed by their own licenses.

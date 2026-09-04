@@ -14,7 +14,7 @@ SelectiveLLM is an experimental inference framework exploring **retrieval over m
 > [!IMPORTANT]
 > SelectiveLLM does NOT currently turn a dense 70B model into a 7B-memory model.
 >
-> The included v0.1 evidence comes from a deterministic-control backend. Its expert capacities are simulated registry declarations, its task score is synthetic capability coverage, and it does **not** demonstrate physical VRAM savings or language-model quality. The real Transformers/PEFT backend uses the same methodology but requires compatible user-supplied model and adapter assets.
+> v0.1.1 includes a real Qwen2.5/PEFT run on Apple M4 alongside the deterministic control. It demonstrates real adapter residency and swapping, but it did **not** establish that better routing reliably improves generated answers. MPS measurements are unified-memory allocator signals, never labeled discrete VRAM.
 
 ## The experiment
 
@@ -53,9 +53,31 @@ Prompt -> Analyzer -> Router -> Budget Planner -> Registry
 
 The hero experiment compares base-only, random, keyword, oracle, embedding, semantic, cached, and all-resident controls on single-domain, ambiguous, irrelevant-domain, and multi-domain prompts. Every row carries its backend, model identity, versioned inputs, measurement semantics, and compatibility fingerprint.
 
-![Quality retention versus declared-capacity reduction from the deterministic-control run](results/latest/plots/quality_vs_memory.png)
+## Real Model Evidence
 
-### Included control result
+Backend: **`transformers-peft`** | Model: **Qwen2.5-1.5B-Instruct** | Hardware: **Apple M4 / 16 GB unified memory / MPS** | Benchmark: **9 cases, 396 primary observations + 18 RLC observations**
+
+The pinned run used independently produced code, math, and science LoRI adapters. Semantic routing reached 0.830 multi-label F1 versus 0.611 keyword and 0.278 random. Dynamic semantic routing averaged 3125.732 MB of MPS live tensor allocation versus 3412.159 MB all-resident, a measured 286.427 MB reduction. This is real live-tensor residency on Apple unified memory, not simulated capacity and not discrete VRAM.
+
+The model-quality result was negative: semantic and oracle averaged about 0.370 to 0.378 fixed-rubric quality, but random also scored 0.370. On the RLC case, base and code-only scored 0.400 while code-plus-science scored 0.067 and three-expert oracle scored 0.000. Better routing did not produce a reliable aggregate quality advantage.
+
+![Real quality-memory tradeoff on Qwen2.5-1.5B-Instruct](results/real/latest/plots/real_quality_vs_memory.png)
+
+| Policy | Quality | Routing F1 | Resident adapters | MPS live MB | Load ms | Request hit rate |
+|---|---:|---:|---:|---:|---:|---:|
+| Base only | 0.267 | 0.222 | 0.000 | 2968.777 | 0.000 | N/A |
+| Random | 0.370 | 0.278 | 1.000 | 3110.121 | 734.933 | 0.0% |
+| Keyword | 0.350 | 0.611 | 0.667 | 3063.006 | 582.213 | 0.0% |
+| Oracle | 0.370 | 1.000 | 1.111 | 3157.253 | 861.736 | 0.0% |
+| Semantic, dynamic | 0.378 | 0.830 | 1.000 | 3125.732 | 796.888 | 0.0% |
+| Semantic, cache 1, high locality | 0.378 | 0.830 | 1.111 | 3141.384 | 521.498 | 55.6% |
+| All resident, semantic active | 0.370 | 0.830 | 3.000 | 3412.159 | 0.000 | 100.0% |
+
+Values are warm means over 27 observations per policy. The full [real-model analysis](docs/real_model_evidence.md) documents uncertainty, lifecycle memory, cache locality, RLC composition, token-cap failures, and every evidence boundary. See the [run report](results/real/latest/report.md), [manifest](results/real/latest/manifest.json), [raw responses](results/real/latest/raw_responses.jsonl), and [failure analysis](results/real/latest/failure_analysis.md).
+
+## Deterministic Control Evidence
+
+![Quality retention versus declared-capacity reduction from the deterministic-control run](results/latest/plots/quality_vs_memory.png)
 
 Backend: **`deterministic-control`** | Benchmark: **`hero-1.0.0`** | 16 cases x 5 repetitions | Accelerator memory: **unavailable**
 
@@ -81,14 +103,14 @@ These numbers demonstrate that the implemented router, planner, cache, metrics, 
 - Strict separation of simulated declared capacity, observed host RSS, and available accelerator allocation/reservation/peak metrics.
 - One backend contract for deterministic control and real Hugging Face Transformers + PEFT/LoRA operation.
 - CUDA -> MPS -> CPU detection, with no CUDA assumption in the default path.
-- Reproducible benchmark directories containing versioned configuration, environment, raw JSONL, summaries, CSV, report, routing decisions, failures, and five plots.
+- Reproducible benchmark directories containing versioned configuration, environment, raw JSONL, summaries, CSV, report, routing decisions, failures, and evidence plots.
 - Compatibility guards using hashes of benchmark content, registry content, routing configuration, model/adapter identity, seed policy, device class, and measurement semantics.
 
 ## What this is not
 
 - It is not document retrieval or a RAG implementation.
 - It is not a newly trained Mixture-of-Experts architecture.
-- v0.1 is adapter/expert routing as a testable proxy for a broader capacity-routing hypothesis.
+- v0.1.x is adapter/expert routing as a testable proxy for a broader capacity-routing hypothesis.
 - It does not show that dense-model knowledge can be separated into clean semantic parameter blocks.
 - It does not bundle model weights or make claims across incompatible backends.
 
@@ -166,6 +188,15 @@ selectivellm run \
 
 The real backend loads a causal language model, adds named PEFT adapters, activates selected adapters, deletes evicted adapters where supported, synchronizes accelerator timing, and reports actual memory telemetry where PyTorch exposes it. `trust_remote_code` defaults to `false`. Multi-adapter composition can fail when adapters are incompatible; this is reported explicitly.
 
+Reproduce the pinned v0.1.1 experiment after installing the optional dependencies and downloading the external assets:
+
+```bash
+selectivellm real-benchmark \
+  --config configs/real_v011.yaml \
+  --warm-repetitions 3 \
+  --output results/real
+```
+
 Model and adapter licenses are separate from the Apache-2.0 project license. SelectiveLLM does not redistribute weights.
 
 ## Experimental modes
@@ -174,7 +205,7 @@ Model and adapter licenses are separate from the Apache-2.0 project license. Sel
 |---|---|---|
 | Full model | Dense/base generation baseline | Implemented through the common backend |
 | CPU/GPU offload | Conventional placement baseline | Configured through Transformers + Accelerate `device_map`; real evidence pending |
-| Semantic expert routing | Shared base plus selected adapters/experts | Implemented; control evidence included |
+| Semantic expert routing | Shared base plus selected adapters/experts | Real MPS residency evidence; quality advantage not established |
 | Multi-model expert pool | Systems-level proxy, not parameter paging | Interface-compatible future experiment |
 
 ## Benchmark contract
@@ -217,7 +248,7 @@ Read the full [benchmark methodology](docs/benchmarking.md) before comparing run
 
 ## Limitations and falsification
 
-The current analyzer is a transparent deterministic feature-hash control, not a learned semantic encoder. The workload is small and authored. Control quality is mechanically tied to required-capability coverage. The included run therefore validates the framework and experimental plumbing, not the central real-model hypothesis.
+The current analyzer is a transparent deterministic feature-hash/keyword hybrid, not a learned semantic encoder. The real workload is small and authored, policies were not counterbalanced, and 45.8% of warm responses reached the fixed 96-token cap. The real run validates adapter residency and cache mechanics, but random tied oracle quality and RLC composition degraded output, so the central quality-preservation hypothesis remains unproven.
 
 A strong falsification test uses a pre-registered held-out workload, a real shared base and validated adapters, repeated workload orders, and equal decoding settings. The hypothesis is weakened or falsified for that setup if semantic routing does not beat keyword/random routing, does not retain quality relative to oracle/all-resident, or incurs enough transfer latency that no useful quality-memory-latency point remains.
 
@@ -232,9 +263,11 @@ Parameter-level semantic paging becomes credible only after causal importance ma
 - [Research questions and hypothesis matrix](docs/research_questions.md)
 - [Semantic parameter paging research agenda](docs/research/semantic_parameter_paging.md)
 - [Living technical report](docs/paper.md)
+- [v0.1.1 real-model evidence](docs/real_model_evidence.md)
 - [Hostile review and falsification criteria](docs/hostile_review.md)
 - [Roadmap](docs/roadmap.md)
 - [v0.1.0 release notes](docs/releases/v0.1.0.md)
+- [v0.1.1 release notes](docs/releases/v0.1.1.md)
 
 ## Development
 
@@ -251,7 +284,7 @@ Tests are network-free and do not download models. Optional real-backend integra
 
 ## Roadmap
 
-The next evidence milestone is a license-compatible real base/adapters experiment with held-out quality evaluation and observed accelerator memory. Later milestones cover cache-policy comparisons, learned routing, adapter composition/interference, activation tracing, causal importance masks, and only then hardware-aligned parameter paging. See the [evidence-gated roadmap](docs/roadmap.md).
+The next evidence milestone is a pre-registered held-out validation of adapter specialization with a generation budget that avoids systematic truncation, followed by interference-aware composition. Learned routing, activation tracing, causal importance masks, and hardware-aligned parameter paging remain later evidence gates. See the [evidence-gated roadmap](docs/roadmap.md).
 
 ## Citation
 

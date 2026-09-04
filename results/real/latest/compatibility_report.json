@@ -1,0 +1,96 @@
+{
+  "adapters": [
+    {
+      "adapter_bytes": 147770496,
+      "base_model_name_or_path": "Qwen/Qwen2.5-1.5B-Instruct",
+      "config_sha256": "e75021e72377f8b6b9e9b7f17049bc76f45f3fd4f659e37519b5c0e9d5ef0c8c",
+      "license": "apache-2.0",
+      "lora_alpha": 64.0,
+      "peft_signature_hash": "fb27495ae7dfa85c5be41feab5cea5e0ac2f30f52a9b75bf8d80970d7e783731",
+      "peft_type": "LORA",
+      "r": 32,
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-code",
+      "requested_revision": "e937bbd728f28a441163f94b60ea5a119513e351",
+      "resolved_revision": "e937bbd728f28a441163f94b60ea5a119513e351",
+      "revision": "e937bbd728f28a441163f94b60ea5a119513e351",
+      "role": "code_expert",
+      "target_modules": [
+        "down_proj",
+        "gate_proj",
+        "k_proj",
+        "o_proj",
+        "q_proj",
+        "up_proj",
+        "v_proj"
+      ]
+    },
+    {
+      "adapter_bytes": 147770496,
+      "base_model_name_or_path": "Qwen/Qwen2.5-1.5B-Instruct",
+      "config_sha256": "c435304d93c2ddb6b773f20165d9c865ecc09a9dbcad6b2b9d7b7438fd19a94c",
+      "license": "apache-2.0",
+      "lora_alpha": 64.0,
+      "peft_signature_hash": "fb27495ae7dfa85c5be41feab5cea5e0ac2f30f52a9b75bf8d80970d7e783731",
+      "peft_type": "LORA",
+      "r": 32,
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-math",
+      "requested_revision": "f992ab536c07761c67bd46e35c787bb68ea97657",
+      "resolved_revision": "f992ab536c07761c67bd46e35c787bb68ea97657",
+      "revision": "f992ab536c07761c67bd46e35c787bb68ea97657",
+      "role": "math_expert",
+      "target_modules": [
+        "down_proj",
+        "gate_proj",
+        "k_proj",
+        "o_proj",
+        "q_proj",
+        "up_proj",
+        "v_proj"
+      ]
+    },
+    {
+      "adapter_bytes": 147770496,
+      "base_model_name_or_path": "Qwen/Qwen2.5-1.5B-Instruct",
+      "config_sha256": "fc1da6fd76bd75249b379a122cf5945a3d05094480a41296955b2cbd0ac69fa9",
+      "license": "apache-2.0",
+      "lora_alpha": 64.0,
+      "peft_signature_hash": "fb27495ae7dfa85c5be41feab5cea5e0ac2f30f52a9b75bf8d80970d7e783731",
+      "peft_type": "LORA",
+      "r": 32,
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-science",
+      "requested_revision": "398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f",
+      "resolved_revision": "398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f",
+      "revision": "398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f",
+      "role": "science_expert",
+      "target_modules": [
+        "down_proj",
+        "gate_proj",
+        "k_proj",
+        "o_proj",
+        "q_proj",
+        "up_proj",
+        "v_proj"
+      ]
+    }
+  ],
+  "base": {
+    "config_sha256": "98d2ff8cc47488d08a2b0b3acf4eb99ef210779b42bd48605f6b8e36acdbf670",
+    "license": "apache-2.0",
+    "model_type": "qwen2",
+    "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "requested_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "resolved_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "role": "base",
+    "vocab_size": 151936
+  },
+  "status": "compatible",
+  "tokenizer": {
+    "class": "Qwen2Tokenizer",
+    "max_token_id": 151664,
+    "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "requested_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "resolved_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "vocab_size": 151665
+  }
+}

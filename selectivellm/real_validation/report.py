@@ -44,6 +44,8 @@ METRICS = (
     "mps_driver_peak_generation_mb",
 )
 
+CACHE_REQUEST_HIT_RATE = "cache_request_hit_rate"
+
 
 def summarize(rows: list[dict[str, Any]], manifest: dict[str, Any]) -> dict[str, Any]:
     policies = sorted({row["policy"] for row in rows})
@@ -56,12 +58,23 @@ def summarize(rows: list[dict[str, Any]], manifest: dict[str, Any]) -> dict[str,
                 for row in rows
                 if row["policy"] == policy and (phase is None or row["phase"] == phase)
             ]
-            output[policy] = {
+            policy_metrics = {
                 metric: aggregate(
                     [float(row[metric]) for row in observations if row.get(metric) is not None]
                 ).model_dump(mode="json")
                 for metric in METRICS
             }
+            request_outcomes = [
+                outcome
+                for row in observations
+                for outcome in (
+                    [1.0] * int(row.get("cache_hits", 0)) + [0.0] * int(row.get("cache_misses", 0))
+                )
+            ]
+            policy_metrics[CACHE_REQUEST_HIT_RATE] = aggregate(request_outcomes).model_dump(
+                mode="json"
+            )
+            output[policy] = policy_metrics
         return output
 
     return {
@@ -107,6 +120,46 @@ def generate_plots(summary: dict[str, Any], plots: Path) -> None:
     labels = [item.replace("semantic_", "sem ").replace("_", " ") for item in policies]
     plt.style.use("seaborn-v0_8-whitegrid")
 
+    representative = {
+        "Base only": "base_only",
+        "Random": "random",
+        "Keyword": "keyword",
+        "Oracle": "oracle",
+        "Semantic dynamic": "semantic_cache0_low",
+        "All resident": "all_resident",
+    }
+    fig, axis = plt.subplots(figsize=(11, 7))
+    colors = ("#3D405B", "#E07A5F", "#F2CC8F", "#81B29A", "#247BA0", "#8E6C88")
+    for (label, policy), color in zip(representative.items(), colors, strict=True):
+        metrics = summary["warm_methods"][policy]
+        x_stats = metrics["mps_current_before_generation_mb"]
+        y_stats = metrics["quality"]
+        x = float(x_stats["mean"])
+        y = float(y_stats["mean"])
+        x_ci = x_stats["confidence_interval_95"]
+        y_ci = y_stats["confidence_interval_95"]
+        x_error = [[x - x_ci[0]], [x_ci[1] - x]] if x_ci else None
+        y_error = [[y - y_ci[0]], [y_ci[1] - y]] if y_ci else None
+        axis.errorbar(
+            x,
+            y,
+            xerr=x_error,
+            yerr=y_error,
+            fmt="o",
+            markersize=8,
+            capsize=3,
+            color=color,
+            label=label,
+        )
+    axis.set_xlabel("Mean MPS live tensor allocation before generation (MB), not VRAM")
+    axis.set_ylabel("Mean fixed-rubric quality")
+    axis.set_ylim(0, 0.58)
+    axis.set_title("Real quality-memory tradeoff\nWarm workload: 9 cases x 3 repetitions")
+    axis.legend(loc="lower right")
+    fig.tight_layout()
+    fig.savefig(plots / "real_quality_vs_memory.png", dpi=180)
+    plt.close(fig)
+
     fig, axis = plt.subplots(figsize=(13, 6))
     quality = [_mean(summary, item, "quality") for item in policies]
     axis.bar(labels, quality, color="#247BA0")
@@ -134,13 +187,25 @@ def generate_plots(summary: dict[str, Any], plots: Path) -> None:
     fig, axis = plt.subplots(figsize=(13, 6))
     live = [_mean(summary, item, "mps_current_before_generation_mb") for item in policies]
     peak = [_mean(summary, item, "mps_current_peak_generation_mb") for item in policies]
-    x = np.arange(len(policies))
+    memory_positions = np.arange(len(policies))
     width = 0.38
-    axis.bar(x - width / 2, live, width, label="MPS live before generation", color="#247BA0")
-    axis.bar(x + width / 2, peak, width, label="MPS sampled generation peak", color="#FF7B6B")
+    axis.bar(
+        memory_positions - width / 2,
+        live,
+        width,
+        label="MPS live before generation",
+        color="#247BA0",
+    )
+    axis.bar(
+        memory_positions + width / 2,
+        peak,
+        width,
+        label="MPS sampled generation peak",
+        color="#FF7B6B",
+    )
     axis.set_ylabel("MPS current tensor allocation (MB), not VRAM")
     axis.set_title("Observed live tensor allocation")
-    axis.set_xticks(x, labels, rotation=28)
+    axis.set_xticks(memory_positions, labels, rotation=28)
     axis.legend()
     fig.tight_layout()
     fig.savefig(plots / "real_mps_live_memory.png", dpi=180)
@@ -149,9 +214,9 @@ def generate_plots(summary: dict[str, Any], plots: Path) -> None:
     fig, axis = plt.subplots(figsize=(13, 6))
     stages = ("routing_ms", "planning_ms", "loading_ms", "activation_ms", "generation_ms")
     stage_labels = ("Route", "Plan", "Load", "Activate", "Generate")
-    colors = ("#247BA0", "#70C1B3", "#F3C677", "#A78BFA", "#FF7B6B")
+    stage_colors = ("#247BA0", "#70C1B3", "#F3C677", "#A78BFA", "#FF7B6B")
     bottom = np.zeros(len(policies))
-    for metric, label, color in zip(stages, stage_labels, colors, strict=True):
+    for metric, label, color in zip(stages, stage_labels, stage_colors, strict=True):
         values = np.array([_mean(summary, item, metric) for item in policies])
         axis.bar(labels, values, bottom=bottom, label=label, color=color)
         bottom += values
@@ -165,17 +230,19 @@ def generate_plots(summary: dict[str, Any], plots: Path) -> None:
 
     cache_policies = [item for item in policies if item.startswith("semantic_cache")]
     fig, axis = plt.subplots(figsize=(11, 6))
-    hits = [_mean(summary, item, "cache_hit_rate") for item in cache_policies]
+    hits = [_mean(summary, item, CACHE_REQUEST_HIT_RATE) for item in cache_policies]
     loads = [_mean(summary, item, "adapter_loads") for item in cache_policies]
-    x = np.arange(len(cache_policies))
-    axis.bar(x - 0.2, hits, 0.4, label="Hit rate", color="#70C1B3")
+    cache_positions = np.arange(len(cache_policies))
+    axis.bar(cache_positions - 0.2, hits, 0.4, label="Hit rate", color="#70C1B3")
     second = axis.twinx()
-    second.bar(x + 0.2, loads, 0.4, label="Loads/request", color="#FF7B6B")
+    second.bar(cache_positions + 0.2, loads, 0.4, label="Loads/request", color="#FF7B6B")
     axis.set_ylim(0, 1.05)
     axis.set_ylabel("Cache hit rate")
     second.set_ylabel("Adapter loads per request")
     axis.set_xticks(
-        x, [item.replace("semantic_", "").replace("_", " ") for item in cache_policies], rotation=20
+        cache_positions,
+        [item.replace("semantic_", "").replace("_", " ") for item in cache_policies],
+        rotation=20,
     )
     axis.set_title("Cache locality and capacity")
     handles, names = axis.get_legend_handles_labels()
@@ -205,14 +272,26 @@ def write_report(summary: dict[str, Any], manifest: dict[str, Any], path: Path) 
     ]
     for policy, metrics in summary["warm_methods"].items():
         lines.append(
-            f"| {policy} | {metrics['quality']['count']} | {_format_mean(metrics, 'quality')} | {_format_mean(metrics, 'quality_delta_base')} | {_format_mean(metrics, 'quality_delta_oracle')} | {_format_mean(metrics, 'routing_f1')} | {_format_mean(metrics, 'mps_current_before_generation_mb')} | {_format_mean(metrics, 'mps_driver_before_generation_mb')} | {_format_mean(metrics, 'loading_ms')} | {_format_mean(metrics, 'first_token_ms')} | {_format_mean(metrics, 'end_to_end_ms')} | {_format_mean(metrics, 'cache_hit_rate')} |"
+            f"| {policy} | {metrics['quality']['count']} | {_format_mean(metrics, 'quality')} | {_format_mean(metrics, 'quality_delta_base')} | {_format_mean(metrics, 'quality_delta_oracle')} | {_format_mean(metrics, 'routing_f1')} | {_format_mean(metrics, 'mps_current_before_generation_mb')} | {_format_mean(metrics, 'mps_driver_before_generation_mb')} | {_format_mean(metrics, 'loading_ms')} | {_format_mean(metrics, 'first_token_ms')} | {_format_mean(metrics, 'end_to_end_ms')} | {_format_mean(metrics, CACHE_REQUEST_HIT_RATE)} |"
         )
     lines.extend(
         [
             "",
             "Cold-workload observations and full variability statistics are retained in `summary.json` and `summary.csv`; the table above does not pool them with warm repetitions.",
             "",
+            "## Observed conclusion",
+            "",
+            f"Semantic routing reached {_mean(summary, 'semantic_cache0_low', 'routing_f1'):.3f} routing F1 versus {_mean(summary, 'keyword', 'routing_f1'):.3f} keyword and {_mean(summary, 'random', 'routing_f1'):.3f} random. Its quality was {_mean(summary, 'semantic_cache0_low', 'quality'):.3f}, but random and oracle both scored {_mean(summary, 'random', 'quality'):.3f}. Better routing therefore did not establish a reliable aggregate quality advantage.",
+            "",
+            f"Dynamic semantic routing used {_mean(summary, 'semantic_cache0_low', 'mps_current_before_generation_mb'):.3f} MB mean MPS live tensor allocation versus {_mean(summary, 'all_resident', 'mps_current_before_generation_mb'):.3f} MB all-resident, a measured reduction of {_mean(summary, 'all_resident', 'mps_current_before_generation_mb') - _mean(summary, 'semantic_cache0_low', 'mps_current_before_generation_mb'):.3f} MB on Apple unified memory.",
+            "",
+            f"Cache size 1 reached {_mean(summary, 'semantic_cache1_high', CACHE_REQUEST_HIT_RATE):.1%} request hits at high locality and {_mean(summary, 'semantic_cache1_low', CACHE_REQUEST_HIT_RATE):.1%} at low locality. Cache size 3 reached 100% by retaining all source adapters. End-to-end policy timings are not a counterbalanced causal estimate because policies ran sequentially.",
+            "",
+            "The RLC matrix in `rlc_matrix.jsonl` preserves the completed but degraded weighted-linear composition result. See the [full evidence interpretation](../../../docs/real_model_evidence.md) and `failure_analysis.md`.",
+            "",
             "## Plots",
+            "",
+            "![Real quality-memory tradeoff](plots/real_quality_vs_memory.png)",
             "",
             "![Real quality](plots/real_quality.png)",
             "",
@@ -227,6 +306,7 @@ def write_report(summary: dict[str, Any], manifest: dict[str, Any], path: Path) 
             "## Measurement boundaries",
             "",
             "- Quality is a fixed deterministic rubric, not synthetic routing coverage and not an LLM judge.",
+            "- Cache hit rate is weighted over adapter requests; prompts requesting no adapter are excluded.",
             "- All-resident means all adapter tensors were loaded; active adapters are recorded separately.",
             "- MPS live tensor allocation excludes allocator caches. Metal driver allocation includes caches and framework allocations.",
             "- Host RSS overlaps conceptually with accelerator use on Apple unified memory and must not be added to MPS figures.",

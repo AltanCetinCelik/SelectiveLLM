@@ -194,11 +194,15 @@ class TransformersPeftBackend(InferenceBackend):
             },
         )
 
-    def activate_adapters(self, adapters: list[str]) -> dict[str, float]:
+    def activate_adapters(self, adapters: list[str]) -> dict[str, Any]:
         if self.model is None:
             raise RuntimeError("Transformers model is not loaded")
         if adapters and adapters == self.active_adapters:
-            return {"activation_ms": 0.0, "activation_synchronization_ms": 0.0}
+            return {
+                "activation_ms": 0.0,
+                "activation_synchronization_ms": 0.0,
+                **self._activation_metadata,
+            }
         activation_started = perf_counter()
         self._drop_composition()
         self._activation_metadata = {
@@ -241,6 +245,7 @@ class TransformersPeftBackend(InferenceBackend):
         return {
             "activation_ms": activation_ms,
             "activation_synchronization_ms": activation_sync_ms,
+            **self._activation_metadata,
         }
 
     def _drop_composition(self) -> None:

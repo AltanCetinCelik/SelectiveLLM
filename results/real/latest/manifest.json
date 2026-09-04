@@ -1,0 +1,265 @@
+{
+  "adapters": [
+    {
+      "license": "apache-2.0",
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-code",
+      "revision": "e937bbd728f28a441163f94b60ea5a119513e351",
+      "role": "code_expert"
+    },
+    {
+      "license": "apache-2.0",
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-math",
+      "revision": "f992ab536c07761c67bd46e35c787bb68ea97657",
+      "role": "math_expert"
+    },
+    {
+      "license": "apache-2.0",
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-science",
+      "revision": "398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f",
+      "role": "science_expert"
+    }
+  ],
+  "artifact_counts": {
+    "benchmark_cases": 9,
+    "cold_workload_observations": 99,
+    "primary_observations": 396,
+    "rlc_matrix_observations": 18,
+    "warm_observations": 297,
+    "warm_repetitions": 3
+  },
+  "backend": "transformers-peft",
+  "backend_kind": "real",
+  "base_load_ms": 4452.718334010569,
+  "benchmark_fingerprint": "a24ac14e5122d5681ddf091602c57777897c6a637d578ce6407dc8031fe51b03",
+  "benchmark_version": "real-hero-1.0.0",
+  "completed_at": "2026-09-04T14:14:12.088101+00:00",
+  "created_at": "2026-09-04T13:13:29.848230+00:00",
+  "device": {
+    "accelerator": "Apple Metal Performance Shaders",
+    "accelerator_memory_mb": null,
+    "architecture": "arm64",
+    "cpu": "arm",
+    "cuda_version": null,
+    "device": "mps",
+    "device_class": "mps",
+    "logical_cpus": 10,
+    "mps_available": true,
+    "os": "Darwin",
+    "os_version": "25.5.0",
+    "python_version": "3.12.14",
+    "torch_version": "2.14.0",
+    "total_ram_gb": 16.0
+  },
+  "evaluation_schema_version": "deterministic-rubric-1.0.0",
+  "fingerprint_payload": {
+    "assets": [
+      {
+        "license": "apache-2.0",
+        "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "role": "base"
+      },
+      {
+        "license": "apache-2.0",
+        "repo_id": "uditjain/lori-qwen2.5-1.5b-code",
+        "revision": "e937bbd728f28a441163f94b60ea5a119513e351",
+        "role": "code_expert"
+      },
+      {
+        "license": "apache-2.0",
+        "repo_id": "uditjain/lori-qwen2.5-1.5b-math",
+        "revision": "f992ab536c07761c67bd46e35c787bb68ea97657",
+        "role": "math_expert"
+      },
+      {
+        "license": "apache-2.0",
+        "repo_id": "uditjain/lori-qwen2.5-1.5b-science",
+        "revision": "398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f",
+        "role": "science_expert"
+      }
+    ],
+    "benchmark_hash": "4312f5d266daab8318ab19a81ced205a563b0905807d0b7eec41f8299de0ed50",
+    "benchmark_version": "real-hero-1.0.0",
+    "device": {
+      "accelerator": "Apple Metal Performance Shaders",
+      "accelerator_memory_mb": null,
+      "architecture": "arm64",
+      "cpu": "arm",
+      "cuda_version": null,
+      "device": "mps",
+      "device_class": "mps",
+      "logical_cpus": 10,
+      "mps_available": true,
+      "os": "Darwin",
+      "os_version": "25.5.0",
+      "python_version": "3.12.14",
+      "torch_version": "2.14.0",
+      "total_ram_gb": 16.0
+    },
+    "evaluation_schema_version": "deterministic-rubric-1.0.0",
+    "metric_schema_version": "1.1.0",
+    "packages": {
+      "accelerate": "1.14.0",
+      "huggingface-hub": "1.30.0",
+      "numpy": "2.2.6",
+      "peft": "0.20.0",
+      "safetensors": "0.8.0",
+      "selectivellm": "0.1.1",
+      "torch": "2.14.0",
+      "transformers": "5.16.1"
+    },
+    "peft_config_hashes": [
+      "e75021e72377f8b6b9e9b7f17049bc76f45f3fd4f659e37519b5c0e9d5ef0c8c",
+      "c435304d93c2ddb6b773f20165d9c865ecc09a9dbcad6b2b9d7b7438fd19a94c",
+      "fc1da6fd76bd75249b379a122cf5945a3d05094480a41296955b2cbd0ac69fa9"
+    ],
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "registry_hash": "43eccc8ad75106a7072acba0c95acc78db84e6762f32db25e84811e3b9f6b497",
+    "registry_version": "qwen25-lori-real-1.0.0",
+    "router": {
+      "embedding_weight": 0.65,
+      "keyword_weight": 0.35,
+      "static_components": [],
+      "threshold": 0.16,
+      "top_k": 2,
+      "type": "hybrid",
+      "version": "real-hybrid-1.0.0"
+    },
+    "runtime": {
+      "max_active_experts": 2,
+      "policies": [
+        {
+          "all_resident": false,
+          "cache_size": 0,
+          "locality": "low",
+          "name": "base_only",
+          "router": "base"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 0,
+          "locality": "low",
+          "name": "random",
+          "router": "random"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 0,
+          "locality": "low",
+          "name": "keyword",
+          "router": "keyword"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 0,
+          "locality": "low",
+          "name": "oracle",
+          "router": "oracle"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 0,
+          "locality": "low",
+          "name": "semantic_cache0_low",
+          "router": "semantic"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 1,
+          "locality": "low",
+          "name": "semantic_cache1_low",
+          "router": "semantic"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 3,
+          "locality": "low",
+          "name": "semantic_cache3_low",
+          "router": "semantic"
+        },
+        {
+          "all_resident": true,
+          "cache_size": 3,
+          "locality": "low",
+          "name": "all_resident",
+          "router": "semantic"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 0,
+          "locality": "high",
+          "name": "semantic_cache0_high",
+          "router": "semantic"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 1,
+          "locality": "high",
+          "name": "semantic_cache1_high",
+          "router": "semantic"
+        },
+        {
+          "all_resident": false,
+          "cache_size": 3,
+          "locality": "high",
+          "name": "semantic_cache3_high",
+          "router": "semantic"
+        }
+      ],
+      "warm_repetitions": 3
+    }
+  },
+  "git_commit": "ec437eda6df6d03396578123ba4fcf8e07f4bf60",
+  "hardware_details": {
+    "chip": "Apple M4",
+    "cpu_cores": 10,
+    "disk_available_after_completed_run_gib": 10,
+    "disk_available_before_asset_download_gib": 15,
+    "efficiency_cores": 6,
+    "gpu_cores": 8,
+    "machine_model": "Mac16,12",
+    "machine_name": "MacBook Air",
+    "metal_support": "Metal 4",
+    "mps_available": true,
+    "mps_built": true,
+    "mps_recommended_max_mb": 12124.171875,
+    "performance_cores": 4,
+    "unified_memory_gb": 16
+  },
+  "manifest_amendments": [
+    {
+      "amended_at": "2026-09-04T14:18:34.886733+00:00",
+      "reason": "Added required registry/metric schema fingerprints, sanitized hardware detail, self-contained input snapshots, and a runnable archived config after the completed run; measurements, responses, and scores are unchanged.",
+      "supersedes_fingerprint": "5077ead2b807b2e2498968d37fce4e7ff82243dc8c1e3163451570adf2372a14"
+    }
+  ],
+  "measurement_semantics": {
+    "generation_peak": "5 ms sampled peak; not a CUDA peak counter",
+    "host_rss_mb": "process RSS on unified memory",
+    "mps_current_allocated_mb": "live tensor allocation excluding allocator cache",
+    "mps_driver_allocated_mb": "Metal driver allocation including cache/framework"
+  },
+  "metric_schema_version": "1.1.0",
+  "model_identity": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "original_benchmark_fingerprint": "5077ead2b807b2e2498968d37fce4e7ff82243dc8c1e3163451570adf2372a14",
+  "packages": {
+    "accelerate": "1.14.0",
+    "huggingface-hub": "1.30.0",
+    "numpy": "2.2.6",
+    "peft": "0.20.0",
+    "safetensors": "0.8.0",
+    "selectivellm": "0.1.1",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "registry_content_hash": "43eccc8ad75106a7072acba0c95acc78db84e6762f32db25e84811e3b9f6b497",
+  "registry_version": "qwen25-lori-real-1.0.0",
+  "run_id": "20260904T131326Z",
+  "seed": 42,
+  "seed_policy": "fixed:42; greedy decoding; deterministic prompt-derived random routing",
+  "source_dirty": false,
+  "status": "completed",
+  "tokenizer_identity": "Qwen/Qwen2.5-1.5B-Instruct",
+  "tokenizer_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306"
+}

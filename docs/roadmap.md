@@ -9,12 +9,19 @@ The roadmap is evidence-gated. A milestone is not complete because an interface 
 - Reproducible mixed-domain hero benchmark with baselines, ablations, failure analysis, reports, and plots.
 - CPU-safe CLI, Python API, tests, CI, and research documentation.
 
-## v0.2 - Real adapter evidence
+## v0.1.1 - First real adapter evidence
 
-- Publish a license-compatible base model and aligned domain-adapter matrix.
-- Validate adapter loading, deletion, and multi-adapter composition across CUDA and MPS.
-- Add task-specific quality metrics and repeated real-hardware trials.
-- Compare adapter hot swapping with load/delete behavior.
+- Completed a pinned Qwen2.5/LoRI matrix on Apple M4/MPS.
+- Measured real live tensor residency, driver allocation, host RSS, load/eviction latency, composition, and cache locality.
+- Preserved the negative result: better routing did not beat random quality, and RLC composition degraded output.
+
+## v0.2 - Expert quality and composition validation
+
+- Pre-register a larger held-out domain suite and a decoding budget that avoids systematic truncation.
+- Validate each adapter alone against base before using it in a routing experiment.
+- Compare weighted-linear composition with interference-aware alternatives and independent multi-active support.
+- Randomize policy order across process-level runs to isolate end-to-end cache latency.
+- Add a conventional offload baseline and repeat on CUDA when available.
 
 ## v0.3 - Paging and cache policies
 

@@ -6,12 +6,15 @@ import json
 import platform
 import shutil
 import subprocess
+from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from time import perf_counter
 from typing import Any
+
+import yaml
 
 from selectivellm.analyzers import DeterministicEmbeddingAnalyzer
 from selectivellm.backends.transformers import TransformersPeftBackend
@@ -35,7 +38,7 @@ from selectivellm.registry import CapacityRegistry
 from selectivellm.routing.baselines import BaseOnlyRouter, KeywordRouter, OracleRouter, RandomRouter
 from selectivellm.routing.hybrid import HybridRouter
 from selectivellm.runtime.device import inspect_hardware
-from selectivellm.schemas import CapacityComponent
+from selectivellm.schemas import METRIC_SCHEMA_VERSION, CapacityComponent
 
 
 @dataclass(frozen=True)
@@ -98,7 +101,10 @@ class RealBenchmarkRunner:
             ],
             "benchmark_version": self.dataset.benchmark_version,
             "benchmark_hash": stable_fingerprint(self.dataset.model_dump(mode="json")),
+            "registry_version": self.registry.version,
+            "registry_hash": stable_fingerprint(self.registry.document.model_dump(mode="json")),
             "evaluation_schema_version": self.dataset.evaluation_schema_version,
+            "metric_schema_version": METRIC_SCHEMA_VERSION,
             "router": self.config.router.model_dump(mode="json"),
             "runtime": {
                 "policies": [asdict(policy) for policy in POLICIES],
@@ -122,7 +128,9 @@ class RealBenchmarkRunner:
             "adapters": [asdict(asset) for asset in ASSETS[1:]],
             "benchmark_version": self.dataset.benchmark_version,
             "evaluation_schema_version": self.dataset.evaluation_schema_version,
+            "metric_schema_version": METRIC_SCHEMA_VERSION,
             "registry_version": self.registry.version,
+            "registry_content_hash": fingerprint_payload["registry_hash"],
             "seed": self.config.seed,
             "seed_policy": "fixed:42; greedy decoding; deterministic prompt-derived random routing",
             "device": hardware.to_dict(),
@@ -139,7 +147,15 @@ class RealBenchmarkRunner:
             "source_dirty": self._git_dirty(),
         }
         self._write_json(run_path / "manifest.json", manifest)
-        shutil.copy2(self.config_path, run_path / "config.yaml")
+        shutil.copy2(self.config_path, run_path / "config.source.yaml")
+        shutil.copy2(self.config.registry_path or "", run_path / "registry.yaml")
+        shutil.copy2(self.config.benchmark_path or "", run_path / "benchmark.yaml")
+        saved_config = yaml.safe_load(self.config_path.read_text(encoding="utf-8"))
+        saved_config["registry_path"] = "./registry.yaml"
+        saved_config["benchmark_path"] = "./benchmark.yaml"
+        (run_path / "config.yaml").write_text(
+            yaml.safe_dump(saved_config, sort_keys=False), encoding="utf-8"
+        )
         self._write_json(
             run_path / "environment.json",
             {**hardware.to_dict(), "platform": platform.platform(), "packages": packages},
@@ -224,12 +240,20 @@ class RealBenchmarkRunner:
             )
             self._write_json(run_path / "summary.json", summary)
             write_summary_csv(summary, run_path / "summary.csv")
-            self._write_failures(rows, rlc_rows, run_path / "failure_analysis.md")
+            self._write_failures(
+                rows,
+                rlc_rows,
+                run_path / "failure_analysis.md",
+                low_confidence_threshold=self.config.router.threshold,
+                max_new_tokens=self.config.backend.max_new_tokens,
+            )
             generate_plots(summary, run_path / "plots")
             write_report(summary, manifest, run_path / "report.md")
             manifest["status"] = "completed"
             manifest["completed_at"] = datetime.now(UTC).isoformat()
             self._write_json(run_path / "manifest.json", manifest)
+            for partial in ("raw_results.partial.jsonl", "telemetry.partial.jsonl"):
+                (run_path / partial).unlink(missing_ok=True)
             self._publish_latest(run_path)
         except Exception as exc:
             manifest["status"] = "failed"
@@ -322,6 +346,7 @@ class RealBenchmarkRunner:
             "rejected_experts": rejected,
             "resident_adapters_before_inference": before["resident_adapters"],
             "active_adapters": output.metadata["active_adapters"],
+            "composition_mode": activation["composition_mode"],
             "response": output.text,
             "quality": quality,
             "quality_delta_base": None,
@@ -347,6 +372,7 @@ class RealBenchmarkRunner:
             "generation_ms": output.generation_ms,
             "end_to_end_ms": end_to_end_ms,
             "tokens": output.token_count,
+            "response_reached_token_cap": output.token_count >= self.config.backend.max_new_tokens,
             "tokens_per_second": (
                 output.token_count / (output.generation_ms / 1000) if output.generation_ms else None
             ),
@@ -470,10 +496,14 @@ class RealBenchmarkRunner:
                             "variant": label,
                             "repetition": repetition,
                             "active_adapters": result.metadata["active_adapters"],
+                            "composition_mode": activation["composition_mode"],
                             "resident_adapters": before["resident_adapters"],
                             "quality": quality,
                             "evaluation": evaluation,
                             "response": result.text,
+                            "response_reached_token_cap": (
+                                result.token_count >= self.config.backend.max_new_tokens
+                            ),
                             "activation_ms": activation["activation_ms"],
                             "loading_ms": sum(
                                 event.duration_ms for event in events if event.action == "load"
@@ -520,7 +550,12 @@ class RealBenchmarkRunner:
 
     @staticmethod
     def _write_failures(
-        rows: list[dict[str, Any]], rlc_rows: list[dict[str, Any]], path: Path
+        rows: list[dict[str, Any]],
+        rlc_rows: list[dict[str, Any]],
+        path: Path,
+        *,
+        low_confidence_threshold: float,
+        max_new_tokens: int,
     ) -> None:
         base = {
             (row["phase"], row["repetition"], row["case_id"]): row["quality"]
@@ -532,18 +567,19 @@ class RealBenchmarkRunner:
             for row in rows
             if row["policy"] == "oracle"
         }
-        lines = [
-            "# Real-Model Failure Analysis",
-            "",
-            "All categories were fixed before method-level outputs were inspected.",
-            "",
-        ]
+        entries: list[str] = []
+        reason_counts: Counter[str] = Counter()
         count = 0
         for row in rows:
             reasons: list[str] = []
             key = (row["phase"], row["repetition"], row["case_id"])
             if row["routing_recall"] < 1:
                 reasons.append("misroute or missing expected expert")
+            if (
+                row["routing_method"] == "semantic"
+                and row["routing_confidence"] < low_confidence_threshold
+            ):
+                reasons.append("low routing confidence")
             if row["false_activations"]:
                 reasons.append("unnecessary expert activation")
             if row["routing_recall"] == 1 and row["quality"] < base[key]:
@@ -553,15 +589,24 @@ class RealBenchmarkRunner:
             if row["policy"] == "random" and row["quality"] > oracle[key]:
                 reasons.append("random beat oracle")
             if (
+                row["expected_experts"]
+                and set(row["selected_experts"]) == set(row["expected_experts"])
+                and row["quality"] == base[key]
+            ):
+                reasons.append("correct routing did not improve quality versus base")
+            if (
                 not row["expected_experts"]
                 and row["selected_experts"]
                 and row["quality"] < base[key]
             ):
                 reasons.append("adapter damaged no-specialist response")
+            if row["tokens"] >= max_new_tokens:
+                reasons.append("response reached the configured token cap")
             if not reasons:
                 continue
             count += 1
-            lines.extend(
+            reason_counts.update(reasons)
+            entries.extend(
                 [
                     f"## {row['policy']} / {row['case_id']} / {row['phase']} {row['repetition']}",
                     "",
@@ -569,20 +614,57 @@ class RealBenchmarkRunner:
                     f"**Expected:** `{row['expected_experts']}`",
                     f"**Selected:** `{row['selected_experts']}`",
                     f"**Resident:** `{row['resident_adapters_before_inference']}`",
+                    f"**Confidence:** `{row['routing_confidence']:.3f}`; candidates `{row['candidate_scores']}`",
                     f"**Quality:** `{row['quality']:.3f}`; base `{base[key]:.3f}`; oracle `{oracle[key]:.3f}`",
+                    f"**Tokens:** `{row['tokens']}` / `{max_new_tokens}` maximum",
+                    f"**Evaluation:** `{row['evaluation_details']}`",
                     "",
                     row["response"],
                     "",
                 ]
             )
-        degraded = [
-            row
-            for row in rlc_rows
-            if row.get("variant") == "code_plus_science" and row.get("status") != "completed"
+        lines = [
+            "# Real-Model Failure Analysis",
+            "",
+            "Core routing and quality categories were fixed before outputs were inspected. Low-confidence and token-cap categories are post-run diagnostics; they do not alter any score.",
+            "",
+            "## Category counts",
+            "",
+            "| Category | Observations |",
+            "|---|---:|",
         ]
-        if degraded:
-            lines.extend(["## RLC composition constraint", "", json.dumps(degraded, indent=2), ""])
-        if count == 0 and not degraded:
+        lines.extend(f"| {reason} | {total} |" for reason, total in reason_counts.most_common())
+        lines.extend(["", *entries])
+
+        rlc_quality: dict[str, list[float]] = {}
+        rlc_status: dict[str, set[str]] = {}
+        for row in rlc_rows:
+            rlc_status.setdefault(row["variant"], set()).add(row["status"])
+            if row.get("quality") is not None:
+                rlc_quality.setdefault(row["variant"], []).append(float(row["quality"]))
+        if rlc_rows:
+            lines.extend(
+                [
+                    "## RLC multi-adapter result",
+                    "",
+                    "| Variant | n | Mean quality | Status |",
+                    "|---|---:|---:|---|",
+                ]
+            )
+            for variant in sorted(rlc_status):
+                values = rlc_quality.get(variant, [])
+                quality = f"{sum(values) / len(values):.3f}" if values else "N/A"
+                lines.append(
+                    f"| {variant} | {len(values)} | {quality} | {', '.join(sorted(rlc_status[variant]))} |"
+                )
+            lines.extend(
+                [
+                    "",
+                    "`code_plus_science`, `semantic`, and `oracle` used PEFT weighted-linear derived adapters when more than one source adapter was active. Completed composition is reported even when quality degraded.",
+                    "",
+                ]
+            )
+        if count == 0 and not rlc_rows:
             lines.append("No configured failure category was observed.\n")
         path.write_text("\n".join(lines), encoding="utf-8")
 

@@ -15,6 +15,7 @@ from selectivellm.real_validation.evaluation import (
     RealEvaluationSpec,
     score_response,
 )
+from selectivellm.real_validation.report import CACHE_REQUEST_HIT_RATE, METRICS, summarize
 from selectivellm.real_validation.runtime import AdapterResidencyManager, memory_checkpoint
 from selectivellm.schemas import CapacityComponent, ComponentType
 
@@ -217,3 +218,34 @@ def test_transformers_backend_unwraps_when_last_adapter_is_evicted() -> None:
     assert backend.model is base
     assert backend.loaded_adapters == set()
     assert backend.active_adapters == []
+
+
+def test_real_summary_uses_request_weighted_cache_hit_rate() -> None:
+    rows = [
+        {
+            "policy": "semantic",
+            "phase": "warm",
+            "cache_hits": 2,
+            "cache_misses": 0,
+            **{metric: 0.0 for metric in METRICS},
+        },
+        {
+            "policy": "semantic",
+            "phase": "warm",
+            "cache_hits": 0,
+            "cache_misses": 1,
+            **{metric: 0.0 for metric in METRICS},
+        },
+    ]
+    summary = summarize(
+        rows,
+        {
+            "run_id": "test",
+            "backend": "transformers-peft",
+            "benchmark_fingerprint": "fingerprint",
+        },
+    )
+
+    stats = summary["warm_methods"]["semantic"][CACHE_REQUEST_HIT_RATE]
+    assert stats["count"] == 3
+    assert stats["mean"] == pytest.approx(2 / 3)

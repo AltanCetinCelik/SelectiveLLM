@@ -115,4 +115,3 @@ Large model and adapter weights remain in the Hugging Face cache and are not com
 Unit tests cover compatibility rejection, rubric scoring, residency versus activation, MPS metric semantics, lifecycle checkpoint ordering, cache workload identity, fingerprint inputs, and artifact completeness. The final gate includes pre-commit, Ruff, mypy, pytest with coverage, package build, and clean-wheel smoke testing.
 
 The written conclusion answers all twenty requested experimental questions, reports contradictions without tuning them away, and recommends the next experiment based on the observed bottleneck: routing, prefetch, composition, pool size, expert training, or activation tracing.
-
