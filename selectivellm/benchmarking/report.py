@@ -60,7 +60,7 @@ def write_summary_csv(summary: dict[str, Any], path: Path) -> None:
         rows.append(row)
     columns = sorted({key for row in rows for key in row})
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer = csv.DictWriter(handle, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

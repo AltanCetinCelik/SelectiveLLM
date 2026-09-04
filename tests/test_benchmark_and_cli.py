@@ -52,6 +52,7 @@ def test_benchmark_writes_complete_labeled_artifact(
     assert all(row["benchmark_fingerprint"] == manifest["benchmark_fingerprint"] for row in raw)
     assert all("quality_retention" in row for row in raw)
     assert all("declared_memory_reduction" in row for row in raw)
+    assert b"\r\n" not in (run / "summary.csv").read_bytes()
     failures = (run / "routing_failures.md").read_text(encoding="utf-8")
     assert "**Scores:**" in failures
 
