@@ -50,6 +50,10 @@ def test_benchmark_writes_complete_labeled_artifact(
         "all_resident",
     }
     assert all(row["benchmark_fingerprint"] == manifest["benchmark_fingerprint"] for row in raw)
+    assert all("quality_retention" in row for row in raw)
+    assert all("declared_memory_reduction" in row for row in raw)
+    failures = (run / "routing_failures.md").read_text(encoding="utf-8")
+    assert "**Scores:**" in failures
 
 
 def test_cli_inspect_and_registry_are_cpu_safe() -> None:
@@ -60,6 +64,16 @@ def test_cli_inspect_and_registry_are_cpu_safe() -> None:
     assert "Device Class" in inspected.stdout
     assert listed.exit_code == 0
     assert "Declared MB is registry metadata" in listed.stdout
+
+
+def test_single_method_report_marks_relative_metrics_unavailable(
+    tmp_path: Path, control_config: SelectiveLLMConfig
+) -> None:
+    run = BenchmarkRunner(control_config, results_root=tmp_path).run(
+        methods=["semantic"], report=True, run_id="single-method"
+    )
+    report = (run / "report.md").read_text(encoding="utf-8")
+    assert "| N/A |" in report
 
 
 def test_security_default_disables_remote_code() -> None:

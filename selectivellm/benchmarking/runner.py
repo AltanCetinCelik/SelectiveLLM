@@ -167,6 +167,9 @@ class BenchmarkRunner:
                         "tags": case.tags,
                         "expected_experts": case.expected_experts,
                         "selected_experts": selected_experts,
+                        "candidate_scores": {
+                            item.component_id: item.score for item in result.routing.candidates
+                        },
                         "rejected_experts": result.plan.rejected,
                         "routing_confidence": result.routing.confidence,
                         "routing_precision": routing["precision"],
@@ -212,6 +215,7 @@ class BenchmarkRunner:
                     )
             engine.runtime.clear()
 
+        self._add_relative_metrics(rows)
         self._write_jsonl(run_path / "raw_results.jsonl", rows)
         self._write_jsonl(run_path / "routing_decisions.jsonl", decisions)
         summary = self._summarize(rows, manifest)
@@ -280,12 +284,16 @@ class BenchmarkRunner:
             "planning_ms",
             "loading_ms",
             "inference_ms",
+            "first_token_ms",
             "end_to_end_ms",
             "tokens_per_second",
             "cache_hit_rate",
             "expert_swaps",
             "declared_resident_capacity_mb",
             "declared_peak_capacity_mb",
+            "declared_memory_reduction",
+            "accelerator_memory_reduction",
+            "quality_retention",
             "host_rss_mb",
         ]
         grouped: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -308,6 +316,44 @@ class BenchmarkRunner:
             "methods": methods,
         }
 
+    @staticmethod
+    def _add_relative_metrics(rows: list[dict[str, Any]]) -> None:
+        oracle_quality = {
+            (row["repetition"], row["case_id"]): row["quality"]
+            for row in rows
+            if row["method"] == "oracle"
+        }
+        all_resident_declared = {
+            (row["repetition"], row["case_id"]): row["declared_peak_capacity_mb"]
+            for row in rows
+            if row["method"] == "all_resident"
+        }
+        all_resident_accelerator = {
+            (row["repetition"], row["case_id"]): row["accelerator_peak_allocated_mb"]
+            for row in rows
+            if row["method"] == "all_resident" and row["accelerator_peak_allocated_mb"] is not None
+        }
+        for row in rows:
+            key = (row["repetition"], row["case_id"])
+            oracle = oracle_quality.get(key)
+            declared = all_resident_declared.get(key)
+            accelerator = all_resident_accelerator.get(key)
+            row["quality_retention"] = (
+                row["quality"] / oracle if oracle is not None and oracle > 0 else None
+            )
+            row["declared_memory_reduction"] = (
+                1 - row["declared_peak_capacity_mb"] / declared
+                if declared is not None and declared > 0
+                else None
+            )
+            row["accelerator_memory_reduction"] = (
+                1 - row["accelerator_peak_allocated_mb"] / accelerator
+                if accelerator is not None
+                and accelerator > 0
+                and row["accelerator_peak_allocated_mb"] is not None
+                else None
+            )
+
     def _write_failures(self, rows: list[dict[str, Any]], path: Path) -> None:
         base_quality = {
             (row["repetition"], row["case_id"]): row["quality"]
@@ -329,6 +375,9 @@ class BenchmarkRunner:
                 reasons.append("missing required expert")
             if row["false_activations"] > 0:
                 reasons.append("unnecessary expert activation")
+            rejected_relevant = sorted(set(row["expected_experts"]) & set(row["rejected_experts"]))
+            if rejected_relevant:
+                reasons.append("relevant expert rejected by memory budget")
             if row["routing_confidence"] < 0.3:
                 reasons.append("low confidence")
             baseline = base_quality.get((row["repetition"], row["case_id"]))
@@ -346,6 +395,7 @@ class BenchmarkRunner:
                     f"**Expected:** `{row['expected_experts']}`  ",
                     f"**Selected:** `{row['selected_experts']}`  ",
                     f"**Confidence:** `{row['routing_confidence']:.3f}`  ",
+                    f"**Scores:** `{row['candidate_scores']}`  ",
                     f"**Quality:** `{row['quality']:.3f}` (`{row['quality_semantics']}`)  ",
                     f"**Possible reason:** {', '.join(reasons)}",
                     "",

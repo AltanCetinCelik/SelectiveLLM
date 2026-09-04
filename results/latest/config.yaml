@@ -1,0 +1,44 @@
+schema_version: 1.0.0
+mode: semantic_routing
+seed: 42
+registry_path: null
+benchmark_path: null
+analyzer:
+  type: deterministic_embedding
+  dimension: 256
+router:
+  version: 1.0.0
+  type: hybrid
+  top_k: 3
+  threshold: 0.18
+  static_components: []
+  keyword_weight: 0.35
+  embedding_weight: 0.65
+runtime:
+  memory_budget_mb: 900.0
+  cache_policy: lru
+  cache_enabled: true
+backend:
+  type: deterministic
+  model_path: null
+  tokenizer_path: null
+  trust_remote_code: false
+  max_new_tokens: 128
+  device: auto
+  device_map: auto
+  max_memory: null
+experiment:
+  methods:
+  - base_only
+  - random
+  - keyword
+  - oracle
+  - embedding
+  - semantic_top1
+  - semantic
+  - semantic_threshold_high
+  - semantic_cache
+  - semantic_cache_small
+  - all_resident
+  repetitions: 5
+  benchmark_version: hero-1.0.0

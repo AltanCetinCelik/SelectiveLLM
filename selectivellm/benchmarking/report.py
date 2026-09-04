@@ -47,17 +47,43 @@ def generate_plots(summary: dict[str, Any], rows: list[dict[str, Any]], plots: P
     label = f"Backend: {summary['backend']} ({summary['backend_kind']})"
     plt.style.use("seaborn-v0_8-whitegrid")
 
-    fig, axis = plt.subplots(figsize=(8, 5))
+    fig, axis = plt.subplots(figsize=(10, 6))
+    memory_metric = (
+        "accelerator_memory_reduction"
+        if any(
+            summary["methods"][method]["accelerator_memory_reduction"]["count"] > 0
+            for method in methods
+        )
+        else "declared_memory_reduction"
+    )
+    plotted = 0
     for method in methods:
-        x = _mean(summary, method, "declared_peak_capacity_mb")
-        y = _mean(summary, method, "quality")
+        if (
+            summary["methods"][method][memory_metric]["count"] == 0
+            or summary["methods"][method]["quality_retention"]["count"] == 0
+        ):
+            continue
+        x = 100 * _mean(summary, method, memory_metric)
+        y = 100 * _mean(summary, method, "quality_retention")
         axis.scatter(x, y, s=70)
         axis.annotate(method, (x, y), xytext=(5, 5), textcoords="offset points", fontsize=8)
-    axis.set_xlabel("Declared peak resident capacity (MB; simulated for control backend)")
-    axis.set_ylabel(
-        "Control task score" if summary["backend_kind"] == "control" else "Task quality"
+        plotted += 1
+    if plotted == 0:
+        axis.text(
+            0.5,
+            0.5,
+            "Unavailable: include oracle and all_resident controls",
+            ha="center",
+            va="center",
+            transform=axis.transAxes,
+        )
+    axis.set_xlabel(
+        "Observed accelerator-memory reduction vs all-resident (%)"
+        if memory_metric == "accelerator_memory_reduction"
+        else "Declared-capacity reduction vs all-resident (%; simulated for control)"
     )
-    axis.set_title(f"Quality vs declared capacity\n{label}")
+    axis.set_ylabel("Quality retention vs oracle (%)")
+    axis.set_title(f"Quality retention vs memory reduction\n{label}")
     fig.tight_layout()
     fig.savefig(plots / "quality_vs_memory.png", dpi=180)
     plt.close(fig)
@@ -164,17 +190,21 @@ def write_report(
         "",
         "## Methods and results",
         "",
-        "| Method | n | Quality mean | Routing F1 | Declared peak MB | Latency p50 ms | Latency p95 ms | Cache hit rate |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Method | n | Quality | Quality retention | Routing F1 | Declared peak MB | Declared reduction | Latency p50 ms | Latency p95 ms | Cache hit rate |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for method, metrics in methods.items():
+        retention = metrics["quality_retention"]["mean"]
+        reduction = metrics["declared_memory_reduction"]["mean"]
         lines.append(
-            "| {method} | {count} | {quality:.3f} | {routing:.3f} | {memory:.1f} | {p50:.3f} | {p95:.3f} | {cache:.3f} |".format(
+            "| {method} | {count} | {quality:.3f} | {retention} | {routing:.3f} | {memory:.1f} | {reduction} | {p50:.3f} | {p95:.3f} | {cache:.3f} |".format(
                 method=method,
                 count=metrics["quality"]["count"],
                 quality=metrics["quality"]["mean"] or 0,
+                retention=f"{retention:.1%}" if retention is not None else "N/A",
                 routing=metrics["routing_f1"]["mean"] or 0,
                 memory=metrics["declared_peak_capacity_mb"]["mean"] or 0,
+                reduction=f"{reduction:.1%}" if reduction is not None else "N/A",
                 p50=metrics["end_to_end_ms"]["p50"] or 0,
                 p95=metrics["end_to_end_ms"]["p95"] or 0,
                 cache=metrics["cache_hit_rate"]["mean"] or 0,
@@ -187,7 +217,7 @@ def write_report(
             "",
             "## Plots",
             "",
-            "![Quality versus declared capacity](plots/quality_vs_memory.png)",
+            "![Quality retention versus memory reduction](plots/quality_vs_memory.png)",
             "",
             "![Routing accuracy](plots/routing_accuracy.png)",
             "",

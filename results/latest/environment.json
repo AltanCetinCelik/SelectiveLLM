@@ -1,0 +1,29 @@
+{
+  "accelerator": null,
+  "accelerator_memory_mb": null,
+  "architecture": "arm64",
+  "cpu": "arm",
+  "cuda_version": null,
+  "device": "cpu",
+  "device_class": "cpu",
+  "git_commit": "a278167c8b4bd1fedc9bc16c568a8e5ecb2b76cd",
+  "logical_cpus": 10,
+  "mps_available": false,
+  "os": "Darwin",
+  "os_version": "25.5.0",
+  "packages": {
+    "matplotlib": "3.11.1",
+    "numpy": "2.2.6",
+    "peft": null,
+    "psutil": "7.2.2",
+    "pydantic": "2.13.5",
+    "selectivellm": "0.1.0",
+    "torch": null,
+    "transformers": null
+  },
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "python_version": "3.12.14",
+  "source_dirty": true,
+  "torch_version": null,
+  "total_ram_gb": 16.0
+}
