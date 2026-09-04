@@ -59,6 +59,13 @@ All policy lookups and empirical-best decisions use cell-mean quality. No policy
 
 Use exact floating-point equality within an absolute tolerance of `1e-12` for empirical-best ties.
 
+For cases with a primary labeled expert, report both:
+
+- tie-inclusive win rate: the primary specialist appears anywhere in the empirical-best tie set;
+- strict sole-winner rate: the primary specialist is the only member of the empirical-best set.
+
+The preregistered decision gate uses the tie-inclusive rate. The sole-winner rate is supporting evidence only.
+
 ## Case-level metrics
 
 For each case with a primary labeled expert:
@@ -98,7 +105,7 @@ Report technical repetition variability separately through within-cell standard 
 - mean routing opportunity is at least `0.10` absolute quality;
 - empirical oracle strictly improves over base on at least 3 of 9 cases.
 
-The primary labeled specialist **usually wins** when it appears in the empirical-best tie set for at least 60% of cases that have a primary labeled expert.
+The primary labeled specialist **usually wins** when its tie-inclusive win rate is at least 60% across cases that have a primary labeled expert. The strict sole-winner rate does not change this classification.
 
 Classify the result as:
 
