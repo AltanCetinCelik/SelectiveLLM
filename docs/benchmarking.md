@@ -72,4 +72,3 @@ Real backends use case-declared exact match or token F1 in v0.1. Those simple me
 ## Reproducing a run
 
 Use the saved `config.yaml`, match the environment and model/adapter assets recorded in `manifest.json`, and rerun against the same benchmark version. Compare fingerprints before combining results. Model weights are external and remain governed by their own licenses.
-

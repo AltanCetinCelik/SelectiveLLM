@@ -32,4 +32,3 @@ The Transformers/PEFT backend uses the same engine and benchmark runner. A real 
 ## Negative results
 
 A null result is informative. The central hypothesis is weakened when semantic routing fails to beat simple baselines, when better routing does not improve output quality, or when transfer and loading latency erases the value of lower resident capacity. These outcomes are preserved in raw observations and failure reports; benchmark cases are not edited after inspection merely to improve the headline.
-

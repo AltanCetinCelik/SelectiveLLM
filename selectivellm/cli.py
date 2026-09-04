@@ -59,6 +59,10 @@ def _render_result(prompt: str, engine: SelectiveLLM, *, verbose: bool) -> None:
             "yes" if candidate.component_id in result.routing.selected else "",
         )
     console.print(route)
+    plan = Table(title="Capacity plan", show_header=False)
+    plan.add_row("Active", ", ".join(result.plan.selected))
+    plan.add_row("Rejected", json.dumps(result.plan.rejected) if result.plan.rejected else "none")
+    console.print(plan)
     runtime = Table(title="Runtime", show_header=False)
     runtime.add_row("Budget", f"{result.plan.budget_mb:.1f} MB declared capacity")
     runtime.add_row(
@@ -78,7 +82,7 @@ def _render_result(prompt: str, engine: SelectiveLLM, *, verbose: bool) -> None:
         "Cache", f"{result.metrics.cache_hits} hit / {result.metrics.cache_misses} miss"
     )
     console.print(runtime)
-    console.print(Panel(result.text, title="Output", border_style="green"))
+    console.print(Panel(Text(result.text), title="Output", border_style="green"))
     if verbose:
         console.print_json(
             json.dumps(

@@ -29,4 +29,3 @@
 Use a held-out, pre-registered multi-domain benchmark and a real shared base model with independently validated compatible adapters. Compare semantic, keyword, random, oracle, base-only, all-resident, and standard offload under equal generation settings and a fixed physical memory budget. Repeat across seeds and workload orders.
 
 The central routing hypothesis is falsified for that setup if semantic routing does not improve held-out routing metrics over keyword/random, does not retain quality relative to oracle/all-resident, or incurs enough load and transfer latency that no useful quality-memory-latency operating point remains.
-

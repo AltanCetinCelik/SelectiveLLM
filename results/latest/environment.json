@@ -6,7 +6,7 @@
   "cuda_version": null,
   "device": "cpu",
   "device_class": "cpu",
-  "git_commit": "ca4798b56bc108925b6515fb72da11fb70867fc9",
+  "git_commit": "1f30176950c12b53699a9cb1600aead3accff20e",
   "logical_cpus": 10,
   "mps_available": false,
   "os": "Darwin",

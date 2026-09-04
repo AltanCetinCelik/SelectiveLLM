@@ -21,4 +21,3 @@ body:
     attributes:
       label: Validation
       description: Which baseline, metric, or test would validate it?
-

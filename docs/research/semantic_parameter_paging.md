@@ -37,4 +37,3 @@ A future `future_parameter_shard` registry entry may describe block coordinates,
 ## Go/no-go criterion
 
 Proceed to a paging prototype only after importance masks beat matched random and pruning baselines on held-out tasks, remain stable enough to route, and align with a block-sparse layout whose physical memory and latency can be measured. Otherwise, adapter/expert routing remains the honest scope.
-

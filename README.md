@@ -65,8 +65,8 @@ Backend: **`deterministic-control`** | Benchmark: **`hero-1.0.0`** | 16 cases x 
 | Random | 0.514 | 51.4% | 0.150 | 860.0 MB | 45.6% | 0.0% |
 | Keyword | 0.503 | 50.3% | 0.198 | 680.0 MB | 57.0% | 0.0% |
 | Oracle | 1.000 | 100.0% | 1.000 | 1019.8 MB | 35.5% | 0.0% |
-| Semantic | 0.797 | 79.7% | 0.633 | 857.8 MB | 45.7% | 0.0% |
-| Semantic + cache | 0.797 | 79.7% | 0.633 | 857.8 MB | 45.7% | 31.2% |
+| Semantic | 0.801 | 80.1% | 0.696 | 857.8 MB | 45.7% | 0.0% |
+| Semantic + cache | 0.801 | 80.1% | 0.696 | 857.8 MB | 45.7% | 31.2% |
 | All resident | 0.963 | 96.3% | 0.368 | 1580.0 MB | 0.0% | 98.8% |
 
 These numbers demonstrate that the implemented router, planner, cache, metrics, and reporting pipeline respond quantitatively to independently defined capacity and workload locality. They do not establish equivalent behavior for real adapters. See the [complete report](results/latest/report.md), [raw observations](results/latest/raw_results.jsonl), [failure analysis](results/latest/routing_failures.md), and [manifest](results/latest/manifest.json).

@@ -61,4 +61,3 @@ The engine records routing, planning, loading, inference, orchestration, first-t
 ## Extension boundaries
 
 New analyzers, routers, and backends implement small interfaces. New component types can enter the registry schema before runtime support, but documentation must identify them as unsupported until a backend implements their lifecycle. Future parameter shards must not reuse the adapter implementation while claiming finer granularity.
-

@@ -21,4 +21,3 @@ Harassment, discriminatory language, threats, sexualized attention, doxxing, sus
 Report conduct concerns privately to the maintainers through the repository security contact. Maintainers may remove content or restrict participation when conduct threatens a safe, rigorous community. Enforcement decisions should protect reporters' privacy and be proportionate to the behavior.
 
 This policy is informed by the Contributor Covenant 2.1.
-

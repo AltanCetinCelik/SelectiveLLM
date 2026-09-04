@@ -22,7 +22,7 @@ Evidence: `manifest.json` identifies `deterministic-control`; every raw row cont
 
 ## Does better routing actually improve output quality?
 
-It improves only the control backend's synthetic capability-coverage score. Mean semantic routing F1 was 0.633, versus 0.198 for keyword and 0.150 for random. Corresponding control scores were 0.797, 0.503, and 0.514; base-only scored 0.431 and oracle 1.000. This relationship is partly mechanical because control quality is defined from required-capability coverage. It does not show that a real model generates better answers.
+It improves only the control backend's synthetic capability-coverage score. Mean semantic routing F1 was 0.696, versus 0.198 for keyword and 0.150 for random. Corresponding control scores were 0.801, 0.503, and 0.514; base-only scored 0.431 and oracle 1.000. This relationship is partly mechanical because control quality is defined from required-capability coverage. It does not show that a real model generates better answers.
 
 The real hypothesis remains open. A compatible Transformers/PEFT run with task-specific evaluation must show that routing gains transfer to output quality.
 
@@ -30,17 +30,17 @@ The real hypothesis remains open. A compatible Transformers/PEFT run with task-s
 
 The analyzer and router retain multiple labels. For “Use Python to simulate an RLC circuit and plot the transient response,” the benchmark expects Python, electrical engineering, and mathematics. Semantic routing ranked all three, but the 900 MB budget admitted two experts with the 500 MB base and rejected `math_expert` as `memory_budget`. The control score was 0.783 versus oracle 1.000.
 
-Across the workload, top-1 semantic routing retained 0.764 control quality while multi-label semantic routing retained 0.797. This control result exposes both the benefit of multi-label routing and the quality loss when the capacity plan cannot fit every requested expert. Real adapter composition may introduce additional incompatibility and interference.
+Across the workload, top-1 semantic routing retained 0.767 control quality while multi-label semantic routing retained 0.801. This control result exposes both the benefit of multi-label routing and the quality loss when the capacity plan cannot fit every requested expert. Real adapter composition may introduce additional incompatibility and interference.
 
 ## What is the latency cost of swapping?
 
-On this control implementation, uncached semantic routing performed 85 expert misses and 85 unloads across 80 observations. Mean load-stage latency was about 0.385 ms and end-to-end p95 was about 1.514 ms. All-resident performed six cold expert loads, no swaps, and had about 0.397 ms p95 end-to-end latency.
+On this control implementation, uncached semantic routing performed 80 expert misses and 80 unloads across 80 observations. Mean load-stage latency was about 0.363 ms and end-to-end p95 was about 1.654 ms. All-resident performed six cold expert loads, no swaps, and had about 0.450 ms p95 end-to-end latency.
 
 These are measured wall-clock control costs, not forecasts for model transfers. The real cost depends on adapter size, storage, interconnect, device synchronization, framework behavior, and generation length.
 
 ## Under what workload does caching help?
 
-The benchmark repeats a mixed-domain sequence with local clusters. Under that order, semantic caching served 30 of 85 expert requests as hits, reduced misses from 85 to 55 and swaps from 85 to 53, lowered mean control load time from about 0.385 ms to 0.259 ms, and lowered p95 end-to-end latency from about 1.514 ms to 1.295 ms without changing selected capacity or control quality.
+The benchmark repeats a mixed-domain sequence with local clusters. Under that order, semantic caching served 30 of 80 expert requests as hits, reduced misses from 80 to 50 and swaps from 80 to 48, lowered mean control load time from about 0.363 ms to 0.236 ms, and lowered p95 end-to-end latency from about 1.654 ms to 1.354 ms without changing selected capacity or control quality.
 
 Caching helps when repeated requests reuse experts before eviction and load cost is material. It may not help under low-locality, adversarial, or rapidly shifting workloads. A future real study must randomize and parameterize workload order rather than generalize from this sequence.
 
@@ -74,4 +74,3 @@ Dense-model importance units must be causally localized, stable across prompts a
 - Failure reports include candidate scores and budget-related rejection reasons.
 - Manifests hash benchmark, registry, and routing content in addition to versions.
 - Memory snapshots separate declared base/expert capacity and explicitly mark unavailable tensor/KV/framework attribution.
-

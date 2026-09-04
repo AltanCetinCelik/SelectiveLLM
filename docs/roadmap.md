@@ -40,4 +40,3 @@ The roadmap is evidence-gated. A milestone is not complete because an interface 
 - Prototype block layouts and sparse kernels only after localization evidence is strong enough.
 - Compare learned masks with pruning, contextual sparsity, MoE, and conventional offloading.
 - Demonstrate physical memory reduction and retained quality on held-out tasks before using the term semantic parameter paging for an implementation.
-

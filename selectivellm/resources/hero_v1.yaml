@@ -99,4 +99,3 @@ cases:
     expected_experts: [scientific_writing_expert, reasoning_expert]
     reference: The abstract should state motivation, method, evidence, and limitations without overstating conclusions.
     tags: [multi-domain, writing]
-

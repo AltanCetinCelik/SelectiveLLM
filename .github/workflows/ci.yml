@@ -28,4 +28,3 @@ jobs:
       - run: python -m build
       - run: selectivellm inspect --device cpu
       - run: selectivellm benchmark --router semantic --report --output /tmp/selectivellm-results
-

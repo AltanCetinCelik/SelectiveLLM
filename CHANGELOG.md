@@ -14,4 +14,3 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Deterministic-control and optional Transformers/PEFT backends behind one lifecycle API.
 - Versioned mixed-domain hero benchmark with hostile baselines, ablations, statistical summaries, compatibility fingerprints, failure analysis, reports, and plots.
 - Rich CLI, Python API, hardware inspection, tests, CI, and research documentation.
-

@@ -86,6 +86,11 @@ def tokenize(text: str) -> list[str]:
     return [token.lower() for token in TOKEN_RE.findall(text)]
 
 
+def contains_term(text: str, term: str) -> bool:
+    normalized = term.replace("_", " ").lower()
+    return re.search(rf"(?<!\w){re.escape(normalized)}(?!\w)", text.lower()) is not None
+
+
 def stable_embedding(text: str, dimension: int = 256) -> list[float]:
     """Build a deterministic feature-hash embedding without network dependencies."""
     normalized = " ".join(tokenize(text))
@@ -126,7 +131,7 @@ class DeterministicEmbeddingAnalyzer:
         scores: dict[str, float] = {}
         evidence: dict[str, list[str]] = {}
         for domain, terms in DOMAIN_TERMS.items():
-            hits = [term for term in terms if term in lowered]
+            hits = [term for term in terms if contains_term(lowered, term)]
             lexical = min(1.0, len(hits) / 2.0)
             semantic = max(
                 0.0, cosine_similarity(prompt_embedding, self._domain_embeddings[domain])
@@ -144,7 +149,7 @@ class DeterministicEmbeddingAnalyzer:
 
         task_scores: defaultdict[str, float] = defaultdict(float)
         for task, terms in TASK_TERMS.items():
-            task_hit_count = sum(term in lowered for term in terms)
+            task_hit_count = sum(contains_term(lowered, term) for term in terms)
             task_scores[task] = min(1.0, task_hit_count / 2.0)
 
         ranked = sorted(scores, key=lambda domain: scores[domain], reverse=True)

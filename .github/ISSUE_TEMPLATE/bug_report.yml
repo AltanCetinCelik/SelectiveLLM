@@ -26,4 +26,3 @@ body:
     attributes:
       label: Environment
       description: Paste `selectivellm inspect` output and backend/model identity.
-

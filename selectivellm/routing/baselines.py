@@ -5,6 +5,7 @@ from __future__ import annotations
 import random
 from time import perf_counter
 
+from selectivellm.analyzers import contains_term
 from selectivellm.registry import CapacityRegistry
 from selectivellm.routing.base import Router, select_candidates
 from selectivellm.schemas import PromptProfile, RouteCandidate, RoutingDecision
@@ -30,7 +31,7 @@ class KeywordRouter(Router):
         candidates: list[RouteCandidate] = []
         for component in registry.routable_components():
             terms = [*component.domain, *component.supported_tasks]
-            hits = [term for term in terms if term.replace("_", " ").lower() in prompt]
+            hits = [term for term in terms if contains_term(prompt, term)]
             score = min(1.0, len(hits) / max(1, len(terms)))
             candidates.append(RouteCandidate(component_id=component.id, score=score, reasons=hits))
         candidates.sort(key=lambda item: (-item.score, item.component_id))

@@ -99,4 +99,3 @@ components:
     parameter_count: 4500000
     metadata:
       capacity_semantics: simulated_declared_capacity
-

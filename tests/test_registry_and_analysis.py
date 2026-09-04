@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from selectivellm.analyzers import DeterministicEmbeddingAnalyzer, stable_embedding
+from selectivellm.analyzers import DeterministicEmbeddingAnalyzer, contains_term, stable_embedding
 from selectivellm.registry import CapacityRegistry
 from selectivellm.registry.registry import RegistryError
 
@@ -54,3 +54,10 @@ def test_stable_embedding_is_deterministic_and_normalized() -> None:
     second = stable_embedding("identical text", 64)
     assert first == second
     assert sum(value * value for value in first) == pytest.approx(1.0)
+
+
+def test_term_matching_uses_word_boundaries_without_removing_lexical_traps() -> None:
+    assert not contains_term("What is the capital of Japan?", "api")
+    assert contains_term("Name one Python species.", "python")
+    profile = DeterministicEmbeddingAnalyzer().analyze("What is the capital of Japan?")
+    assert "software_engineering" not in profile.capabilities

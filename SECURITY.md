@@ -15,4 +15,3 @@ Use GitHub private vulnerability reporting when available. Do not open a public 
 - Model and adapter paths may point to third-party artifacts; users must review their code, license, and provenance.
 - Model weights, credentials, access tokens, and private prompts must not be committed.
 - Benchmark reports can contain prompts and generated text. Review artifacts before publishing them.
-
