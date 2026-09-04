@@ -6,7 +6,7 @@
   "cuda_version": null,
   "device": "cpu",
   "device_class": "cpu",
-  "git_commit": "2604737b3b2e3898b55978c02fb671f90b40b16f",
+  "git_commit": "1905533d6ccd78d0d3cbbd592298de4788ae50b8",
   "logical_cpus": 10,
   "mps_available": false,
   "os": "Darwin",
@@ -23,7 +23,7 @@
   },
   "platform": "macOS-26.5.2-arm64-arm-64bit",
   "python_version": "3.12.14",
-  "source_dirty": true,
+  "source_dirty": false,
   "torch_version": null,
   "total_ram_gb": 16.0
 }

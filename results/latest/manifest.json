@@ -13,9 +13,9 @@
   "benchmark_fingerprint": "3792ea55c906065d90f9a79b15b301169e929817fad7fde76491f9c751a6a34d",
   "benchmark_version": "hero-1.0.0",
   "configuration_fingerprint": "1fce4cf94b3f9d80f45c587d8c06b5688484becbdffff519d498173b76a2b1e0",
-  "created_at": "2026-09-04T12:24:05.529418+00:00",
+  "created_at": "2026-09-04T12:24:50.697748+00:00",
   "device_class": "cpu",
-  "git_commit": "2604737b3b2e3898b55978c02fb671f90b40b16f",
+  "git_commit": "1905533d6ccd78d0d3cbbd592298de4788ae50b8",
   "measurement_semantics": "declared_capacity_plus_observed_process_and_accelerator",
   "metric_schema_version": "1.0.0",
   "model_identity": "selectivellm-control-v1",
@@ -23,8 +23,8 @@
   "registry_version": "hero-control-1.0.0",
   "routing_config_hash": "a609a499a9a00fa183ae43c763e7b92e2c66b2e7b78c29f811d1171ac36b2cf8",
   "routing_config_version": "1.0.0",
-  "run_id": "20260904T122405Z",
+  "run_id": "20260904T122450Z",
   "seed_policy": "fixed-base-seed:42; deterministic-case-derived random baseline",
-  "source_dirty": true,
+  "source_dirty": false,
   "status": "completed"
 }
