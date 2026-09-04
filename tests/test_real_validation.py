@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 
+from selectivellm.backends.transformers import TransformersPeftBackend
 from selectivellm.benchmarking.evaluation import routing_scores
+from selectivellm.config import BackendConfig
 from selectivellm.real_validation.assets import validate_compatibility_report
 from selectivellm.real_validation.evaluation import (
     RealBenchmarkCase,
@@ -192,3 +194,26 @@ def test_shared_routing_scores_map_to_real_metric_names() -> None:
         "routing_recall": 1.0,
         "routing_f1": 1.0,
     }
+
+
+def test_transformers_backend_unwraps_when_last_adapter_is_evicted() -> None:
+    class Base:
+        def eval(self) -> None:
+            return None
+
+    base = Base()
+
+    class Wrapped:
+        def unload(self) -> Base:
+            return base
+
+    backend = TransformersPeftBackend(BackendConfig(device="cpu"))
+    backend.model = Wrapped()
+    backend.loaded_adapters = {"code_expert"}
+    backend.active_adapters = ["code_expert"]
+
+    backend.unload_component(_component("code_expert"))
+
+    assert backend.model is base
+    assert backend.loaded_adapters == set()
+    assert backend.active_adapters == []

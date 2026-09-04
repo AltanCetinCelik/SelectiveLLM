@@ -97,7 +97,10 @@ class TransformersPeftBackend(InferenceBackend):
     def unload_component(self, component: CapacityComponent) -> None:
         if component.id in self.loaded_adapters and self.model is not None:
             self._drop_composition()
-            if hasattr(self.model, "delete_adapter"):
+            if len(self.loaded_adapters) == 1 and hasattr(self.model, "unload"):
+                self.model = self.model.unload()
+                self.model.eval()
+            elif hasattr(self.model, "delete_adapter"):
                 self.model.delete_adapter(component.id)
             self.loaded_adapters.discard(component.id)
             self.active_adapters = [item for item in self.active_adapters if item != component.id]
@@ -194,7 +197,7 @@ class TransformersPeftBackend(InferenceBackend):
     def activate_adapters(self, adapters: list[str]) -> dict[str, float]:
         if self.model is None:
             raise RuntimeError("Transformers model is not loaded")
-        if adapters == self.active_adapters:
+        if adapters and adapters == self.active_adapters:
             return {"activation_ms": 0.0, "activation_synchronization_ms": 0.0}
         activation_started = perf_counter()
         self._drop_composition()
