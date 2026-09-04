@@ -1,0 +1,27 @@
+{
+  "accelerator": "Apple Metal Performance Shaders",
+  "accelerator_memory_mb": null,
+  "architecture": "arm64",
+  "cpu": "arm",
+  "cuda_version": null,
+  "device": "mps",
+  "device_class": "mps",
+  "logical_cpus": 10,
+  "mps_available": true,
+  "os": "Darwin",
+  "os_version": "25.5.0",
+  "packages": {
+    "accelerate": "1.14.0",
+    "huggingface-hub": "1.30.0",
+    "numpy": "2.2.6",
+    "peft": "0.20.0",
+    "safetensors": "0.8.0",
+    "selectivellm": "0.1.1",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "python_version": "3.12.14",
+  "torch_version": "2.14.0",
+  "total_ram_gb": 16.0
+}

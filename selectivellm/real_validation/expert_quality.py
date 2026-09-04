@@ -311,7 +311,7 @@ def write_matrix(case_analysis: list[dict[str, Any]], path: Path) -> None:
         "routing_opportunity",
     ]
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer = csv.DictWriter(handle, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         for item in case_analysis:
             qualities = item["quality_by_condition"]
@@ -365,7 +365,7 @@ def write_report(
 
     classification = str(summary["decision_gate"]["classification"])
     conclusions = {
-        "expert_pool_viable": "The fixed expert pool is worth routing: it has strong empirical upside and primary labeled specialists usually occur among the best conditions.",
+        "expert_pool_viable": "The fixed expert pool passes the preregistered gate for a larger routing-validation study: it has strong empirical upside and primary labeled specialists usually occur among the best tie sets.",
         "label_or_routing_bottleneck": "The fixed expert pool has useful quality diversity, but preregistered labels and routing are not aligned with which condition actually performs best.",
         "expert_pool_bottleneck": "The fixed expert pool is not worth router optimization under this benchmark: its empirical-oracle advantage does not clear the preregistered gate.",
     }
@@ -375,6 +375,8 @@ def write_report(
         f"**Backend:** real `{summary['backend']}` on `{manifest['device']['device_class']}`. No deterministic or simulated quality results appear in this report.",
         "",
         f"**Decision:** `{classification}`. {conclusions[classification]}",
+        "",
+        "Passing this gate demonstrates response-quality diversity, not clean domain specialization. Specialist lift, specialization margin, sole-winner rate, and evaluator validity must be read alongside the gate.",
         "",
         "## Aggregate quality",
         "",

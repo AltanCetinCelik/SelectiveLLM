@@ -1,0 +1,31 @@
+schema_version: "1.2.0"
+seed: 42
+mode: expert_quality_diagnostic
+registry_path: ./registry.real.v011.yaml
+benchmark_path: ../selectivellm/resources/real_hero_v1.yaml
+analyzer:
+  type: deterministic_embedding
+  dimension: 256
+router:
+  version: "real-hybrid-1.0.0"
+  type: hybrid
+  top_k: 2
+  threshold: 0.16
+  keyword_weight: 0.35
+  embedding_weight: 0.65
+runtime:
+  memory_budget_mb: 3300
+  cache_policy: lru
+  cache_enabled: false
+backend:
+  type: transformers_peft
+  model_path: Qwen/Qwen2.5-1.5B-Instruct
+  tokenizer_path: Qwen/Qwen2.5-1.5B-Instruct
+  model_revision: 989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+  tokenizer_revision: 989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+  trust_remote_code: false
+  dtype: float16
+  max_new_tokens: 384
+  device: mps
+  device_map: null
+  max_memory: null

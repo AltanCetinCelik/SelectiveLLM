@@ -1,0 +1,10 @@
+case_id,expected_experts,base,code,math,science,label_oracle,semantic_router,empirical_oracle,empirical_best,specialist_lift,specialization_margin,routing_opportunity
+py_binary_search,code_expert,0.5,1.0,0.25,0.25,1.0,1.0,1.0,code,0.5,0.75,0.5
+py_fastapi,code_expert,1.0,0.25,0.75,0.25,0.25,0.25,1.0,base,-0.75,-0.25,0.0
+math_probability,math_expert,0.0,1.0,0.0,0.0,0.0,0.0,1.0,code,0.0,-0.5,1.0
+math_proof,math_expert,0.75,0.5,0.75,0.25,0.75,0.75,0.75,base;math,0.0,0.375,0.0
+ee_mosfet,science_expert,0.0,0.25,0.25,0.25,0.25,0.25,0.25,code;math;science,0.25,0.0,0.25
+ee_filter,science_expert;math_expert,0.0,0.3333333333333333,0.3333333333333333,0.3333333333333333,0.3333333333333333,0.3333333333333333,0.3333333333333333,code;math;science,0.3333333333333333,0.0,0.3333333333333333
+general_capital,,1.0,1.0,1.0,1.0,1.0,1.0,1.0,base;code;math;science,,,0.0
+irrelevant_python,,0.0,0.0,0.0,1.0,0.0,0.0,1.0,science,,,1.0
+rlc_python,code_expert;science_expert;math_expert,0.4000000000000001,0.4000000000000001,0.4000000000000001,0.0,0.4000000000000001,0.4000000000000001,0.4000000000000001,base;code;math,0.0,,0.0

@@ -1,0 +1,207 @@
+{
+  "adapters": [
+    {
+      "license": "apache-2.0",
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-code",
+      "revision": "e937bbd728f28a441163f94b60ea5a119513e351",
+      "role": "code_expert"
+    },
+    {
+      "license": "apache-2.0",
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-math",
+      "revision": "f992ab536c07761c67bd46e35c787bb68ea97657",
+      "role": "math_expert"
+    },
+    {
+      "license": "apache-2.0",
+      "repo_id": "uditjain/lori-qwen2.5-1.5b-science",
+      "revision": "398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f",
+      "role": "science_expert"
+    }
+  ],
+  "backend": "transformers-peft",
+  "backend_kind": "real",
+  "benchmark_content_hash": "4312f5d266daab8318ab19a81ced205a563b0905807d0b7eec41f8299de0ed50",
+  "benchmark_fingerprint": "a7d886bd50a80e15d9207c122198f80bddad26f2c46a44d4f4e3c0c222486849",
+  "benchmark_version": "real-hero-1.0.0",
+  "completed_at": "2026-09-04T23:10:42.718707+00:00",
+  "created_at": "2026-09-04T22:44:31.510066+00:00",
+  "decision_gate": {
+    "mean_routing_opportunity_threshold": 0.1,
+    "primary_tie_inclusive_win_rate_threshold": 0.6,
+    "strict_improvement_case_threshold": 3
+  },
+  "decision_gate_classification": "expert_pool_viable",
+  "device": {
+    "accelerator": "Apple Metal Performance Shaders",
+    "accelerator_memory_mb": null,
+    "architecture": "arm64",
+    "cpu": "arm",
+    "cuda_version": null,
+    "device": "mps",
+    "device_class": "mps",
+    "logical_cpus": 10,
+    "mps_available": true,
+    "os": "Darwin",
+    "os_version": "25.5.0",
+    "python_version": "3.12.14",
+    "torch_version": "2.14.0",
+    "total_ram_gb": 16.0
+  },
+  "evaluation_schema_version": "deterministic-rubric-1.0.0",
+  "experiment_version": "expert-quality-diagnostic-1.0.0",
+  "fingerprint_payload": {
+    "assets": [
+      {
+        "license": "apache-2.0",
+        "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "role": "base"
+      },
+      {
+        "license": "apache-2.0",
+        "repo_id": "uditjain/lori-qwen2.5-1.5b-code",
+        "revision": "e937bbd728f28a441163f94b60ea5a119513e351",
+        "role": "code_expert"
+      },
+      {
+        "license": "apache-2.0",
+        "repo_id": "uditjain/lori-qwen2.5-1.5b-math",
+        "revision": "f992ab536c07761c67bd46e35c787bb68ea97657",
+        "role": "math_expert"
+      },
+      {
+        "license": "apache-2.0",
+        "repo_id": "uditjain/lori-qwen2.5-1.5b-science",
+        "revision": "398cf3cc78a3ff8c78c84c3a424da3ba994bdd6f",
+        "role": "science_expert"
+      }
+    ],
+    "benchmark_hash": "4312f5d266daab8318ab19a81ced205a563b0905807d0b7eec41f8299de0ed50",
+    "benchmark_version": "real-hero-1.0.0",
+    "decision_gate": {
+      "mean_routing_opportunity_threshold": 0.1,
+      "primary_tie_inclusive_win_rate_threshold": 0.6,
+      "strict_improvement_case_threshold": 3
+    },
+    "device": {
+      "accelerator": "Apple Metal Performance Shaders",
+      "accelerator_memory_mb": null,
+      "architecture": "arm64",
+      "cpu": "arm",
+      "cuda_version": null,
+      "device": "mps",
+      "device_class": "mps",
+      "logical_cpus": 10,
+      "mps_available": true,
+      "os": "Darwin",
+      "os_version": "25.5.0",
+      "python_version": "3.12.14",
+      "torch_version": "2.14.0",
+      "total_ram_gb": 16.0
+    },
+    "evaluation_schema_version": "deterministic-rubric-1.0.0",
+    "experiment_version": "expert-quality-diagnostic-1.0.0",
+    "generation_matrix": {
+      "cases": 9,
+      "conditions": [
+        "base",
+        "code",
+        "math",
+        "science"
+      ],
+      "decoding": "greedy",
+      "expected_generations": 108,
+      "max_new_tokens": 384,
+      "technical_repetitions": 3
+    },
+    "metric_schema_version": "1.1.0",
+    "packages": {
+      "accelerate": "1.14.0",
+      "huggingface-hub": "1.30.0",
+      "numpy": "2.2.6",
+      "peft": "0.20.0",
+      "safetensors": "0.8.0",
+      "selectivellm": "0.1.1",
+      "torch": "2.14.0",
+      "transformers": "5.16.1"
+    },
+    "peft_config_hashes": [
+      "e75021e72377f8b6b9e9b7f17049bc76f45f3fd4f659e37519b5c0e9d5ef0c8c",
+      "c435304d93c2ddb6b773f20165d9c865ecc09a9dbcad6b2b9d7b7438fd19a94c",
+      "fc1da6fd76bd75249b379a122cf5945a3d05094480a41296955b2cbd0ac69fa9"
+    ],
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "registry_hash": "43eccc8ad75106a7072acba0c95acc78db84e6762f32db25e84811e3b9f6b497",
+    "registry_version": "qwen25-lori-real-1.0.0",
+    "router": {
+      "embedding_weight": 0.65,
+      "keyword_weight": 0.35,
+      "static_components": [],
+      "threshold": 0.16,
+      "top_k": 2,
+      "type": "hybrid",
+      "version": "real-hybrid-1.0.0"
+    },
+    "statistical_protocol": {
+      "bootstrap_interval": "percentile_95",
+      "bootstrap_resamples": 10000,
+      "bootstrap_seed": 42,
+      "bootstrap_unit": "benchmark_case",
+      "cell_aggregate": "arithmetic_mean_over_three_technical_repetitions",
+      "primary_unit": "benchmark_case",
+      "tie_absolute_tolerance": 1e-12
+    }
+  },
+  "generation_matrix": {
+    "cases": 9,
+    "conditions": [
+      "base",
+      "code",
+      "math",
+      "science"
+    ],
+    "decoding": "greedy",
+    "expected_generations": 108,
+    "max_new_tokens": 384,
+    "technical_repetitions": 3
+  },
+  "git_commit": "16c1430d0ffe269871fc3c34203d17be69556d64",
+  "measurement_semantics": {
+    "expert_capacity": "one real PEFT LoRA active for specialist conditions",
+    "memory": "not a memory benchmark; no memory conclusion is drawn",
+    "quality": "fixed deterministic rubric over real model generations"
+  },
+  "metric_schema_version": "1.1.0",
+  "model_identity": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "observed_cells": 36,
+  "observed_generations": 108,
+  "packages": {
+    "accelerate": "1.14.0",
+    "huggingface-hub": "1.30.0",
+    "numpy": "2.2.6",
+    "peft": "0.20.0",
+    "safetensors": "0.8.0",
+    "selectivellm": "0.1.1",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "registry_content_hash": "43eccc8ad75106a7072acba0c95acc78db84e6762f32db25e84811e3b9f6b497",
+  "registry_version": "qwen25-lori-real-1.0.0",
+  "router_version": "real-hybrid-1.0.0",
+  "run_id": "20260904T224431Z",
+  "seed": 42,
+  "seed_policy": "fixed:42; greedy decoding; three technical repetitions",
+  "source_dirty": false,
+  "statistical_protocol": {
+    "bootstrap_interval": "percentile_95",
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 42,
+    "bootstrap_unit": "benchmark_case",
+    "cell_aggregate": "arithmetic_mean_over_three_technical_repetitions",
+    "primary_unit": "benchmark_case",
+    "tie_absolute_tolerance": 1e-12
+  },
+  "status": "completed"
+}
