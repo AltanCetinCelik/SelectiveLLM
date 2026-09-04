@@ -1,7 +1,7 @@
 # SelectiveLLM v0.1 Design
 
 Date: 2026-09-04
-Status: Approved for implementation, pending written-spec review
+Status: Approved for implementation
 
 ## 1. Objective
 
@@ -129,6 +129,12 @@ T_total = T_route + T_plan + T_load + T_inference + measured orchestration overh
 
 Environment manifests record configuration, seed, operating system, CPU, total RAM, accelerator, reported VRAM, CUDA version, PyTorch version, MPS availability, Python version, dependency versions, and Git commit.
 
+Benchmark-level aggregates report sample count and, where meaningful, mean, median, standard deviation, p50, and p95. Repeated runs can report confidence intervals and retain their individual observations so a single run is not presented as universal evidence.
+
+Every completed run stores a benchmark fingerprint derived from the backend, model identity, adapter set, benchmark version, seed policy, device class, measurement semantics, registry version, routing configuration version, and metric schema version. Results may share a comparison table or plot only when those compatibility fields match, except for the intentionally varied experimental method. Comparison tooling rejects or visibly separates incompatible runs.
+
+Benchmark datasets, registry configurations, routing configurations, and metric schemas carry explicit versions. Changes to cases, labels, evaluation logic, component definitions, routing semantics, or metric meanings require a version change and therefore cannot silently inherit comparability with older artifacts.
+
 ## 5. Hero Experiment
 
 The primary workload contains general knowledge, Python, mathematics, electrical engineering, reasoning, ambiguous prompts, irrelevant-domain prompts, and multi-domain prompts such as Python-based RLC simulation.
@@ -181,6 +187,10 @@ Each run saves:
 - Correctly routed prompts whose output did not improve over base-only.
 
 Failure records include the prompt, expected and selected experts, scores, confidence, runtime state, baseline quality, routed quality, and a deterministic reason category where one can be derived. Reports do not hide or discard failures.
+
+### Negative-result principle
+
+Negative and null results are first-class evidence. If semantic routing does not outperform keyword or random routing, correct routing does not improve generation quality, or loading overhead overwhelms the memory benefit, the run and its failure analysis are preserved and documented. Benchmark cases and evaluation logic are not tuned solely to make SelectiveLLM appear successful.
 
 ## 6. Result Artifacts
 
@@ -245,6 +255,9 @@ Tests require no network and no large model downloads. They cover:
 - Budget planning and rejection reasons.
 - LRU hit, miss, eviction, and impossible-budget behavior.
 - Metric availability and unit labeling.
+- Aggregate statistics, repeated-run confidence intervals, and small-sample behavior.
+- Compatibility fingerprints and rejection of invalid cross-run comparisons.
+- Dataset, registry, routing, and metric-schema version propagation.
 - Backend parity through shared contract tests.
 - Benchmark baselines, quality metrics, failure classification, report schemas, and plot generation.
 - CLI smoke tests and Python API integration.
