@@ -34,13 +34,13 @@ Across the workload, top-1 semantic routing retained 0.767 control quality while
 
 ## What is the latency cost of swapping?
 
-On this control implementation, uncached semantic routing performed 80 expert misses and 80 unloads across 80 observations. Mean load-stage latency was about 0.363 ms and end-to-end p95 was about 1.654 ms. All-resident performed six cold expert loads, no swaps, and had about 0.450 ms p95 end-to-end latency.
+On this control implementation, uncached semantic routing performed 80 expert misses and 80 unloads across 80 observations. Mean load-stage latency was about 0.361 ms and end-to-end p95 was about 1.662 ms. All-resident performed six cold expert loads, no swaps, and had about 0.464 ms p95 end-to-end latency.
 
 These are measured wall-clock control costs, not forecasts for model transfers. The real cost depends on adapter size, storage, interconnect, device synchronization, framework behavior, and generation length.
 
 ## Under what workload does caching help?
 
-The benchmark repeats a mixed-domain sequence with local clusters. Under that order, semantic caching served 30 of 80 expert requests as hits, reduced misses from 80 to 50 and swaps from 80 to 48, lowered mean control load time from about 0.363 ms to 0.236 ms, and lowered p95 end-to-end latency from about 1.654 ms to 1.354 ms without changing selected capacity or control quality.
+The benchmark repeats a mixed-domain sequence with local clusters. Under that order, semantic caching served 30 of 80 expert requests as hits, reduced misses from 80 to 50 and swaps from 80 to 48, lowered mean control load time from about 0.361 ms to 0.232 ms, and lowered p95 end-to-end latency from about 1.662 ms to 1.360 ms without changing selected capacity or control quality.
 
 Caching helps when repeated requests reuse experts before eviction and load cost is material. It may not help under low-locality, adversarial, or rapidly shifting workloads. A future real study must randomize and parameterize workload order rather than generalize from this sequence.
 
