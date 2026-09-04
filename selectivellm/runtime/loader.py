@@ -91,7 +91,23 @@ class RuntimeLoader:
         return events
 
     def memory_snapshot(self) -> MemorySnapshot:
-        return self.meter.snapshot(self.resident_memory_mb)
+        snapshot = self.meter.snapshot(self.resident_memory_mb)
+        base_ids = {component.id for component in self.registry.base_components()}
+        base_capacity = sum(
+            component.memory_mb
+            for component_id, component in self.resident.items()
+            if component_id in base_ids
+        )
+        return snapshot.model_copy(
+            update={
+                "declared_base_capacity_mb": base_capacity,
+                "declared_expert_capacity_mb": self.resident_memory_mb - base_capacity,
+                "breakdown_unavailable_reason": (
+                    "Backend does not yet expose tensor-level model, adapter, KV-cache, "
+                    "and framework allocation attribution"
+                ),
+            }
+        )
 
     def _unload(self, component_id: str, detail: str) -> list[RuntimeEvent]:
         component = self.resident.pop(component_id)

@@ -113,7 +113,15 @@ class SelectiveLLM:
             event.action == "miss" and event.component_id not in base_ids for event in events
         )
         swaps = sum(event.action == "unload" for event in events)
-        transfers = sum(event.action == "transfer" for event in events)
+        transfers = sum(
+            event.action == "transfer"
+            or (
+                event.action == "load"
+                and event.to_location is not None
+                and event.to_location.split(":", maxsplit=1)[0] in {"cuda", "mps"}
+            )
+            for event in events
+        )
         known_parameters = [component.parameter_count for component in active]
         active_parameters = (
             sum(value for value in known_parameters if value is not None)
@@ -160,6 +168,7 @@ class SelectiveLLM:
             backend=self.backend.name,
             backend_kind=self.backend.kind,
             model_identity=self.backend.model_identity,
+            backend_metadata=output.metadata,
             profile=profile,
             routing=routing,
             plan=plan,

@@ -13,8 +13,13 @@ def test_engine_separates_declared_capacity_from_accelerator_memory(
     assert result.backend == "deterministic-control"
     assert result.backend_kind == "control"
     assert result.memory.declared_resident_capacity_mb > 0
+    assert result.memory.declared_base_capacity_mb == 500
+    assert result.memory.declared_expert_capacity_mb > 0
     assert result.memory.accelerator_peak_allocated_mb is None
     assert not result.memory.accelerator_measurement_available
+    assert result.memory.kv_cache_memory_mb is None
+    assert result.memory.breakdown_unavailable_reason is not None
+    assert result.backend_metadata["physical_vram_claim"] is False
 
 
 def test_cache_hit_counts_experts_not_pinned_base(

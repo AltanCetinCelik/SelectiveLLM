@@ -98,12 +98,19 @@ class MemorySnapshot(BaseModel):
     measurement_semantics: str
     declared_resident_capacity_mb: float = Field(ge=0)
     declared_peak_capacity_mb: float = Field(ge=0)
+    declared_base_capacity_mb: float = Field(default=0, ge=0)
+    declared_expert_capacity_mb: float = Field(default=0, ge=0)
     host_rss_mb: float | None = Field(default=None, ge=0)
     accelerator_allocated_mb: float | None = Field(default=None, ge=0)
     accelerator_reserved_mb: float | None = Field(default=None, ge=0)
     accelerator_peak_allocated_mb: float | None = Field(default=None, ge=0)
     accelerator_measurement_available: bool
     unavailable_reason: str | None = None
+    model_parameter_memory_mb: float | None = Field(default=None, ge=0)
+    adapter_parameter_memory_mb: float | None = Field(default=None, ge=0)
+    kv_cache_memory_mb: float | None = Field(default=None, ge=0)
+    framework_overhead_mb: float | None = Field(default=None, ge=0)
+    breakdown_unavailable_reason: str | None = None
 
 
 class StageMetrics(BaseModel):
@@ -137,6 +144,7 @@ class GenerationResult(BaseModel):
     backend: str
     backend_kind: Literal["control", "real"]
     model_identity: str
+    backend_metadata: dict[str, Any] = Field(default_factory=dict)
     profile: PromptProfile
     routing: RoutingDecision
     plan: PlanDecision

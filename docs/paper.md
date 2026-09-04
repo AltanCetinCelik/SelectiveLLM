@@ -26,7 +26,7 @@ The versioned hero dataset includes 16 single-domain, multi-domain, ambiguous, a
 
 ## 6. Evaluation
 
-The included deterministic-control experiment quantifies whether the implemented router and runtime obey their methodology. Its synthetic capability score changes when required independently defined experts are available, and its wall-clock timings show whether the small control loader is reused. These are not model-quality or physical-memory results. Consult `results/latest/report.md` for the machine-specific run and confidence summaries.
+The included deterministic-control experiment contains 80 observations per method. Semantic routing reached 0.633 mean multi-label F1 versus 0.198 keyword and 0.150 random. Its synthetic capability-coverage score was 0.797 versus 0.431 base-only and 1.000 oracle, while using 45.7% less declared peak capacity than all-resident. Caching preserved selection and control quality while serving 30 of 85 expert requests as hits and reducing swaps from 85 to 53 in the repeated mixed-domain order. These are not model-quality or physical-memory results. Consult `results/latest/report.md` for machine-specific timings, confidence summaries, and limitations, and [the hostile review](hostile_review.md) for the evidence boundary.
 
 A publishable real-backend evaluation remains pending compatible, license-reviewed base and adapter assets. It must measure actual accelerator memory, task-specific generation quality, loading/transfers, cold and warm latency, and repeated workload orders.
 
@@ -47,4 +47,3 @@ The immediate priority is a pre-registered real adapter study with held-out prom
 ## 9. Conclusion
 
 SelectiveLLM v0.1 provides the machinery to test capacity routing without conflating control evidence with real inference. The central question remains open until real runs demonstrate a useful quality-memory-latency tradeoff. Negative outcomes are valid results and are preserved.
-

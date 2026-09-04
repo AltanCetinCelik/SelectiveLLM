@@ -232,6 +232,7 @@ Parameter-level semantic paging becomes credible only after causal importance ma
 - [Research questions and hypothesis matrix](docs/research_questions.md)
 - [Semantic parameter paging research agenda](docs/research/semantic_parameter_paging.md)
 - [Living technical report](docs/paper.md)
+- [Hostile review and falsification criteria](docs/hostile_review.md)
 - [Roadmap](docs/roadmap.md)
 - [v0.1.0 release notes](docs/releases/v0.1.0.md)
 
