@@ -20,6 +20,10 @@ results/real/*
 !results/real/README.md
 !results/real/latest/
 !results/real/latest/**
+!results/real/expert_quality/
+results/real/expert_quality/*
+!results/real/expert_quality/latest/
+!results/real/expert_quality/latest/**
 *.safetensors
 *.bin
 *.pt
