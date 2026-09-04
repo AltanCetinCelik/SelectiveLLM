@@ -1,0 +1,29 @@
+schema_version: "1.0.0"
+registry_version: "user-real-assets-1.0.0"
+components:
+  - id: base
+    name: User-provided base model
+    type: base_model
+    domain: [general]
+    description: A local or explicitly configured Hugging Face causal language model.
+    memory_mb: 4096
+    backend: transformers-peft
+    model_path: /absolute/path/to/base-model
+    supported_tasks: [generation]
+    priority: 100
+    dependencies: []
+    metadata:
+      license: verify_upstream_model_license
+  - id: python_expert
+    name: User-provided Python LoRA
+    type: lora
+    domain: [python, programming]
+    description: A PEFT adapter trained for Python code generation.
+    memory_mb: 256
+    backend: transformers-peft
+    model_path: /absolute/path/to/python-adapter
+    supported_tasks: [python, code_generation]
+    priority: 50
+    dependencies: [base]
+    metadata:
+      license: verify_upstream_adapter_license

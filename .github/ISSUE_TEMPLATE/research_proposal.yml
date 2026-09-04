@@ -1,0 +1,23 @@
+name: Research proposal
+description: Propose a falsifiable experiment.
+title: "[Research]: "
+labels: [research]
+body:
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Hypothesis and falsification criterion
+    validations:
+      required: true
+  - type: textarea
+    id: methodology
+    attributes:
+      label: Methodology
+      description: Describe workload, baselines, metrics, controls, and repeated runs.
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: Closest related work
+

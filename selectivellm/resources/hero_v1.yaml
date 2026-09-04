@@ -1,0 +1,102 @@
+schema_version: "1.0.0"
+benchmark_version: "hero-1.0.0"
+name: SelectiveLLM mixed-domain hero benchmark
+description: Versioned control workload for routing, capacity, latency, and cache experiments.
+cases:
+  - id: py_binary_search
+    prompt: Implement binary search in Python and state its time complexity.
+    domain: [python]
+    expected_experts: [python_expert]
+    reference: Binary search halves a sorted interval and runs in O(log n) time.
+    tags: [single-domain, programming, easy]
+  - id: py_fastapi
+    prompt: Write a FastAPI endpoint with input validation and a unit test.
+    domain: [python, software_engineering]
+    expected_experts: [python_expert, software_engineering_expert]
+    reference: Use a Pydantic request model, an endpoint, and a test client assertion.
+    tags: [multi-domain, programming, api]
+  - id: py_paraphrase
+    prompt: Show an idiomatic generator that lazily walks a tree, including edge-case checks.
+    domain: [python, reasoning]
+    expected_experts: [python_expert, reasoning_expert]
+    reference: A recursive or iterative Python generator should yield nodes lazily and handle an empty tree.
+    tags: [multi-domain, paraphrase, ambiguous]
+  - id: math_integral
+    prompt: Calculate the integral of x squared from zero to three and explain each step.
+    domain: [mathematics, reasoning]
+    expected_experts: [math_expert, reasoning_expert]
+    reference: The antiderivative is x cubed over three, giving 9.
+    tags: [multi-domain, mathematics]
+  - id: math_probability
+    prompt: Two fair dice are rolled. Compute the probability that their sum is eight.
+    domain: [mathematics]
+    expected_experts: [math_expert]
+    reference: Five of the 36 equally likely outcomes sum to eight, so the probability is 5/36.
+    tags: [single-domain, mathematics]
+  - id: math_proof
+    prompt: Give a concise proof that the square root of two is irrational.
+    domain: [mathematics, reasoning]
+    expected_experts: [math_expert, reasoning_expert]
+    reference: Assume a reduced fraction, derive that numerator and denominator are both even, and contradict reduction.
+    tags: [multi-domain, proof]
+  - id: ee_mosfet
+    prompt: Explain why a MOSFET gate driver must source and sink current quickly.
+    domain: [electrical_engineering]
+    expected_experts: [electrical_engineering_expert]
+    reference: The driver charges and discharges gate capacitance quickly to reduce switching loss.
+    tags: [single-domain, electronics]
+  - id: ee_filter
+    prompt: Derive the cutoff frequency of a first-order RC low-pass circuit.
+    domain: [electrical_engineering, mathematics]
+    expected_experts: [electrical_engineering_expert, math_expert]
+    reference: The magnitude falls by 3 dB when omega RC equals one, so fc is 1/(2 pi RC).
+    tags: [multi-domain, electronics, derivation]
+  - id: rlc_python
+    prompt: Use Python to simulate an RLC circuit and plot the transient response.
+    domain: [python, electrical_engineering, mathematics]
+    expected_experts: [python_expert, electrical_engineering_expert, math_expert]
+    reference: Formulate the RLC differential equation, integrate it numerically, and plot voltage or current over time.
+    tags: [multi-domain, three-capability, simulation]
+  - id: reasoning_schedule
+    prompt: Analyze two competing project schedules and identify the critical dependency.
+    domain: [reasoning, software_engineering]
+    expected_experts: [reasoning_expert, software_engineering_expert]
+    reference: Compare dependency paths, identify the longest blocking chain, and explain schedule risk.
+    tags: [multi-domain, ambiguous]
+  - id: reasoning_logic
+    prompt: Deduce which statement must be true when exactly one of three claims is false.
+    domain: [reasoning]
+    expected_experts: [reasoning_expert]
+    reference: Enumerate the possible false claim and eliminate inconsistent assignments.
+    tags: [single-domain, logic]
+  - id: general_capital
+    prompt: What is the capital of Japan?
+    domain: [general]
+    expected_experts: []
+    reference: Tokyo.
+    tags: [base-sufficient, general]
+  - id: general_summary
+    prompt: Summarize why reproducibility matters in scientific experiments.
+    domain: [general, scientific_writing]
+    expected_experts: [scientific_writing_expert]
+    reference: Reproducibility permits verification, comparison, and cumulative scientific progress.
+    tags: [writing, general]
+  - id: irrelevant_python
+    prompt: Name one Python species found in Southeast Asia.
+    domain: [general]
+    expected_experts: []
+    reference: The reticulated python is native to South and Southeast Asia.
+    tags: [irrelevant-domain, lexical-trap]
+  - id: irrelevant_current
+    prompt: Explain the current state of a historical debate without discussing electricity.
+    domain: [general, reasoning]
+    expected_experts: [reasoning_expert]
+    reference: A sound answer distinguishes the main positions and their supporting evidence.
+    tags: [irrelevant-domain, lexical-trap, ambiguous]
+  - id: scientific_abstract
+    prompt: Draft a scientific abstract describing a controlled routing experiment and its limitations.
+    domain: [scientific_writing, reasoning]
+    expected_experts: [scientific_writing_expert, reasoning_expert]
+    reference: The abstract should state motivation, method, evidence, and limitations without overstating conclusions.
+    tags: [multi-domain, writing]
+

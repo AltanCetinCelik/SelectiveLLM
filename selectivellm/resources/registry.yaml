@@ -1,0 +1,102 @@
+schema_version: "1.0.0"
+registry_version: "hero-control-1.0.0"
+components:
+  - id: base
+    name: Shared base capacity
+    type: base_model
+    domain: [general]
+    description: Shared language and instruction-following capacity.
+    memory_mb: 500
+    backend: deterministic-control
+    model_path: null
+    supported_tasks: [generation]
+    priority: 100
+    dependencies: []
+    parameter_count: 125000000
+    metadata:
+      capacity_semantics: simulated_declared_capacity
+  - id: python_expert
+    name: Python expert
+    type: lora
+    domain: [python, programming]
+    description: Python algorithms, libraries, testing, APIs, simulation, and code generation.
+    memory_mb: 180
+    backend: deterministic-control
+    model_path: null
+    supported_tasks: [python, code_generation, algorithms, simulation]
+    priority: 50
+    dependencies: [base]
+    parameter_count: 4500000
+    metadata:
+      capacity_semantics: simulated_declared_capacity
+  - id: software_engineering_expert
+    name: Software engineering expert
+    type: adapter
+    domain: [software_engineering, programming]
+    description: API design, distributed systems, databases, testing, and maintainable software.
+    memory_mb: 180
+    backend: deterministic-control
+    model_path: null
+    supported_tasks: [architecture, api_design, testing]
+    priority: 40
+    dependencies: [base]
+    parameter_count: 4500000
+    metadata:
+      capacity_semantics: simulated_declared_capacity
+  - id: math_expert
+    name: Mathematics expert
+    type: lora
+    domain: [mathematics]
+    description: Algebra, calculus, probability, proofs, equations, and numerical methods.
+    memory_mb: 180
+    backend: deterministic-control
+    model_path: null
+    supported_tasks: [calculation, proof, numerical_analysis]
+    priority: 50
+    dependencies: [base]
+    parameter_count: 4500000
+    metadata:
+      capacity_semantics: simulated_declared_capacity
+  - id: electrical_engineering_expert
+    name: Electrical engineering expert
+    type: adapter
+    domain: [electrical_engineering]
+    description: Analog and digital circuits, MOSFETs, RLC transients, impedance, and control.
+    memory_mb: 180
+    backend: deterministic-control
+    model_path: null
+    supported_tasks: [circuit_analysis, electronics, simulation]
+    priority: 50
+    dependencies: [base]
+    parameter_count: 4500000
+    metadata:
+      capacity_semantics: simulated_declared_capacity
+  - id: reasoning_expert
+    name: General reasoning expert
+    type: adapter
+    domain: [reasoning]
+    description: Multi-step logical analysis, comparison, deduction, and tradeoff reasoning.
+    memory_mb: 180
+    backend: deterministic-control
+    model_path: null
+    supported_tasks: [reasoning, analysis, planning]
+    priority: 45
+    dependencies: [base]
+    parameter_count: 4500000
+    metadata:
+      capacity_semantics: simulated_declared_capacity
+  - id: scientific_writing_expert
+    name: Scientific writing expert
+    type: adapter
+    domain: [scientific_writing]
+    description: Research abstracts, hypotheses, methods, limitations, and technical prose.
+    memory_mb: 180
+    backend: deterministic-control
+    model_path: null
+    supported_tasks: [scientific_writing, summarization]
+    priority: 35
+    dependencies: [base]
+    parameter_count: 4500000
+    metadata:
+      capacity_semantics: simulated_declared_capacity
+

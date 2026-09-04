@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use SelectiveLLM in research, cite the software and the exact benchmark run fingerprint."
+title: "SelectiveLLM: Semantic Model Paging and Dynamic Expert Routing for Memory-Constrained LLM Inference"
+type: software
+version: 0.1.0
+date-released: 2026-09-04
+license: Apache-2.0
+repository-code: "https://github.com/selectivellm/selectivellm"
+keywords:
+  - large language models
+  - expert routing
+  - model offloading
+  - PEFT
+  - memory-constrained inference
+authors:
+  - name: "SelectiveLLM contributors"
+

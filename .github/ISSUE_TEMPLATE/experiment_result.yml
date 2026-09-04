@@ -1,0 +1,24 @@
+name: Experiment result
+description: Share a reproducible positive, null, or negative result.
+title: "[Result]: "
+labels: [experiment]
+body:
+  - type: input
+    id: fingerprint
+    attributes:
+      label: Benchmark fingerprint
+    validations:
+      required: true
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Artifacts and reproduction command
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Finding and limitations
+    validations:
+      required: true
+
