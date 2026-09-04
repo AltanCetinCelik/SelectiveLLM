@@ -13,6 +13,35 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+METHOD_LABELS = {
+    "base_only": "base",
+    "random": "random",
+    "keyword": "keyword",
+    "oracle": "oracle",
+    "embedding": "embedding",
+    "semantic_top1": "semantic top-1",
+    "semantic": "semantic",
+    "semantic_threshold_high": "high threshold",
+    "semantic_cache": "semantic + cache",
+    "semantic_cache_small": "small cache",
+    "all_resident": "all resident",
+}
+
+QUALITY_LABEL_OFFSETS = {
+    "semantic": (6, 10),
+    "semantic_top1": (6, 10),
+    "embedding": (6, -10),
+    "random": (6, -16),
+    "semantic_threshold_high": (6, 10),
+}
+
+QUALITY_LABELS = {
+    "semantic": "semantic / semantic + cache",
+    "semantic_top1": "semantic top-1 / small cache",
+}
+
+QUALITY_LABEL_SKIPS = {"semantic_cache", "semantic_cache_small"}
+
 
 def write_summary_csv(summary: dict[str, Any], path: Path) -> None:
     rows: list[dict[str, Any]] = []
@@ -66,7 +95,14 @@ def generate_plots(summary: dict[str, Any], rows: list[dict[str, Any]], plots: P
         x = 100 * _mean(summary, method, memory_metric)
         y = 100 * _mean(summary, method, "quality_retention")
         axis.scatter(x, y, s=70)
-        axis.annotate(method, (x, y), xytext=(5, 5), textcoords="offset points", fontsize=8)
+        if method not in QUALITY_LABEL_SKIPS:
+            axis.annotate(
+                QUALITY_LABELS.get(method, METHOD_LABELS.get(method, method)),
+                (x, y),
+                xytext=QUALITY_LABEL_OFFSETS.get(method, (6, 6)),
+                textcoords="offset points",
+                fontsize=8,
+            )
         plotted += 1
     if plotted == 0:
         axis.text(
@@ -88,41 +124,42 @@ def generate_plots(summary: dict[str, Any], rows: list[dict[str, Any]], plots: P
     fig.savefig(plots / "quality_vs_memory.png", dpi=180)
     plt.close(fig)
 
-    fig, axis = plt.subplots(figsize=(9, 5))
+    display_methods = [METHOD_LABELS.get(method, method) for method in methods]
+    fig, axis = plt.subplots(figsize=(12, 6))
     values = [_mean(summary, method, "routing_f1") for method in methods]
-    axis.bar(methods, values, color="#247BA0")
+    axis.bar(display_methods, values, color="#247BA0")
     axis.set_ylim(0, 1.05)
     axis.set_ylabel("Mean multi-label routing F1")
     axis.set_title(f"Routing quality\n{label}")
-    axis.tick_params(axis="x", rotation=30)
+    axis.tick_params(axis="x", rotation=25)
     fig.tight_layout()
     fig.savefig(plots / "routing_accuracy.png", dpi=180)
     plt.close(fig)
 
     stages = ["routing_ms", "planning_ms", "loading_ms", "inference_ms"]
     stage_labels = ["Route", "Plan", "Load", "Inference"]
-    fig, axis = plt.subplots(figsize=(10, 5))
+    fig, axis = plt.subplots(figsize=(12, 6))
     bottom = np.zeros(len(methods))
     colors = ["#247BA0", "#70C1B3", "#F3FFBD", "#FF7B6B"]
     for stage, stage_label, color in zip(stages, stage_labels, colors, strict=True):
         stage_values = np.array([_mean(summary, method, stage) for method in methods])
-        axis.bar(methods, stage_values, bottom=bottom, label=stage_label, color=color)
+        axis.bar(display_methods, stage_values, bottom=bottom, label=stage_label, color=color)
         bottom += stage_values
     axis.set_ylabel("Mean measured wall-clock latency (ms)")
     axis.set_title(f"Latency breakdown\n{label}")
     axis.legend()
-    axis.tick_params(axis="x", rotation=30)
+    axis.tick_params(axis="x", rotation=25)
     fig.tight_layout()
     fig.savefig(plots / "latency_breakdown.png", dpi=180)
     plt.close(fig)
 
-    fig, axis = plt.subplots(figsize=(9, 5))
+    fig, axis = plt.subplots(figsize=(12, 6))
     values = [_mean(summary, method, "cache_hit_rate") for method in methods]
-    axis.bar(methods, values, color="#70C1B3")
+    axis.bar(display_methods, values, color="#70C1B3")
     axis.set_ylim(0, 1.05)
     axis.set_ylabel("Cache hit rate")
     axis.set_title(f"Runtime cache behavior\n{label}")
-    axis.tick_params(axis="x", rotation=30)
+    axis.tick_params(axis="x", rotation=25)
     fig.tight_layout()
     fig.savefig(plots / "cache_hit_rate.png", dpi=180)
     plt.close(fig)
@@ -153,13 +190,15 @@ def generate_plots(summary: dict[str, Any], rows: list[dict[str, Any]], plots: P
     axis.set_title(f"Semantic-router multi-label co-selection\n{label}")
     for row_index in range(len(experts)):
         for column_index in range(len(experts)):
+            value = matrix[row_index, column_index]
             axis.text(
                 column_index,
                 row_index,
-                str(matrix[row_index, column_index]),
+                str(value),
                 ha="center",
                 va="center",
                 fontsize=7,
+                color="white" if value > matrix.max() / 2 else "#1F2937",
             )
     fig.colorbar(image, ax=axis)
     fig.tight_layout()

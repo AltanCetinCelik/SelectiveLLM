@@ -19,7 +19,7 @@
   "cuda_version": null,
   "device": "cpu",
   "device_class": "cpu",
-  "git_commit": "e5ccfb62c3c2cfdc2aaf240dd4bcf8fd28202b15",
+  "git_commit": "ca4798b56bc108925b6515fb72da11fb70867fc9",
   "logical_cpus": 10,
   "mps_available": false,
   "os": "Darwin",
@@ -46,17 +46,17 @@
 
 | Method | n | Quality | Quality retention | Routing F1 | Declared peak MB | Declared reduction | Latency p50 ms | Latency p95 ms | Cache hit rate |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| base_only | 80 | 0.431 | 43.1% | 0.125 | 500.0 | 68.4% | 0.305 | 0.373 | 0.000 |
-| random | 80 | 0.514 | 51.4% | 0.150 | 860.0 | 45.6% | 0.978 | 1.098 | 0.000 |
-| keyword | 80 | 0.503 | 50.3% | 0.198 | 680.0 | 57.0% | 0.314 | 0.647 | 0.000 |
-| oracle | 80 | 1.000 | 100.0% | 1.000 | 1019.8 | 35.5% | 0.940 | 1.278 | 0.000 |
-| embedding | 80 | 0.757 | 75.7% | 0.571 | 857.8 | 45.7% | 1.151 | 1.486 | 0.000 |
-| semantic_top1 | 80 | 0.764 | 76.4% | 0.594 | 680.0 | 57.0% | 1.176 | 1.268 | 0.000 |
-| semantic | 80 | 0.797 | 79.7% | 0.633 | 857.8 | 45.7% | 1.171 | 1.517 | 0.000 |
-| semantic_threshold_high | 80 | 0.516 | 51.6% | 0.217 | 842.0 | 46.7% | 0.844 | 1.507 | 0.000 |
-| semantic_cache | 80 | 0.797 | 79.7% | 0.633 | 857.8 | 45.7% | 1.161 | 1.339 | 0.312 |
-| semantic_cache_small | 80 | 0.764 | 76.4% | 0.594 | 680.0 | 57.0% | 1.148 | 1.296 | 0.312 |
-| all_resident | 80 | 0.963 | 96.2% | 0.368 | 1580.0 | 0.0% | 0.321 | 0.367 | 0.988 |
+| base_only | 80 | 0.431 | 43.1% | 0.125 | 500.0 | 68.4% | 0.307 | 0.374 | 0.000 |
+| random | 80 | 0.514 | 51.4% | 0.150 | 860.0 | 45.6% | 0.999 | 1.104 | 0.000 |
+| keyword | 80 | 0.503 | 50.3% | 0.198 | 680.0 | 57.0% | 0.324 | 0.661 | 0.000 |
+| oracle | 80 | 1.000 | 100.0% | 1.000 | 1019.8 | 35.5% | 0.956 | 1.303 | 0.000 |
+| embedding | 80 | 0.757 | 75.7% | 0.571 | 857.8 | 45.7% | 1.154 | 1.501 | 0.000 |
+| semantic_top1 | 80 | 0.764 | 76.4% | 0.594 | 680.0 | 57.0% | 1.163 | 1.280 | 0.000 |
+| semantic | 80 | 0.797 | 79.7% | 0.633 | 857.8 | 45.7% | 1.169 | 1.511 | 0.000 |
+| semantic_threshold_high | 80 | 0.516 | 51.6% | 0.217 | 842.0 | 46.7% | 0.837 | 1.484 | 0.000 |
+| semantic_cache | 80 | 0.797 | 79.7% | 0.633 | 857.8 | 45.7% | 1.167 | 1.297 | 0.312 |
+| semantic_cache_small | 80 | 0.764 | 76.4% | 0.594 | 680.0 | 57.0% | 1.157 | 1.259 | 0.312 |
+| all_resident | 80 | 0.963 | 96.2% | 0.368 | 1580.0 | 0.0% | 0.318 | 0.368 | 0.988 |
 
 Statistics include count, mean, median, standard deviation, p50, p95, and a normal-approximation 95% confidence interval where more than one observation exists. Case-level observations are not independent repeated training runs; intervals characterize this workload only.
 
@@ -74,7 +74,7 @@ Statistics include count, mean, median, standard deviation, p50, p95, and a norm
 
 ## Interpretation
 
-Semantic routing changed the backend-specific quality score by +0.366 relative to base-only. Its mean routing F1 differed from keyword routing by +0.435. Caching changed mean control-backend load time by -0.124 ms (cached minus uncached). These observations support conclusions only for the labeled backend, workload, configuration, and measurement semantics.
+Semantic routing changed the backend-specific quality score by +0.366 relative to base-only. Its mean routing F1 differed from keyword routing by +0.435. Caching changed mean control-backend load time by -0.122 ms (cached minus uncached). These observations support conclusions only for the labeled backend, workload, configuration, and measurement semantics.
 
 ## Limitations
 
