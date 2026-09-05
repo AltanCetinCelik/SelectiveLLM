@@ -1,0 +1,109 @@
+{
+  "benchmark_validation": {
+    "answer_position_counts": {
+      "code/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "code/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      },
+      "general/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "general/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      },
+      "mathematics/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "mathematics/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      },
+      "science/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "science/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      }
+    },
+    "benchmark_sha256": "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0",
+    "benchmark_version": "dense-capacity-mcq-1.0.0",
+    "case_count": 80,
+    "cross_split_template_family_overlap": [],
+    "domain_split_counts": {
+      "code/discovery": 12,
+      "code/evaluation": 8,
+      "general/discovery": 12,
+      "general/evaluation": 8,
+      "mathematics/discovery": 12,
+      "mathematics/evaluation": 8,
+      "science/discovery": 12,
+      "science/evaluation": 8
+    },
+    "errors": [],
+    "excluded_smoke_test_topic_present": false,
+    "manual_correctness_reviews": 80,
+    "maximum_cross_split_five_gram_jaccard": 0.05,
+    "maximum_similarity_pair": [
+      "dense_general_discovery_12",
+      "dense_general_eval_08"
+    ],
+    "numeric_expression_checks": 27,
+    "schema_version": "1.0.0",
+    "stability_sentinels": [
+      "dense_code_eval_01",
+      "dense_code_eval_02",
+      "dense_general_eval_01",
+      "dense_general_eval_02",
+      "dense_math_eval_01",
+      "dense_math_eval_02",
+      "dense_science_eval_01",
+      "dense_science_eval_02"
+    ],
+    "status": "valid",
+    "unique_id_count": 80,
+    "unique_template_family_count": 80
+  },
+  "mapping_hashes": {
+    "128": "540d63699a469a54b86d9bd5d07df9110fc1266791b0c8c1b1636412d0c1018a",
+    "64": "c7d55beae21124b7b3e3d96857ad9aec5d92ddc03d616e829d15bcd8d3b8bb73"
+  },
+  "prior_classification": "C",
+  "prior_evidence_hashes": {
+    "causal_scores.jsonl": "6ce91c758f8b4db0d4bcb47cc35b827cd08e4afddcc9da6e9c95ef015efe92d3",
+    "discovery_activities.npz": "737b38606421ba69af82f5e416757bc968e9984468a8677dabad7d6cffcbb085",
+    "full_model_scores.jsonl": "139d3625c23b16bc75fd6b5c37d4f67975d19556faea2f811716b9047a2b2bdb",
+    "initial_masks.jsonl": "63fda7443870ff0920402d501ca499910ce9c2e19a5357399930a97e0c52dcca",
+    "noop_scores.jsonl": "0f5f0d749124d5369fea076f64545e7bf85ffc639c5beb71e3311d15202ae4ec",
+    "stability.json": "c1524aa740b642bba0dc778f0e3647f538b10b38ddb7fd95269f437ed9ee4821"
+  },
+  "quota_pattern_hashes": {
+    "128": "1036fe53b46c43304d60bd1975344cdbb047a3f576bf53fbf93cdecc02fd408a",
+    "64": "e4ddd83394d461f85dd095bf59d1f625591a17950d5db12ca9ed135c45a4634c"
+  },
+  "status": "valid"
+}

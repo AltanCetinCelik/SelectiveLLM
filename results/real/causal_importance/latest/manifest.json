@@ -1,0 +1,158 @@
+{
+  "adapter_set": [],
+  "artifact_sha256": {
+    "benchmark.yaml": "2404e2f96f32d0e8d58fb992b144c4bfc762e085705ac678763336a1912f261c",
+    "causal_analysis.json": "38c9f8761533f3e329a4db75fa862d70574973eee3959da9bbb6b03823b4f10c",
+    "causal_progress.json": "1ac9a788927178ddba89f8fa9eba04ee78825eb2c8338ba559812241784f67a9",
+    "causal_scores.jsonl": "d39e793689b1b96e663a627858bcb87c97cab23054394daf16b4524657e6a042",
+    "config.yaml": "3aa6218aee6e9fb82486b54af3b77c2f2739e7ca2602fecd4e02670bf33d2965",
+    "discovery_channel_summaries.npz": "54f5bf0311fa52e78ea3735dee1c622e710c43e7b22865a005e816304d17cf81",
+    "discovery_gradient_metadata.jsonl": "0e89421dde6f6752e64e2c18eed2713e4910344d3c60daf8b63e91e4ffdb0cd4",
+    "discovery_progress.json": "2db6a26bcaacf968527161ebe6a37bee7b26eded6e8e6dc810e500500c02335d",
+    "environment.json": "cf988cc113c4bf7a77888c83447fcff801f18faf632f91c7034682340a113f21",
+    "failure_analysis.md": "69422831ac7e82ee6ca0bc40e7b6cfcce7c9eddbf50a8b5da64a7d67e428d8c1",
+    "full_model_scores.jsonl": "ad3aa5501b3aa680831a3455bb83e72fa9eaa310d99d8e5ce97f07f480688c90",
+    "gradient_preflight.json": "2d9fa299348dbd775ad67224454bc4640b724d446d2dd9d9b04c5f4e27d6eebd",
+    "heldout_gradient_metadata.jsonl": "3cef4d103dc827d1adf4ba34f0a1813e551e00920d248daa4206a3472f2e7701",
+    "heldout_signed_channel_summaries.npz": "d121135db017eae29298e8c4bc16298883ce7c47e51f0060adcf0bc99f8489ea",
+    "immutable_input_validation.json": "53d345a9ea3df70fb4718c3ac3b3e0f27e8f1e712e93fdf7f667316182f372b1",
+    "mapping_block128.json": "c1cc448a02a57c978a8f369a1f0af2bf0ebe60526893d334f295267608aebd15",
+    "mapping_block64.json": "4b9a2f501a9152eb0e113c7ef1bdaaf52f4b96f74528447b920f8528f2f0c877",
+    "masks.jsonl": "7548f9b93b570ba0104260265d56167f75754fe30bd575378acb5a220518413b",
+    "normalized_blocks_128.npz": "06ed0e694bb01e6a3c754492fa057727e60ec3c96d8a3860b55882844cb3cc93",
+    "normalized_blocks_64.npz": "f96266de96163a602cf1a1ae8d155f4aa6b419e7931b9a3847d1b5c84d3cfdf1",
+    "numerical_stability.json": "b2f4b669c1dca63d7d9db273e854114a36a1c756427f76f31efb0c59672bbdf0",
+    "paired_causal_effects.jsonl": "3f754fcaf5fa65a0f991510221df39fbfee008f80edb7aba66cb4ee06a7af5df",
+    "plots/causal_comparison_block128.png": "405994afc3640c8d0ce86ac8976a707dd1d8cd15ad4c8fd1a62432add6be113d",
+    "plots/causal_comparison_block64.png": "e1f03cc2784b75feb5892af984246eefcfc310e16b7496df8ffa18f811da82ce",
+    "plots/stability_block128.png": "4d3b966c2e9115bdce1465567e550c0cee1fd906d8258af244e448c9492a4bb5",
+    "plots/stability_block64.png": "efc40098369e99afa1aba5f58e528063ae977d453db70c0643ae73d845d34322",
+    "rankings_128.npz": "d3a54dbfec598c35c078235266972e094183de459055f7a8e8035a66de531ed5",
+    "rankings_64.npz": "83f9cb5a225be80170c7e262155dd5abd51f044a25da79e0aba85ae6276b501d",
+    "raw_blocks_128.npz": "558f3a01a58c7f36ac097a10bdef1938c12d4732dc26d26da22a71784b6f4fa0",
+    "raw_blocks_64.npz": "3ea212bc32fa5fe6968d09abaf9c24c97f54e66940a9e0a4fb02c9d133d82c97",
+    "report.md": "054804e478ae575aafd0902125d3d3cc804ea92c2bd0918cc59dddee0d6f9609",
+    "signed_analysis.json": "859d91fcfbcc505ade487d9cdddfc1e5943d853c26a5aa2b21e5504eeb87ebb9",
+    "signed_diagnostics.jsonl": "4acdb8f07312d386f1094e47c8ba66b3a9dd5dcfc5c6b92739a2659efed60d5b",
+    "signed_progress.json": "f33819b0161b498bc70fd31ea13924f3669773170afbd6aa0627b7c8f268e32f",
+    "split_assignments.json": "ba20164046700a31c749d8836d7011b19d3913c504b7b7b145460fed46dc8b4a",
+    "stability.json": "2b193a22f20f4a1b3f17d3a677f82d17571a2f38d0906e093b0d5d761c659286",
+    "tokenizer_validation.json": "6a8465600e6a45b152ddc716ccdc9b16617d1e6e44c372e2892a7194c85cc25c",
+    "validity.json": "e2dc1134f241c8fb6140710627c40b9266d4803397d7e573fccf169af6d381e4"
+  },
+  "backend": "transformers_dense_real",
+  "backend_kind": "real",
+  "benchmark_fingerprint": "139dae96800d4b3e9896033d8a73b855c7e16f3086cbb57a0a14ef63c6eb8ff2",
+  "benchmark_hash": "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0",
+  "benchmark_version": "dense-capacity-mcq-1.0.0",
+  "block_sizes": {
+    "128": "corroborative",
+    "64": "primary"
+  },
+  "canonical_latest_eligible": true,
+  "completed": true,
+  "completed_at": "2026-09-05T15:06:07.782586+00:00",
+  "created_at": "2026-09-05T14:51:29.998153+00:00",
+  "dirty": false,
+  "discovery_schema_version": "mlp-block-discovery-1.0.0",
+  "experiment_version": "causal-importance-discovery-1.0.0",
+  "final_memory": {
+    "mps_current_allocated_mb": 2968.77685546875,
+    "mps_driver_allocated_mb": 4497.703125
+  },
+  "git_commit": "ac3c0d9384ab9474900ef5930bc12b66d888971e",
+  "git_status_porcelain": "",
+  "logical_masking_only": true,
+  "mapping_hashes": {
+    "128": "540d63699a469a54b86d9bd5d07df9110fc1266791b0c8c1b1636412d0c1018a",
+    "64": "c7d55beae21124b7b3e3d96857ad9aec5d92ddc03d616e829d15bcd8d3b8bb73"
+  },
+  "mapping_schema_version": "mlp-contiguous-block-map-1.0.0",
+  "measured_vram_reduction": false,
+  "measurement_semantics": {
+    "causal": "logical zeroing at MLP down_proj input",
+    "memory": "real unified-memory allocation; no parameters unloaded",
+    "normalized_signed_attribution": "token-mean signed attribution",
+    "predicted_taylor_damage": "token-summed signed first-order estimate",
+    "scoring_execution": "frozen parameters; detached input embeddings; gradient-enabled forward; no backward outside discovery and held-out signed diagnostics"
+  },
+  "metric_schema_version": "dense-block-causal-nll-1.0.0",
+  "model_identity": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "model_runtime": {
+    "adapter_wrapper_detected": false,
+    "attention_implementation": "sdpa",
+    "class": "transformers.models.qwen2.modeling_qwen2.Qwen2ForCausalLM",
+    "device": "mps:0",
+    "dtype": "torch.float16",
+    "intermediate_size": 8960,
+    "layers": 28,
+    "memory_after_load": {
+      "mps_current_allocated_mb": 2968.77685546875,
+      "mps_driver_allocated_mb": 3152.453125
+    },
+    "parameters_frozen": true,
+    "use_cache": false
+  },
+  "packages": {
+    "accelerate": "1.14.0",
+    "numpy": "2.2.6",
+    "safetensors": "0.8.0",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "primary_decision": {
+    "a_checks": {
+      "gradient_minus_activation_ci_positive": false,
+      "gradient_minus_activation_threshold": false,
+      "gradient_stable_at_least_three_domains": false,
+      "improved_stability": false,
+      "same_damage_at_least_0_10": false,
+      "same_exceeds_all_controls_in_three_domains": false,
+      "same_minus_global_high_ci_positive": false,
+      "same_minus_global_high_positive": true,
+      "same_minus_random_ci_positive": false,
+      "same_minus_random_threshold": false,
+      "same_minus_wrong_ci_positive": false,
+      "same_minus_wrong_threshold": false,
+      "validity_passed": true
+    },
+    "b_checks": {
+      "gradient_stable_at_least_three_domains": false,
+      "outcome_a_failed": true,
+      "same_damage_at_least_0_10": false,
+      "same_minus_random_ci_positive": false,
+      "same_minus_random_threshold": false,
+      "shared_core_indicator": true,
+      "validity_passed": true
+    },
+    "classification": "C",
+    "label": "still_weak_or_unstable",
+    "qualifier": null
+  },
+  "publishable": true,
+  "quota_pattern_hashes": {
+    "128": "1036fe53b46c43304d60bd1975344cdbb047a3f576bf53fbf93cdecc02fd408a",
+    "64": "e4ddd83394d461f85dd095bf59d1f625591a17950d5db12ca9ed135c45a4634c"
+  },
+  "run_id": "20260905T145129Z",
+  "source_dirty": false,
+  "status": "completed",
+  "tokenizer_validation": {
+    "case_count": 80,
+    "distinct_option_token_ids": true,
+    "option_token_ids": {
+      "A": 32,
+      "B": 33,
+      "C": 34,
+      "D": 35
+    },
+    "prefix_retokenization_observed": false,
+    "prompt_template_sha256": "91c4e5516b3957c4817b9095c2643dfd21d2c25b1c05d9da6746aa83e149ff74",
+    "rendered_prompts_sha256": "b7075a568e99ebc506e1f847ad9cfb8814fede720744f90a8769101be29affac",
+    "rendered_suffix_count": 1,
+    "single_token_at_scored_position": true,
+    "status": "valid"
+  }
+}

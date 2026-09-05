@@ -1,0 +1,16 @@
+{
+  "case_count": 80,
+  "distinct_option_token_ids": true,
+  "option_token_ids": {
+    "A": 32,
+    "B": 33,
+    "C": 34,
+    "D": 35
+  },
+  "prefix_retokenization_observed": false,
+  "prompt_template_sha256": "91c4e5516b3957c4817b9095c2643dfd21d2c25b1c05d9da6746aa83e149ff74",
+  "rendered_prompts_sha256": "b7075a568e99ebc506e1f847ad9cfb8814fede720744f90a8769101be29affac",
+  "rendered_suffix_count": 1,
+  "single_token_at_scored_position": true,
+  "status": "valid"
+}

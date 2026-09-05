@@ -1,0 +1,769 @@
+{
+  "max_correct_nll_range": 0.0,
+  "passed": true,
+  "predictions_stable": true,
+  "repetitions": 3,
+  "rows": {
+    "dense_code_eval_01": [
+      {
+        "case_id": "dense_code_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 0.5180060267448425,
+        "correct_probability": 0.5957071781158447,
+        "domain": "code",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 33.34375,
+          "B": 32.84375,
+          "C": 28.65625,
+          "D": 30.578125
+        },
+        "option_probabilities": {
+          "A": 0.5957071781158447,
+          "B": 0.36131468415260315,
+          "C": 0.005486273672431707,
+          "D": 0.037491876631975174
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.0000000125728548,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_code_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 0.5180060267448425,
+        "correct_probability": 0.5957071781158447,
+        "domain": "code",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 33.34375,
+          "B": 32.84375,
+          "C": 28.65625,
+          "D": 30.578125
+        },
+        "option_probabilities": {
+          "A": 0.5957071781158447,
+          "B": 0.36131468415260315,
+          "C": 0.005486273672431707,
+          "D": 0.037491876631975174
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.0000000125728548,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_code_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 0.5180060267448425,
+        "correct_probability": 0.5957071781158447,
+        "domain": "code",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 33.34375,
+          "B": 32.84375,
+          "C": 28.65625,
+          "D": 30.578125
+        },
+        "option_probabilities": {
+          "A": 0.5957071781158447,
+          "B": 0.36131468415260315,
+          "C": 0.005486273672431707,
+          "D": 0.037491876631975174
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.0000000125728548,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ],
+    "dense_code_eval_02": [
+      {
+        "case_id": "dense_code_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 0.0003393312799744308,
+        "correct_probability": 0.9996607303619385,
+        "domain": "code",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 26.578125,
+          "B": 36.46875,
+          "C": 28.3125,
+          "D": 23.234375
+        },
+        "option_probabilities": {
+          "A": 5.063010030426085e-05,
+          "B": 0.9996607303619385,
+          "C": 0.0002868390583898872,
+          "D": 1.7874612012747093e-06
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999869818339,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_code_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 0.0003393312799744308,
+        "correct_probability": 0.9996607303619385,
+        "domain": "code",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 26.578125,
+          "B": 36.46875,
+          "C": 28.3125,
+          "D": 23.234375
+        },
+        "option_probabilities": {
+          "A": 5.063010030426085e-05,
+          "B": 0.9996607303619385,
+          "C": 0.0002868390583898872,
+          "D": 1.7874612012747093e-06
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999869818339,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_code_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 0.0003393312799744308,
+        "correct_probability": 0.9996607303619385,
+        "domain": "code",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 26.578125,
+          "B": 36.46875,
+          "C": 28.3125,
+          "D": 23.234375
+        },
+        "option_probabilities": {
+          "A": 5.063010030426085e-05,
+          "B": 0.9996607303619385,
+          "C": 0.0002868390583898872,
+          "D": 1.7874612012747093e-06
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999869818339,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ],
+    "dense_general_eval_01": [
+      {
+        "case_id": "dense_general_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 1.1920928244535389e-07,
+        "correct_probability": 0.9999998807907104,
+        "domain": "general",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 38.59375,
+          "B": 22.90625,
+          "C": 21.765625,
+          "D": 20.703125
+        },
+        "option_probabilities": {
+          "A": 0.9999998807907104,
+          "B": 1.5381733931008057e-07,
+          "C": 4.916297058343844e-08,
+          "D": 1.6990268747463233e-08
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.000000100761289,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_general_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 1.1920928244535389e-07,
+        "correct_probability": 0.9999998807907104,
+        "domain": "general",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 38.59375,
+          "B": 22.90625,
+          "C": 21.765625,
+          "D": 20.703125
+        },
+        "option_probabilities": {
+          "A": 0.9999998807907104,
+          "B": 1.5381733931008057e-07,
+          "C": 4.916297058343844e-08,
+          "D": 1.6990268747463233e-08
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.000000100761289,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_general_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 1.1920928244535389e-07,
+        "correct_probability": 0.9999998807907104,
+        "domain": "general",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 38.59375,
+          "B": 22.90625,
+          "C": 21.765625,
+          "D": 20.703125
+        },
+        "option_probabilities": {
+          "A": 0.9999998807907104,
+          "B": 1.5381733931008057e-07,
+          "C": 4.916297058343844e-08,
+          "D": 1.6990268747463233e-08
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.000000100761289,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ],
+    "dense_general_eval_02": [
+      {
+        "case_id": "dense_general_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 2.3841855067985307e-07,
+        "correct_probability": 0.9999997615814209,
+        "domain": "general",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 24.78125,
+          "B": 40.1875,
+          "C": 22.03125,
+          "D": 21.734375
+        },
+        "option_probabilities": {
+          "A": 2.037748458860733e-07,
+          "B": 0.9999997615814209,
+          "C": 1.3026888900924405e-08,
+          "D": 9.680761969832474e-09
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999880639177,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_general_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 2.3841855067985307e-07,
+        "correct_probability": 0.9999997615814209,
+        "domain": "general",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 24.78125,
+          "B": 40.1875,
+          "C": 22.03125,
+          "D": 21.734375
+        },
+        "option_probabilities": {
+          "A": 2.037748458860733e-07,
+          "B": 0.9999997615814209,
+          "C": 1.3026888900924405e-08,
+          "D": 9.680761969832474e-09
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999880639177,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_general_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 2.3841855067985307e-07,
+        "correct_probability": 0.9999997615814209,
+        "domain": "general",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 24.78125,
+          "B": 40.1875,
+          "C": 22.03125,
+          "D": 21.734375
+        },
+        "option_probabilities": {
+          "A": 2.037748458860733e-07,
+          "B": 0.9999997615814209,
+          "C": 1.3026888900924405e-08,
+          "D": 9.680761969832474e-09
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999880639177,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ],
+    "dense_math_eval_01": [
+      {
+        "case_id": "dense_math_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 0.647652268409729,
+        "correct_probability": 0.5232728123664856,
+        "domain": "mathematics",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 34.625,
+          "B": 26.21875,
+          "C": 26.5625,
+          "D": 34.53125
+        },
+        "option_probabilities": {
+          "A": 0.5232728123664856,
+          "B": 0.00011693382839439437,
+          "C": 0.0001649031473789364,
+          "D": 0.4764453172683716
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 0.9999999666106305,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_math_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 0.647652268409729,
+        "correct_probability": 0.5232728123664856,
+        "domain": "mathematics",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 34.625,
+          "B": 26.21875,
+          "C": 26.5625,
+          "D": 34.53125
+        },
+        "option_probabilities": {
+          "A": 0.5232728123664856,
+          "B": 0.00011693382839439437,
+          "C": 0.0001649031473789364,
+          "D": 0.4764453172683716
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 0.9999999666106305,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_math_eval_01",
+        "correct": true,
+        "correct_label": "A",
+        "correct_nll": 0.647652268409729,
+        "correct_probability": 0.5232728123664856,
+        "domain": "mathematics",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 34.625,
+          "B": 26.21875,
+          "C": 26.5625,
+          "D": 34.53125
+        },
+        "option_probabilities": {
+          "A": 0.5232728123664856,
+          "B": 0.00011693382839439437,
+          "C": 0.0001649031473789364,
+          "D": 0.4764453172683716
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 0.9999999666106305,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ],
+    "dense_math_eval_02": [
+      {
+        "case_id": "dense_math_eval_02",
+        "correct": false,
+        "correct_label": "B",
+        "correct_nll": 4.619339466094971,
+        "correct_probability": 0.00985930860042572,
+        "domain": "mathematics",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 34.625,
+          "B": 30.015625,
+          "C": 23.9375,
+          "D": 24.3125
+        },
+        "option_probabilities": {
+          "A": 0.990085244178772,
+          "B": 0.00985930860042572,
+          "C": 2.2602180251851678e-05,
+          "D": 3.2885978725971654e-05
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.0000000409381755,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_math_eval_02",
+        "correct": false,
+        "correct_label": "B",
+        "correct_nll": 4.619339466094971,
+        "correct_probability": 0.00985930860042572,
+        "domain": "mathematics",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 34.625,
+          "B": 30.015625,
+          "C": 23.9375,
+          "D": 24.3125
+        },
+        "option_probabilities": {
+          "A": 0.990085244178772,
+          "B": 0.00985930860042572,
+          "C": 2.2602180251851678e-05,
+          "D": 3.2885978725971654e-05
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.0000000409381755,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_math_eval_02",
+        "correct": false,
+        "correct_label": "B",
+        "correct_nll": 4.619339466094971,
+        "correct_probability": 0.00985930860042572,
+        "domain": "mathematics",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 34.625,
+          "B": 30.015625,
+          "C": 23.9375,
+          "D": 24.3125
+        },
+        "option_probabilities": {
+          "A": 0.990085244178772,
+          "B": 0.00985930860042572,
+          "C": 2.2602180251851678e-05,
+          "D": 3.2885978725971654e-05
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "A",
+        "probability_sum": 1.0000000409381755,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ],
+    "dense_science_eval_01": [
+      {
+        "case_id": "dense_science_eval_01",
+        "correct": false,
+        "correct_label": "A",
+        "correct_nll": 4.995476722717285,
+        "correct_probability": 0.006768492981791496,
+        "domain": "science",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 27.234375,
+          "B": 26.65625,
+          "C": 32.21875,
+          "D": 24.578125
+        },
+        "option_probabilities": {
+          "A": 0.006768492981791496,
+          "B": 0.0037967804819345474,
+          "C": 0.988959550857544,
+          "D": 0.00047522279783152044
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "C",
+        "probability_sum": 1.0000000471191015,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_science_eval_01",
+        "correct": false,
+        "correct_label": "A",
+        "correct_nll": 4.995476722717285,
+        "correct_probability": 0.006768492981791496,
+        "domain": "science",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 27.234375,
+          "B": 26.65625,
+          "C": 32.21875,
+          "D": 24.578125
+        },
+        "option_probabilities": {
+          "A": 0.006768492981791496,
+          "B": 0.0037967804819345474,
+          "C": 0.988959550857544,
+          "D": 0.00047522279783152044
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "C",
+        "probability_sum": 1.0000000471191015,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_science_eval_01",
+        "correct": false,
+        "correct_label": "A",
+        "correct_nll": 4.995476722717285,
+        "correct_probability": 0.006768492981791496,
+        "domain": "science",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 27.234375,
+          "B": 26.65625,
+          "C": 32.21875,
+          "D": 24.578125
+        },
+        "option_probabilities": {
+          "A": 0.006768492981791496,
+          "B": 0.0037967804819345474,
+          "C": 0.988959550857544,
+          "D": 0.00047522279783152044
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "C",
+        "probability_sum": 1.0000000471191015,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ],
+    "dense_science_eval_02": [
+      {
+        "case_id": "dense_science_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 0.00033361115492880344,
+        "correct_probability": 0.9996664524078369,
+        "domain": "science",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 27.0,
+          "B": 36.125,
+          "C": 27.53125,
+          "D": 25.984375
+        },
+        "option_probabilities": {
+          "A": 0.00010887243843171746,
+          "B": 0.9996664524078369,
+          "C": 0.0001851982669904828,
+          "D": 3.9430990000255406e-05
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999541032594,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_science_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 0.00033361115492880344,
+        "correct_probability": 0.9996664524078369,
+        "domain": "science",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 27.0,
+          "B": 36.125,
+          "C": 27.53125,
+          "D": 25.984375
+        },
+        "option_probabilities": {
+          "A": 0.00010887243843171746,
+          "B": 0.9996664524078369,
+          "C": 0.0001851982669904828,
+          "D": 3.9430990000255406e-05
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999541032594,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      },
+      {
+        "case_id": "dense_science_eval_02",
+        "correct": true,
+        "correct_label": "B",
+        "correct_nll": 0.00033361115492880344,
+        "correct_probability": 0.9996664524078369,
+        "domain": "science",
+        "execution_semantics": "detached_inputs_embeds_gradient_enabled_no_backward",
+        "option_logits": {
+          "A": 27.0,
+          "B": 36.125,
+          "C": 27.53125,
+          "D": 25.984375
+        },
+        "option_probabilities": {
+          "A": 0.00010887243843171746,
+          "B": 0.9996664524078369,
+          "C": 0.0001851982669904828,
+          "D": 3.9430990000255406e-05
+        },
+        "option_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "prediction": "B",
+        "probability_sum": 0.9999999541032594,
+        "scoring_semantics": "restricted_four_option_softmax",
+        "split": "evaluation"
+      }
+    ]
+  },
+  "sentinel_count": 8
+}
