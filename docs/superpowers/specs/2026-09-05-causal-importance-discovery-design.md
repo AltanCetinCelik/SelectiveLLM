@@ -195,12 +195,17 @@ activation_channel[p,l,j] = mean_t(abs(a[p,l,t,j]))
 gradient_absolute_channel[p,l,j] =
   mean_t(abs(a[p,l,t,j] * d(correct_nll)/d(a[p,l,t,j])))
 
-gradient_signed_channel[p,l,j] =
+gradient_signed_sum_channel[p,l,j] =
+  sum_t(-a[p,l,t,j] * d(correct_nll)/d(a[p,l,t,j]))
+
+gradient_signed_mean_channel[p,l,j] =
   mean_t(-a[p,l,t,j] * d(correct_nll)/d(a[p,l,t,j]))
 ```
 
-The negative sign in the signed quantity represents the local first-order change
-from setting the activation to zero. The signed quantity is diagnostic only.
+The negative sign represents the local first-order contribution from setting the
+activation to zero. The token sum is used for a Taylor estimate of absolute loss
+change. The token mean is a length-normalized attribution. Both are diagnostic
+only.
 
 One backward pass produces the underlying channel values used by both block-size
 experiments. Separate gradient measurements by block size are forbidden.
@@ -215,8 +220,11 @@ activation_block[p,l,b] = sum_j_in_block activation_channel[p,l,j]
 gradient_absolute_block[p,l,b] =
   sum_j_in_block gradient_absolute_channel[p,l,j]
 
-gradient_signed_block[p,l,b] =
-  sum_j_in_block gradient_signed_channel[p,l,j]
+gradient_signed_sum_block[p,l,b] =
+  sum_j_in_block gradient_signed_sum_channel[p,l,j]
+
+gradient_signed_mean_block[p,l,b] =
+  sum_j_in_block gradient_signed_mean_channel[p,l,j]
 ```
 
 Thus the primary gradient score is exactly:
@@ -251,7 +259,7 @@ Percentile ranking happens only after channel contributions are aggregated into
 blocks. Raw magnitudes cannot influence another layer. Held-out data cannot
 influence normalization, ranking, or tie resolution.
 
-The signed diagnostic is not normalized for selection and never enters any
+Neither signed diagnostic is normalized for selection, and neither enters any
 ranking, mask, threshold, or gate.
 
 ## Discovery rankings
@@ -271,8 +279,7 @@ selectivity(m,d,c) =
 The domain-selectivity contrast is retained exactly as calculated and may be
 positive or negative. No absolute value is applied after contrast. Higher positive
 values identify blocks disproportionately important or active for the target
-domain. This contrast is distinct from the diagnostic-only signed first-order
-quantity.
+domain. This contrast is distinct from both diagnostic-only signed quantities.
 
 Global importance for each method and block size is the mean normalized block rank
 over all 48 discovery prompts. Global-high selects the highest scores and
@@ -409,32 +416,50 @@ Report sample count, mean, median, standard deviation, p50, p95, and 95% interva
 where meaningful. Report the complete effect distributions. No result is pooled
 across 64- and 128-channel mappings.
 
-## Signed first-order held-out diagnostic
+## Signed held-out diagnostics
 
 After discovery masks are frozen, perform one gradient pass for each held-out
-question using the same correct-NLL objective and tensor invariants. Aggregate:
+question using the same correct-NLL objective and tensor invariants. Preserve two
+separately named quantities.
+
+The true signed first-order Taylor estimate of absolute NLL change is:
 
 ```text
-predicted_signed_damage[mask,case] =
+predicted_taylor_damage[mask,case] =
+  sum_over_eligible_tokens(
+    sum_over_selected_channels(-activation * gradient(correct_nll))
+  )
+```
+
+The token-normalized signed attribution is:
+
+```text
+normalized_signed_attribution[mask,case] =
   mean_over_eligible_tokens(
     sum_over_selected_channels(-activation * gradient(correct_nll))
   )
 ```
 
-The already frozen selected masks are used. No signed value may change selection,
-tie-breaking, normalization, thresholding, causal results, or classification.
-There are 17 non-noop masks per block size, so the signed diagnostic contains
+The already frozen selected masks are used. Neither signed value may change
+discovery ranking, mask construction, normalization, tie-breaking, stability,
+causal effects, thresholding, or classification.
+There are 17 non-noop masks per block size, so the signed-diagnostic artifact contains
 `17 * 2 * 32 = 1,088` mask-case rows derived from exactly 32 held-out backward
 passes.
 
-Compare predicted signed damage with observed ablation damage using:
+Compare `predicted_taylor_damage` with observed absolute NLL ablation damage using:
 
 - sign agreement rate, with exact zeros reported separately;
 - Spearman rank association;
 - Pearson linear association.
 
-These are diagnostics of a local linear approximation, not independent causal
-evidence. Agreement or disagreement cannot reinterpret a failed gate.
+Preserve `normalized_signed_attribution` as a secondary diagnostic for comparisons
+across prompts of different eligible-token lengths. It is not called a Taylor
+estimate and is not used for association with absolute NLL damage.
+
+These are diagnostics of a local linear approximation and attribution scale, not
+independent causal evidence. Agreement or disagreement cannot reinterpret a failed
+gate.
 
 ## Calibration and validity gates
 
@@ -460,7 +485,8 @@ The run is interpretable only if all hold:
   preserves predictions;
 - the discovery matrix, 32 full rows, 1,152 masked rows, 1,088 signed diagnostic
   rows, and all required method-size-control combinations are complete;
-- signed diagnostics are absent from every mask-construction and gate input.
+- `predicted_taylor_damage` and `normalized_signed_attribution` are absent from
+  every discovery, mask-construction, stability, causal-effect, and gate input.
 
 A scientific validity failure is preserved and classified C with qualifier
 `validity_failure`. Infrastructure failure, nonfinite gradients, structural
@@ -556,8 +582,8 @@ A separate real-backend result directory stores:
 - mapping definitions, channel ranges, quota vectors, mapping hashes, and
   quota-pattern hashes;
 - gradient-path equivalence and runtime preflight validation;
-- raw FP32 per-prompt channel summaries for activation, absolute gradient, and
-  signed gradient contribution;
+- raw FP32 per-prompt channel summaries for activation, absolute gradient,
+  token-summed signed contribution, and token-mean signed attribution;
 - raw 64- and 128-channel block aggregates before normalization;
 - normalized values, activation and gradient rankings, masks, hashes, and layer
   histograms;
@@ -565,7 +591,8 @@ A separate real-backend result directory stores:
 - every full and masked held-out logit, probability, NLL, prediction, and latency;
 - paired causal effects, control means, direct method differences, descriptive
   statistics, and bootstrap samples or reproducible bootstrap metadata;
-- signed first-order diagnostic rows and association summaries;
+- separately named `predicted_taylor_damage` and
+  `normalized_signed_attribution` rows, plus Taylor association summaries;
 - separate 64- and 128-channel tables and plots;
 - failure analysis and a report answering the research question;
 - explicit labels: `real dense model`, `logical masking`, and
