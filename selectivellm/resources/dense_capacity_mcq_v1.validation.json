@@ -1,0 +1,89 @@
+{
+  "answer_position_counts": {
+    "code/discovery": {
+      "A": 3,
+      "B": 3,
+      "C": 3,
+      "D": 3
+    },
+    "code/evaluation": {
+      "A": 2,
+      "B": 2,
+      "C": 2,
+      "D": 2
+    },
+    "general/discovery": {
+      "A": 3,
+      "B": 3,
+      "C": 3,
+      "D": 3
+    },
+    "general/evaluation": {
+      "A": 2,
+      "B": 2,
+      "C": 2,
+      "D": 2
+    },
+    "mathematics/discovery": {
+      "A": 3,
+      "B": 3,
+      "C": 3,
+      "D": 3
+    },
+    "mathematics/evaluation": {
+      "A": 2,
+      "B": 2,
+      "C": 2,
+      "D": 2
+    },
+    "science/discovery": {
+      "A": 3,
+      "B": 3,
+      "C": 3,
+      "D": 3
+    },
+    "science/evaluation": {
+      "A": 2,
+      "B": 2,
+      "C": 2,
+      "D": 2
+    }
+  },
+  "benchmark_sha256": "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0",
+  "benchmark_version": "dense-capacity-mcq-1.0.0",
+  "case_count": 80,
+  "cross_split_template_family_overlap": [],
+  "domain_split_counts": {
+    "code/discovery": 12,
+    "code/evaluation": 8,
+    "general/discovery": 12,
+    "general/evaluation": 8,
+    "mathematics/discovery": 12,
+    "mathematics/evaluation": 8,
+    "science/discovery": 12,
+    "science/evaluation": 8
+  },
+  "errors": [],
+  "excluded_smoke_test_topic_present": false,
+  "manual_correctness_reviews": 80,
+  "maximum_cross_split_five_gram_jaccard": 0.05,
+  "maximum_similarity_pair": [
+    "dense_general_discovery_12",
+    "dense_general_eval_08"
+  ],
+  "numeric_expression_checks": 27,
+  "schema_version": "1.0.0",
+  "stability_sentinels": [
+    "dense_code_eval_01",
+    "dense_code_eval_02",
+    "dense_general_eval_01",
+    "dense_general_eval_02",
+    "dense_math_eval_01",
+    "dense_math_eval_02",
+    "dense_science_eval_01",
+    "dense_science_eval_02"
+  ],
+  "status": "valid",
+  "unique_id_count": 80,
+  "unique_template_family_count": 80
+}

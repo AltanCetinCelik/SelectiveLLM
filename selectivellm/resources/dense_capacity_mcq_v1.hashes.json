@@ -1,0 +1,6 @@
+{
+  "benchmark_canonical_sha256": "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0",
+  "benchmark_file_sha256": "2404e2f96f32d0e8d58fb992b144c4bfc762e085705ac678763336a1912f261c",
+  "benchmark_version": "dense-capacity-mcq-1.0.0",
+  "validation_report_sha256": "0a49bee13457d55d900490feb264420db62bd1540e5c9cd5ac1260ab863a6483"
+}
