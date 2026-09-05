@@ -24,6 +24,11 @@ results/real/*
 results/real/expert_quality/*
 !results/real/expert_quality/latest/
 !results/real/expert_quality/latest/**
+!results/real/dense_capacity/
+results/real/dense_capacity/*
+!results/real/dense_capacity/README.md
+!results/real/dense_capacity/latest/
+!results/real/dense_capacity/latest/**
 *.safetensors
 *.bin
 *.pt
