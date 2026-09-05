@@ -117,7 +117,14 @@ At each layer, a pre-hook on `mlp.down_proj` observes the gated intermediate ten
 
 At each layer, a pre-hook on `self_attn.o_proj` observes the concatenated post-attention query-head outputs. The tensor is reshaped into 12 heads of dimension 128. Per-head activity is RMS output over eligible prompt tokens and head dimensions. There are 336 layer-head components.
 
-The runner validates the observed last dimension as `12 x 128 = 1,536`; otherwise head experiments fail rather than reinterpret the tensor.
+Before head tracing or intervention, the runner validates the exact pinned Qwen implementation and runtime contract:
+
+- model configuration reports 12 query heads and head dimension 128;
+- the tensor observed immediately before `o_proj` has last dimension 1,536;
+- the pinned attention implementation reshapes query-head output from `[..., 12, 128]` to `[..., 1,536]` contiguously before `o_proj`;
+- slicing that runtime tensor into 12 contiguous 128-dimensional ranges reconstructs the original tensor exactly.
+
+Grouped-query KV heads are never treated as independent output heads. If the query-head output layout cannot be established from both implementation and runtime validation, head-granularity tracing and causal intervention are disabled and reported as unsupported rather than applying a speculative mask. A disabled head experiment cannot satisfy the second-granularity corroboration required for classification A.
 
 ### Decoder layers
 
@@ -166,6 +173,16 @@ Initial interventions always mean `ABLATE_SELECTED`: selected components are rem
 - MLP: zero selected coordinates in each `down_proj` input. Select exactly 448 of 8,960 channels in every layer, for 12,544 total channels or 5% per layer.
 - Heads: zero selected 128-dimensional slices in each `o_proj` input. Select exactly one of 12 heads in every layer, for 28 heads total.
 - Layers: replace each selected layer output with its original residual input. Select exactly 7 of 28 complete layers.
+
+Before any layer intervention, the runner inspects and records the pinned decoder-layer input/output contract under `use_cache=False`. The identity bypass must return the exact structure expected by the caller while preserving input shape, dtype, and device. A selected decoder block must behave as an identity map on the residual stream, so its scientific meaning is removal of that block's residual update.
+
+The implementation validation must demonstrate on sentinel inputs that:
+
+- a zero-layer mask reproduces baseline NLL, option logits, output structure, dtype, and device within the no-op tolerances;
+- bypassing one selected layer preserves the expected return structure, shape, dtype, and device;
+- only the selected block's residual update is removed and neighboring blocks still execute normally.
+
+If these invariants fail, layer-granularity tracing may still be reported, but layer causal intervention and retention are disabled as unsupported. The validation record is saved with the run artifacts.
 
 Every mask artifact contains `mask_semantics: ABLATE_SELECTED`, granularity, source, domain if applicable, source split, exact indices, per-layer counts, component count, fraction, and content hash.
 
