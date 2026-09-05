@@ -7,6 +7,7 @@ import json
 import platform
 import shutil
 import subprocess
+from collections import Counter
 from datetime import UTC, datetime
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -150,7 +151,7 @@ class DenseCapacityRunner:
             )
             self._write_jsonl(run_path / "causal_scores.jsonl", causal_rows)
             self._write_jsonl(run_path / "noop_scores.jsonl", noop_rows)
-            validity = self._validity(full_rows, numerical_stability, noop_rows, masks)
+            validity = self._validity(full_rows, numerical_stability, causal_rows, noop_rows, masks)
             self._write_json(run_path / "validity.json", validity)
             analysis = analyze_causal_rows(full_rows, causal_rows, stability, validity)
             self._write_json(run_path / "causal_analysis.json", analysis)
@@ -461,6 +462,7 @@ class DenseCapacityRunner:
         self,
         full_rows: list[dict[str, Any]],
         numerical: dict[str, Any],
+        causal_rows: list[dict[str, Any]],
         noop_rows: list[dict[str, Any]],
         masks: list[LogicalMask],
     ) -> dict[str, Any]:
@@ -478,23 +480,39 @@ class DenseCapacityRunner:
             for granularity in GRANULARITIES
             if any(mask.granularity == granularity for mask in masks)
         }
+        answer_counts = Counter(str(row["correct_label"]) for row in full_rows)
+        prediction_counts = Counter(str(row["prediction"]) for row in full_rows)
+        causal_cells = {(str(row["mask_name"]), str(row["case_id"])) for row in causal_rows}
+        expected_causal_cells = {
+            (mask.name, str(row["case_id"])) for mask in masks for row in full_rows
+        }
         checks = {
             "full_model_accuracy_at_least_50_percent": accuracy >= 0.50,
-            "answer_positions_balanced": True,
+            "answer_positions_balanced": answer_counts == Counter({label: 8 for label in "ABCD"}),
             "repeated_scoring_stable": bool(numerical["passed"]),
             "noop_nll_within_tolerance": max(noop_differences) <= 1e-4,
             "noop_predictions_identical": noop_predictions,
             "all_probability_sums_valid": all(
-                abs(float(row["probability_sum"]) - 1.0) <= 1e-6 for row in [*full_rows, *noop_rows]
+                abs(float(row["probability_sum"]) - 1.0) <= 1e-6
+                for row in [*full_rows, *causal_rows, *noop_rows]
             ),
             "complete_full_model_matrix": len(full_rows) == 32,
+            "complete_causal_matrix": causal_cells == expected_causal_cells
+            and len(causal_rows) == len(expected_causal_cells),
             "complete_noop_matrix": len(noop_rows) == 32 * len(conditions_per_granularity),
+            "causal_semantics_unambiguous": all(
+                row["mask_semantics"] == "ABLATE_SELECTED" for row in causal_rows
+            ),
         }
         return {
             "passed": all(checks.values()),
             "checks": checks,
             "full_model_accuracy": accuracy,
             "random_choice_accuracy": 0.25,
+            "correct_answer_position_counts": dict(sorted(answer_counts.items())),
+            "predicted_position_counts": dict(sorted(prediction_counts.items())),
+            "expected_causal_score_count": len(expected_causal_cells),
+            "observed_causal_score_count": len(causal_rows),
             "numerical_stability_max_nll_range": numerical["max_correct_nll_range"],
             "noop_max_nll_difference": max(noop_differences),
             "noop_tolerance": 1e-4,

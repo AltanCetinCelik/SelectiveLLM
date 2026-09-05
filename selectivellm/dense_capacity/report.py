@@ -19,11 +19,24 @@ def generate_plots(analysis: dict[str, Any], stability: dict[str, Any], output: 
     width = 0.19
     fig, axis = plt.subplots(figsize=(8.5, 4.8))
     for index, (condition, label, color) in enumerate(zip(conditions, labels, colors, strict=True)):
-        values = [
-            analysis["granularities"][granularity]["pooled"][condition]["mean"]
+        summaries = [
+            analysis["granularities"][granularity]["pooled"][condition]
             for granularity in granularities
         ]
-        axis.bar(x + (index - 1.5) * width, values, width, label=label, color=color)
+        values = [item["mean"] for item in summaries]
+        errors = [
+            [item["mean"] - item["ci95_low"] for item in summaries],
+            [item["ci95_high"] - item["mean"] for item in summaries],
+        ]
+        axis.bar(
+            x + (index - 1.5) * width,
+            values,
+            width,
+            yerr=errors,
+            capsize=2,
+            label=label,
+            color=color,
+        )
     axis.axhline(0, color="#202020", linewidth=0.8)
     axis.set_xticks(x, [item.upper() for item in granularities])
     axis.set_ylabel("Mean paired correct-answer NLL degradation")
@@ -41,16 +54,23 @@ def generate_plots(analysis: dict[str, Any], stability: dict[str, Any], output: 
     domains = ("code", "mathematics", "science", "general")
     for axis, granularity in zip(axes, granularities, strict=True):
         items = stability["granularities"][granularity]["domains"]
-        jaccard = [items[domain]["split_half_jaccard_median"] for domain in domains]
-        spearman = [items[domain]["split_half_spearman_median"] for domain in domains]
+        jaccard = [items[domain]["split_half_jaccard_median"] / 0.20 for domain in domains]
+        spearman = [items[domain]["split_half_spearman_median"] / 0.30 for domain in domains]
+        separation = [items[domain]["within_minus_across_jaccard"] / 0.05 for domain in domains]
         positions = np.arange(len(domains))
-        axis.bar(positions - 0.18, jaccard, 0.36, color="#4c78a8", label="Top-mask Jaccard")
-        axis.bar(positions + 0.18, spearman, 0.36, color="#e68a2e", label="Rank Spearman")
-        axis.axhline(0.20, color="#4c78a8", linestyle=":", linewidth=1)
-        axis.axhline(0.30, color="#e68a2e", linestyle=":", linewidth=1)
+        axis.bar(positions - 0.24, jaccard, 0.24, color="#4c78a8", label="Top-mask Jaccard")
+        axis.bar(positions, spearman, 0.24, color="#e68a2e", label="Rank Spearman")
+        axis.bar(
+            positions + 0.24,
+            separation,
+            0.24,
+            color="#72a555",
+            label="Within - across overlap",
+        )
+        axis.axhline(1.0, color="#202020", linestyle=":", linewidth=1)
         axis.set_xticks(positions, ["Code", "Math", "Science", "General"], rotation=25)
         axis.set_title(granularity.upper())
-    axes[0].set_ylabel("Median split-half stability")
+    axes[0].set_ylabel("Observed value / preregistered threshold")
     axes[-1].legend(frameon=False, fontsize=8)
     fig.tight_layout()
     fig.savefig(output / "discovery_stability.png", dpi=180)
@@ -103,6 +123,10 @@ def write_report(
         f"**{analysis['full_model']['case_count']}** independent questions. Full-model correct NLL: "
         f"**{_effect(analysis['full_model']['correct_nll'])}** (mean and case-bootstrap 95% interval).",
         "",
+        "The completed matrix contains 48 discovery traces, 32 full-model held-out scores, "
+        "992 causal scores, and 96 zero-size no-op scores. Pooled intervals use 32 questions; "
+        "domain intervals use eight questions.",
+        "",
         "## Causal Results",
         "",
         "Positive values mean the intervention harmed the correct answer. Intervals bootstrap held-out "
@@ -119,6 +143,33 @@ def write_report(
             f"{_effect(pooled['same_minus_random'])} | {_effect(pooled['same_minus_wrong'])} | "
             f"{result['stable_domain_count']}/4 |"
         )
+    lines.extend(
+        [
+            "",
+            "The MLP point estimate favored same-domain masks over random and wrong-domain masks, "
+            "but both pooled intervals crossed zero and only one of four domain selections passed "
+            "the discovery-stability gate. Head and layer pooled same-domain advantages were "
+            "negative. The domain-level positives are therefore retained as leads, not promoted "
+            "to evidence of generalizable routed capacity.",
+        ]
+    )
+    lines.extend(
+        [
+            "",
+            "Discovery stability requires all three criteria to meet threshold.",
+            "",
+            "| Granularity | Domain | Top-mask Jaccard | Rank Spearman | Within - across | Stable |",
+            "|---|---|---:|---:|---:|---:|",
+        ]
+    )
+    for granularity, result in stability["granularities"].items():
+        for domain, item in result["domains"].items():
+            lines.append(
+                f"| {granularity.upper()} | {domain} | "
+                f"{item['split_half_jaccard_median']:.4f} | "
+                f"{item['split_half_spearman_median']:.4f} | "
+                f"{item['within_minus_across_jaccard']:.4f} | {item['stable']} |"
+            )
     lines.extend(
         [
             "",
