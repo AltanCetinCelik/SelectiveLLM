@@ -1,0 +1,39 @@
+{
+  "checks": {
+    "all_probability_sums_valid": true,
+    "answer_positions_balanced": true,
+    "causal_semantics_unambiguous": true,
+    "complete_causal_matrix": true,
+    "complete_full_model_matrix": true,
+    "complete_noop_matrix": true,
+    "full_model_accuracy_at_least_50_percent": true,
+    "noop_nll_within_tolerance": true,
+    "noop_predictions_identical": true,
+    "repeated_scoring_stable": true
+  },
+  "conditions_per_granularity": {
+    "head": 10,
+    "layer": 10,
+    "mlp": 11
+  },
+  "correct_answer_position_counts": {
+    "A": 8,
+    "B": 8,
+    "C": 8,
+    "D": 8
+  },
+  "expected_causal_score_count": 992,
+  "full_model_accuracy": 0.65625,
+  "noop_max_nll_difference": 0.0,
+  "noop_tolerance": 0.0001,
+  "numerical_stability_max_nll_range": 0.0,
+  "observed_causal_score_count": 992,
+  "passed": true,
+  "predicted_position_counts": {
+    "A": 8,
+    "B": 12,
+    "C": 6,
+    "D": 6
+  },
+  "random_choice_accuracy": 0.25
+}

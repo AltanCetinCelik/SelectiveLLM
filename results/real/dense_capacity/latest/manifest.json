@@ -1,0 +1,94 @@
+{
+  "adapter_set": [],
+  "backend": "transformers_dense_real",
+  "backend_kind": "real",
+  "benchmark_content_hash": "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0",
+  "benchmark_fingerprint": "d2402d21635e73c0a16d3fe92a8c1f18c2f53ca9339295f1cffc34033f8ed44d",
+  "benchmark_version": "dense-capacity-mcq-1.0.0",
+  "completed_at": "2026-09-05T10:30:11.042791+00:00",
+  "config_content_hash": "936ae1ba6e84b267c90318900a4e7bc0186ec951db0611068935def9a351bfc3",
+  "created_at": "2026-09-05T10:19:58.172965+00:00",
+  "decision": {
+    "all_qualifying_granularities": [],
+    "classification": "C",
+    "label": "weak_or_unstable_specialization",
+    "qualifier": null,
+    "retention_triggered": false,
+    "trigger_granularity": null
+  },
+  "device_class": "apple_mps_unified_memory",
+  "disabled_granularities": {
+    "head": null,
+    "layer": null
+  },
+  "experiment_version": "dense-capacity-feasibility-1.0.0",
+  "final_memory": {
+    "mps_current_allocated_mb": 2968.77685546875,
+    "mps_driver_allocated_mb": 3161.703125
+  },
+  "git_commit": "83a08b5dd6471426fa166ea32e3775fef532b3fa",
+  "logical_masking_only": true,
+  "measured_vram_reduction": false,
+  "measurement_semantics": {
+    "intervention": "logical inference-time masking",
+    "layer_ablation": "identity mapping on residual stream",
+    "memory": "real unified-memory allocation; no physical capacity removed",
+    "vram_reduction": "not measured and not claimed"
+  },
+  "metric_schema_version": "dense-forced-choice-nll-1.0.0",
+  "model_identity": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_load_completed_at": "2026-09-05T10:20:04.312374+00:00",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "model_runtime": {
+    "adapter_wrapper_detected": false,
+    "class": "transformers.models.qwen2.modeling_qwen2.Qwen2ForCausalLM",
+    "device": "mps:0",
+    "dtype": "torch.float16",
+    "head_dim": 128,
+    "hidden_size": 1536,
+    "intermediate_size": 8960,
+    "kv_heads": 2,
+    "layers": 28,
+    "memory_after_load": {
+      "mps_current_allocated_mb": 2968.77685546875,
+      "mps_driver_allocated_mb": 3152.453125
+    },
+    "query_heads": 12,
+    "use_cache": false
+  },
+  "packages": {
+    "accelerate": "1.14.0",
+    "numpy": "2.2.6",
+    "safetensors": "0.8.0",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "run_id": "20260905T101958Z",
+  "seed_policy": "discovery/bootstrap:42; random controls:42-46",
+  "source_dirty": false,
+  "status": "completed",
+  "supported_granularities": [
+    "mlp",
+    "head",
+    "layer"
+  ],
+  "tokenizer_identity": "Qwen/Qwen2.5-1.5B-Instruct",
+  "tokenizer_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "tokenizer_validation": {
+    "case_count": 80,
+    "distinct_option_token_ids": true,
+    "option_token_ids": {
+      "A": 32,
+      "B": 33,
+      "C": 34,
+      "D": 35
+    },
+    "prefix_retokenization_observed": false,
+    "prompt_template_sha256": "91c4e5516b3957c4817b9095c2643dfd21d2c25b1c05d9da6746aa83e149ff74",
+    "rendered_prompts_sha256": "b7075a568e99ebc506e1f847ad9cfb8814fede720744f90a8769101be29affac",
+    "rendered_suffix_count": 1,
+    "single_token_at_scored_position": true,
+    "status": "valid"
+  }
+}

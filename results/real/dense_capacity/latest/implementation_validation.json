@@ -1,0 +1,53 @@
+{
+  "attention_head_layout": {
+    "attention_forward_source_sha256": "3d7ae1485294d0c8d57827617a3abed805bcf0c4107ead3d1a47f67eee7dcb1b",
+    "contiguous_slice_reconstruction_exact": true,
+    "expected_o_proj_input_width": 1536,
+    "head_dimension": 128,
+    "implementation_source_contract": true,
+    "kv_head_count": 2,
+    "kv_heads_interpreted_as_output_heads": false,
+    "observed_contiguous": true,
+    "observed_o_proj_input_shape": [
+      1,
+      137,
+      1536
+    ],
+    "query_head_count": 12,
+    "status": "valid"
+  },
+  "layer_identity_bypass": {
+    "intervention_events": [
+      {
+        "device": "mps:0",
+        "dtype": "torch.float16",
+        "granularity": "layer",
+        "input_shape": [
+          1,
+          137,
+          1536
+        ],
+        "layer": 0,
+        "output_shape": [
+          1,
+          137,
+          1536
+        ],
+        "return_structure": "Tensor",
+        "suppressed_count": 1
+      }
+    ],
+    "neighbor_layer_call_count": 1,
+    "next_layer_input_equals_selected_layer_residual": true,
+    "noop_max_correct_nll_difference": 0.0,
+    "noop_sentinel_count": 8,
+    "noop_tolerance": 0.0001,
+    "raw_selected_block_update_nonzero": true,
+    "removed_quantity": "selected_block_residual_update",
+    "scientific_semantics": "selected decoder block is identity on residual stream",
+    "selected_layer_call_count": 1,
+    "status": "valid"
+  },
+  "use_cache": false,
+  "validation_schema_version": "dense-runtime-contracts-1.0.0"
+}

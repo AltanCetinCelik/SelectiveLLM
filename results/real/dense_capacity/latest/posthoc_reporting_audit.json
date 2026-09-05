@@ -1,0 +1,24 @@
+{
+  "created_at": "2026-09-05T10:34:23.930868+00:00",
+  "decision": {
+    "all_qualifying_granularities": [],
+    "classification": "C",
+    "label": "weak_or_unstable_specialization",
+    "qualifier": null,
+    "retention_triggered": false,
+    "trigger_granularity": null
+  },
+  "decision_changed": false,
+  "input_file_sha256": {
+    "causal_scores.jsonl": "6ce91c758f8b4db0d4bcb47cc35b827cd08e4afddcc9da6e9c95ef015efe92d3",
+    "discovery_activities.npz": "737b38606421ba69af82f5e416757bc968e9984468a8677dabad7d6cffcbb085",
+    "full_model_scores.jsonl": "139d3625c23b16bc75fd6b5c37d4f67975d19556faea2f811716b9047a2b2bdb",
+    "initial_masks.jsonl": "63fda7443870ff0920402d501ca499910ce9c2e19a5357399930a97e0c52dcca",
+    "noop_scores.jsonl": "0f5f0d749124d5369fea076f64545e7bf85ffc639c5beb71e3311d15202ae4ec",
+    "stability.json": "c1524aa740b642bba0dc778f0e3647f538b10b38ddb7fd95269f437ed9ee4821"
+  },
+  "model_forward_passes": 0,
+  "reporting_source_commit": "a23b1e1f3cf5b18bf15b613e59628547e5647101",
+  "scope": "artifact validity and presentation hardening only",
+  "scores_changed": false
+}

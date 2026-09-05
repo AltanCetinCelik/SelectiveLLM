@@ -1,0 +1,27 @@
+{
+  "model_runtime": {
+    "adapter_wrapper_detected": false,
+    "class": "transformers.models.qwen2.modeling_qwen2.Qwen2ForCausalLM",
+    "device": "mps:0",
+    "dtype": "torch.float16",
+    "head_dim": 128,
+    "hidden_size": 1536,
+    "intermediate_size": 8960,
+    "kv_heads": 2,
+    "layers": 28,
+    "memory_after_load": {
+      "mps_current_allocated_mb": 2968.77685546875,
+      "mps_driver_allocated_mb": 3152.453125
+    },
+    "query_heads": 12,
+    "use_cache": false
+  },
+  "packages": {
+    "accelerate": "1.14.0",
+    "numpy": "2.2.6",
+    "safetensors": "0.8.0",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "platform": "macOS-26.5.2-arm64-arm-64bit"
+}
