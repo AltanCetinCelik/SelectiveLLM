@@ -665,3 +665,22 @@ The final report must answer only:
 
 Negative, tied, unstable, contradictory, and near-threshold results are preserved.
 The benchmark and thresholds are never tuned to obtain a positive conclusion.
+
+## Invariant-triggered execution clarification
+
+The pre-commit MPS preflight observed that an inference-mode `input_ids` forward and
+the required detached-`inputs_embeds` gradient-enabled forward differed by `0.046875`
+in maximum option logit and `0.014823081861093823` in correct NLL, despite identical
+tokens, weights, and no intervention. Input-ID and input-embedding forwards matched
+exactly when both used no-grad, and two detached-input-embedding forwards matched
+exactly when both used the gradient-enabled path. Explicit math SDPA did not remove
+the discrepancy; eager float16 attention produced nonfinite values on this runtime.
+
+Because gradient-path equivalence is a frozen fail-closed invariant, canonical full
+and masked scoring uses frozen model parameters plus detached input embeddings with
+gradient execution enabled, but performs no backward pass. Discovery and held-out
+signed-diagnostic scoring use that identical forward path and additionally perform
+the preregistered backward pass. This clarification changes no benchmark case,
+score, discovery rule, mask, baseline, statistic, threshold, or decision gate. The
+execution mode is recorded in config, fingerprint, score rows, preflight, and run
+provenance.

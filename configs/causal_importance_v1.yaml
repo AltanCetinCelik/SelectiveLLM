@@ -1,0 +1,24 @@
+experiment_version: causal-importance-discovery-1.0.0
+discovery_schema_version: mlp-block-discovery-1.0.0
+mapping_schema_version: mlp-contiguous-block-map-1.0.0
+metric_schema_version: dense-block-causal-nll-1.0.0
+scoring_execution: detached_inputs_embeds_gradient_enabled
+model:
+  repo_id: Qwen/Qwen2.5-1.5B-Instruct
+  revision: 989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+  dtype: float16
+  device: mps
+  use_cache: false
+  adapters: forbidden
+benchmark:
+  path: selectivellm/resources/dense_capacity_mcq_v1.yaml
+  version: dense-capacity-mcq-1.0.0
+mappings:
+  64: selectivellm/resources/causal_importance_block64_v1.json
+  128: selectivellm/resources/causal_importance_block128_v1.json
+statistics:
+  experimental_unit: held_out_question
+  bootstrap_repetitions: 10000
+  bootstrap_seed: 42
+  pooled_bootstrap: stratified_by_domain
+random_control_seeds: [42, 43, 44, 45, 46]

@@ -29,6 +29,11 @@ results/real/dense_capacity/*
 !results/real/dense_capacity/README.md
 !results/real/dense_capacity/latest/
 !results/real/dense_capacity/latest/**
+!results/real/causal_importance/
+results/real/causal_importance/*
+!results/real/causal_importance/README.md
+!results/real/causal_importance/latest/
+!results/real/causal_importance/latest/**
 *.safetensors
 *.bin
 *.pt
