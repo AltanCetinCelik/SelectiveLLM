@@ -20,6 +20,7 @@ import yaml
 
 from selectivellm.causal_importance.analysis import (
     analyze_causal_matrix,
+    analyze_scale_comparison,
     analyze_signed_diagnostics,
 )
 from selectivellm.causal_importance.discovery import build_discovery
@@ -44,19 +45,24 @@ from selectivellm.dense_capacity.benchmark import (
 from selectivellm.dense_capacity.scoring import ForcedChoiceScorer
 from selectivellm.provenance import stable_fingerprint
 
-MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
-MODEL_REVISION = "989aa7980e4cf806f80c7fef2b1adb7bc71aa306"
-
 
 class CausalImportanceRunner:
     def __init__(
         self,
         config_path: str | Path = "configs/causal_importance_v1.yaml",
         *,
-        results_root: str | Path = "results/real/causal_importance",
+        results_root: str | Path | None = None,
     ) -> None:
         self.config_path = Path(config_path).resolve()
         self.config = yaml.safe_load(self.config_path.read_text(encoding="utf-8"))
+        self.model_id = str(self.config["model"]["repo_id"])
+        self.model_revision = str(self.config["model"]["revision"])
+        architecture = self.config["model"].get("architecture", {})
+        self.expected_layer_count = int(architecture.get("layers", 28))
+        self.expected_intermediate_size = int(architecture.get("intermediate_size", 8960))
+        self.expected_hidden_size = int(architecture.get("hidden_size", 1536))
+        self.expected_query_heads = int(architecture.get("query_heads", 12))
+        self.expected_kv_heads = int(architecture.get("kv_heads", 2))
         self.benchmark_path = self._resolve(self.config["benchmark"]["path"])
         self.dataset = DenseBenchmarkDataset.from_yaml(self.benchmark_path)
         self.mapping_paths = {
@@ -67,12 +73,19 @@ class CausalImportanceRunner:
         }
         if set(self.mappings) != {64, 128}:
             raise ValueError("the experiment requires canonical 64- and 128-channel mappings")
-        self.results_root = Path(results_root).resolve()
+        if any(
+            (mapping.layer_count, mapping.intermediate_size)
+            != (self.expected_layer_count, self.expected_intermediate_size)
+            for mapping in self.mappings.values()
+        ):
+            raise ValueError("mapping geometry does not match the configured model architecture")
+        configured_root = self.config.get("results_root", "results/real/causal_importance")
+        self.results_root = Path(results_root or configured_root).resolve()
 
     def preflight(self, output_path: str | Path | None = None) -> Path:
         output = Path(output_path) if output_path else self.results_root / "preflight.json"
         output.parent.mkdir(parents=True, exist_ok=True)
-        model, tokenizer, _ = self._load_model()
+        model, tokenizer, torch = self._load_model()
         scorer = GradientCompatibleScorer(model, tokenizer, "mps")
         tokenizer_validation = scorer.validate_protocol(self.dataset.cases)
         case = self._ordered_cases("discovery")[0]
@@ -85,6 +98,7 @@ class CausalImportanceRunner:
                 "case_id": case.id,
                 "tokenizer_validation": tokenizer_validation,
                 "gradient_validation": validation,
+                "model_runtime": self._model_runtime(model, torch),
                 "mapping_hashes": {
                     str(size): mapping.mapping_hash for size, mapping in self.mappings.items()
                 },
@@ -196,12 +210,22 @@ class CausalImportanceRunner:
             self._write_json(run_path / "validity.json", validity)
             analysis = analyze_causal_matrix(full_rows, masked_rows, stability, validity)
             signed_analysis = analyze_signed_diagnostics(signed_rows, masked_rows)
+            scale_comparison = self._scale_comparison(analysis, stability)
             self._write_json(run_path / "causal_analysis.json", analysis)
             self._write_jsonl(run_path / "paired_causal_effects.jsonl", analysis["paired_rows"])
             self._write_json(run_path / "signed_analysis.json", signed_analysis)
+            if scale_comparison is not None:
+                self._write_json(run_path / "scale_comparison.json", scale_comparison)
 
             generate_plots(analysis, stability, run_path / "plots")
-            write_report(analysis, stability, signed_analysis, manifest, run_path / "report.md")
+            write_report(
+                analysis,
+                stability,
+                signed_analysis,
+                manifest,
+                run_path / "report.md",
+                scale_comparison=scale_comparison,
+            )
             self._write_failure_analysis(analysis, run_path / "failure_analysis.md")
             manifest["status"] = "completed"
             manifest["completed"] = True
@@ -353,7 +377,7 @@ class CausalImportanceRunner:
                 mapping = self.mappings[mask.block_size]
                 taylor = 0.0
                 normalized = 0.0
-                for layer in range(28):
+                for layer in range(mapping.layer_count):
                     selected = expanded_channels(mask, mapping, layer)
                     taylor += float(signed_sum[layer, selected].sum(dtype=np.float64))
                     normalized += float(signed_mean[layer, selected].sum(dtype=np.float64))
@@ -403,7 +427,9 @@ class CausalImportanceRunner:
             max(logit_differences.values()) <= 1e-4
             and nll_difference <= 1e-4
             and ordinary["prediction"] == gradient["prediction"]
-            and len(gradient["shape_records"]) == 28
+            and len(gradient["shape_records"]) == self.expected_layer_count
+            and gradient["shape_records"][0]["activation_shape"][-1]
+            == self.expected_intermediate_size
             and all(item["finite"] for item in gradient["shape_records"])
         )
         return {
@@ -515,6 +541,9 @@ class CausalImportanceRunner:
         expected_benchmark = "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0"
         if benchmark_validation["benchmark_sha256"] != expected_benchmark:
             raise RuntimeError("immutable benchmark hash changed")
+        prior_config = self.config.get("immutable_prior")
+        if prior_config:
+            return self._verify_scale_prior(benchmark_validation, prior_config)
         published_root = Path("results/real/dense_capacity/latest").resolve()
         audit = json.loads(
             (published_root / "posthoc_reporting_audit.json").read_text(encoding="utf-8")
@@ -539,6 +568,65 @@ class CausalImportanceRunner:
             },
         }
 
+    def _verify_scale_prior(
+        self, benchmark_validation: dict[str, Any], prior_config: dict[str, Any]
+    ) -> dict[str, Any]:
+        published_root = self._resolve(str(prior_config["path"]))
+        manifest = json.loads((published_root / "manifest.json").read_text(encoding="utf-8"))
+        expected_classification = str(prior_config["classification"])
+        observed_classification = str(manifest["primary_decision"]["classification"])
+        if observed_classification != expected_classification:
+            raise RuntimeError("immutable scale-comparison classification changed")
+        prior_root = published_root.parent / str(manifest["run_id"])
+        observed: dict[str, str] = {}
+        for name, expected_hash in manifest["artifact_sha256"].items():
+            path = prior_root / name
+            observed[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+            if observed[name] != expected_hash:
+                raise RuntimeError(f"immutable scale-comparison evidence changed: {name}")
+        return {
+            "status": "valid",
+            "benchmark_validation": benchmark_validation,
+            "prior_model": manifest["model_identity"],
+            "prior_model_revision": manifest["model_revision"],
+            "prior_classification": observed_classification,
+            "prior_run_id": manifest["run_id"],
+            "prior_artifact_hashes": observed,
+            "mapping_hashes": {
+                str(size): mapping.mapping_hash for size, mapping in self.mappings.items()
+            },
+            "quota_pattern_hashes": {
+                str(size): mapping.quota_pattern_hash for size, mapping in self.mappings.items()
+            },
+        }
+
+    def _scale_comparison(
+        self, analysis: dict[str, Any], stability: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        prior_config = self.config.get("immutable_prior")
+        if not prior_config:
+            return None
+        prior_root = self._resolve(str(prior_config["path"]))
+        prior_manifest = json.loads((prior_root / "manifest.json").read_text(encoding="utf-8"))
+        prior_stability = json.loads((prior_root / "stability.json").read_text(encoding="utf-8"))
+        prior_rows = [
+            json.loads(line)
+            for line in (prior_root / "paired_causal_effects.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line
+        ]
+        return analyze_scale_comparison(
+            analysis["paired_rows"],
+            prior_rows,
+            stability,
+            prior_stability,
+            current_model=self.model_id,
+            prior_model=str(prior_manifest["model_identity"]),
+            current_classification=str(analysis["primary_decision"]["classification"]),
+            prior_classification=str(prior_manifest["primary_decision"]["classification"]),
+        )
+
     def _load_model(self) -> tuple[Any, Any, Any]:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -547,10 +635,10 @@ class CausalImportanceRunner:
             raise RuntimeError("the frozen experiment requires Apple MPS")
         torch.manual_seed(42)
         np.random.seed(42)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, revision=MODEL_REVISION)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_id, revision=self.model_revision)
         loaded: Any = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID,
-            revision=MODEL_REVISION,
+            self.model_id,
+            revision=self.model_revision,
             dtype=torch.float16,
             low_cpu_mem_usage=True,
         )
@@ -562,8 +650,22 @@ class CausalImportanceRunner:
         if "peft" in type(model).__module__.casefold() or hasattr(model, "peft_config"):
             raise RuntimeError("adapter/PEFT contamination detected")
         resolved = getattr(model.config, "_commit_hash", None)
-        if resolved not in {None, MODEL_REVISION}:
+        if resolved not in {None, self.model_revision}:
             raise RuntimeError(f"model resolved to unexpected revision: {resolved}")
+        if (
+            int(model.config.num_hidden_layers),
+            int(model.config.intermediate_size),
+            int(model.config.hidden_size),
+            int(model.config.num_attention_heads),
+            int(model.config.num_key_value_heads),
+        ) != (
+            self.expected_layer_count,
+            self.expected_intermediate_size,
+            self.expected_hidden_size,
+            self.expected_query_heads,
+            self.expected_kv_heads,
+        ):
+            raise RuntimeError("loaded model architecture does not match preregistration")
         return model, tokenizer, torch
 
     def _fingerprint(self, tokenizer_validation: dict[str, Any]) -> str:
@@ -571,8 +673,8 @@ class CausalImportanceRunner:
             {
                 "experiment_version": self.config["experiment_version"],
                 "backend": "transformers_dense_real",
-                "model": MODEL_ID,
-                "revision": MODEL_REVISION,
+                "model": self.model_id,
+                "revision": self.model_revision,
                 "benchmark_hash": self.dataset.canonical_hash(),
                 "prompt_hash": tokenizer_validation["prompt_template_sha256"],
                 "mapping_hashes": {
@@ -603,8 +705,8 @@ class CausalImportanceRunner:
             "metric_schema_version": self.config["metric_schema_version"],
             "backend": "transformers_dense_real",
             "backend_kind": "real",
-            "model_identity": MODEL_ID,
-            "model_revision": MODEL_REVISION,
+            "model_identity": self.model_id,
+            "model_revision": self.model_revision,
             "adapter_set": [],
             "benchmark_version": self.dataset.benchmark_version,
             "benchmark_hash": self.dataset.canonical_hash(),
@@ -644,6 +746,9 @@ class CausalImportanceRunner:
             "device": str(next(model.parameters()).device),
             "layers": int(model.config.num_hidden_layers),
             "intermediate_size": int(model.config.intermediate_size),
+            "hidden_size": int(model.config.hidden_size),
+            "query_heads": int(model.config.num_attention_heads),
+            "kv_heads": int(model.config.num_key_value_heads),
             "use_cache": bool(model.config.use_cache),
             "adapter_wrapper_detected": False,
             "parameters_frozen": not any(

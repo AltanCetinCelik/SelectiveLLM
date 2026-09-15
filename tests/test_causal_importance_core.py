@@ -69,3 +69,24 @@ def test_block_mask_rejects_quota_drift() -> None:
 
     with pytest.raises(ValueError, match="frozen per-layer quota"):
         validate_block_mask(mask, mapping)
+
+
+def test_qwen3b_mask_preserves_model_geometry_and_capacity() -> None:
+    mapping = build_mapping(64, intermediate_size=11_008, layer_count=36)
+    selected = {layer: list(range(mapping.per_layer_quota[layer])) for layer in range(36)}
+    mask = BlockMask(
+        "qwen3b_gradient_code",
+        64,
+        "gradient",
+        "domain_selectivity",
+        "code",
+        selected,
+        mapping.mapping_hash,
+        mapping.quota_pattern_hash,
+        layer_count=36,
+        intermediate_size=11_008,
+    )
+
+    validate_block_mask(mask, mapping)
+    assert mask.selected_channel_count == 19_840
+    assert mask.to_dict()["total_fraction"] == pytest.approx(0.05006459948320414)

@@ -34,6 +34,11 @@ results/real/causal_importance/*
 !results/real/causal_importance/README.md
 !results/real/causal_importance/latest/
 !results/real/causal_importance/latest/**
+!results/real/causal_scale_qwen3b/
+results/real/causal_scale_qwen3b/*
+!results/real/causal_scale_qwen3b/README.md
+!results/real/causal_scale_qwen3b/latest/
+!results/real/causal_scale_qwen3b/latest/**
 *.safetensors
 *.bin
 *.pt

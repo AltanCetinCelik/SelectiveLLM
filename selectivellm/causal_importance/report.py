@@ -85,6 +85,8 @@ def write_report(
     signed: dict[str, Any],
     manifest: dict[str, Any],
     path: Path,
+    *,
+    scale_comparison: dict[str, Any] | None = None,
 ) -> None:
     decision = analysis["primary_decision"]
     classification = decision["classification"]
@@ -102,10 +104,15 @@ def write_report(
             "evidence does not support more discovery tuning on this model; model scale is next."
         ),
     }
+    if scale_comparison is not None and classification == "C":
+        conclusions["C"] = (
+            "The same-family 3B scale increase also failed the frozen primary gate. Nearby model "
+            "scale did not rescue stable causal specialization under this protocol."
+        )
     lines = [
         "# Causal Importance Discovery",
         "",
-        "**Backend:** real dense `Qwen/Qwen2.5-1.5B-Instruct`, pinned revision, no adapters.",
+        f"**Backend:** real dense `{manifest['model_identity']}`, pinned revision, no adapters.",
         "",
         "**Boundary:** logical MLP masking only. No weights were unloaded and no VRAM reduction "
         "was measured or claimed.",
@@ -222,6 +229,33 @@ def write_report(
         lines.append(
             f"| {block_size} | {item['row_count']} | {item['sign_agreement']:.3f} | "
             f"{item['spearman_association']:.3f} | {item['pearson_association']:.3f} |"
+        )
+
+    if scale_comparison is not None:
+        lines.extend(
+            [
+                "",
+                "## Paired Scale Comparison",
+                "",
+                f"Models remain separate; values are paired 3B-minus-1.5B case effects. "
+                f"Classification transition: **{scale_comparison['classification_transition']}**. "
+                f"Scale rescue: **{scale_comparison['scale_rescue']}**.",
+                "",
+                "| Metric | Paired scale delta |",
+                "|---|---:|",
+            ]
+        )
+        for metric, summary in scale_comparison["metrics"].items():
+            lines.append(f"| {metric.replace('_', ' ')} | {_effect(summary)} |")
+        scale_stability = scale_comparison["stability"]
+        lines.extend(
+            [
+                "",
+                "Primary gradient-stable domains changed from "
+                f"**{scale_stability['prior_gradient_stable_domains']}/4** to "
+                f"**{scale_stability['current_gradient_stable_domains']}/4**. Models are never "
+                "pooled, and this comparison cannot replace the current model's primary gate.",
+            ]
         )
 
     lines.extend(

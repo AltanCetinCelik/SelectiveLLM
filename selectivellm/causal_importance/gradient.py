@@ -79,6 +79,8 @@ class GradientMeasurement(AbstractContextManager["GradientMeasurement"]):
         self.handles: list[Any] = []
         self.activations: list[Any] = []
         self.original_requires_grad: list[bool] = []
+        self.layer_count = int(self.model.config.num_hidden_layers)
+        self.intermediate_size = int(self.model.config.intermediate_size)
 
     def __enter__(self) -> GradientMeasurement:
         self.original_requires_grad = [
@@ -86,6 +88,8 @@ class GradientMeasurement(AbstractContextManager["GradientMeasurement"]):
         ]
         for parameter in self.model.parameters():
             parameter.requires_grad_(False)
+        if len(self.model.model.layers) != self.layer_count:
+            raise RuntimeError("decoder layer count does not match model configuration")
         for layer_index, layer in enumerate(self.model.model.layers):
             self.handles.append(
                 layer.mlp.down_proj.register_forward_pre_hook(self._capture(layer_index))
@@ -111,7 +115,7 @@ class GradientMeasurement(AbstractContextManager["GradientMeasurement"]):
         with torch.no_grad():
             embeddings = self.model.get_input_embeddings()(inputs["input_ids"])
         embeddings = embeddings.detach().requires_grad_(True)
-        self.activations = [None] * 28
+        self.activations = [None] * self.layer_count
         self.model.zero_grad(set_to_none=True)
         with torch.enable_grad():
             output = self.model(
@@ -146,7 +150,11 @@ class GradientMeasurement(AbstractContextManager["GradientMeasurement"]):
                 raise ValueError(
                     f"activation/gradient shape mismatch for {case.id}/layer {layer_index}"
                 )
-            if activation.ndim != 3 or activation.shape[0] != 1 or activation.shape[-1] != 8960:
+            if (
+                activation.ndim != 3
+                or activation.shape[0] != 1
+                or activation.shape[-1] != self.intermediate_size
+            ):
                 raise ValueError(f"invalid MLP tensor shape for {case.id}/layer {layer_index}")
             if activation.shape[1] != eligible_tensor.shape[0]:
                 raise ValueError(f"eligible-token shape mismatch for {case.id}/layer {layer_index}")
@@ -212,11 +220,12 @@ class GradientMeasurement(AbstractContextManager["GradientMeasurement"]):
 
 
 def aggregate_blocks(channels: FloatArray, block_size: int) -> FloatArray:
-    if channels.shape[-2:] != (28, 8960):
-        raise ValueError(f"expected (..., 28, 8960), found {channels.shape}")
-    if 8960 % block_size or block_size not in {64, 128}:
+    if channels.ndim < 2 or channels.shape[-2] <= 0 or channels.shape[-1] <= 0:
+        raise ValueError(f"expected (..., layers, channels), found {channels.shape}")
+    intermediate_size = channels.shape[-1]
+    if intermediate_size % block_size or block_size not in {64, 128}:
         raise ValueError(f"unsupported block size: {block_size}")
-    shape = (*channels.shape[:-1], 8960 // block_size, block_size)
+    shape = (*channels.shape[:-1], intermediate_size // block_size, block_size)
     return cast(
         FloatArray,
         channels.reshape(shape).sum(axis=-1, dtype=np.float32).astype(np.float32),
@@ -224,7 +233,7 @@ def aggregate_blocks(channels: FloatArray, block_size: int) -> FloatArray:
 
 
 def percentile_rank_blocks(values: FloatArray) -> FloatArray:
-    if values.ndim != 3 or values.shape[1] != 28 or values.shape[2] not in {70, 140}:
+    if values.ndim != 3 or values.shape[1] <= 0 or values.shape[2] <= 1:
         raise ValueError(f"invalid block activity shape: {values.shape}")
     order = np.argsort(values, axis=-1, kind="stable")
     ranks = np.empty_like(order, dtype=np.float32)

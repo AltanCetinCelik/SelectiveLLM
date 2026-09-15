@@ -13,6 +13,13 @@ from selectivellm.dense_capacity.analysis import bootstrap_interval
 DOMAINS = ("code", "mathematics", "science", "general")
 METHODS = ("activation", "gradient")
 FloatArray = NDArray[np.float64]
+SCALE_METRICS = (
+    "same_damage",
+    "same_minus_random",
+    "same_minus_wrong",
+    "same_minus_global_high",
+    "gradient_same_minus_activation_same",
+)
 
 
 def _mean(rows: Sequence[dict[str, Any]], field: str) -> float:
@@ -183,6 +190,74 @@ def analyze_causal_matrix(
         "primary_decision": decision,
         "corroborative_concordance": concordance,
         "paired_rows": paired_rows,
+    }
+
+
+def analyze_scale_comparison(
+    current_rows: list[dict[str, Any]],
+    prior_rows: list[dict[str, Any]],
+    current_stability: dict[str, Any],
+    prior_stability: dict[str, Any],
+    *,
+    current_model: str,
+    prior_model: str,
+    current_classification: str,
+    prior_classification: str,
+) -> dict[str, Any]:
+    """Compare model scales by paired held-out case without pooling model identities."""
+
+    def primary_gradient(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        selected = {
+            str(row["case_id"]): row
+            for row in rows
+            if int(row["block_size"]) == 64 and row["discovery_method"] == "gradient"
+        }
+        if len(selected) != 32:
+            raise ValueError("scale comparison requires 32 primary gradient rows per model")
+        return selected
+
+    current = primary_gradient(current_rows)
+    prior = primary_gradient(prior_rows)
+    if set(current) != set(prior):
+        raise ValueError("scale comparison case identities differ")
+    delta_rows: list[dict[str, Any]] = []
+    for case_id in sorted(current):
+        if current[case_id]["domain"] != prior[case_id]["domain"]:
+            raise ValueError(f"scale comparison domain changed for {case_id}")
+        delta_rows.append(
+            {
+                "case_id": case_id,
+                "domain": current[case_id]["domain"],
+                **{
+                    metric: float(current[case_id][metric]) - float(prior[case_id][metric])
+                    for metric in SCALE_METRICS
+                },
+            }
+        )
+    return {
+        "schema_version": "causal-model-scale-comparison-1.0.0",
+        "experimental_unit": "paired_held_out_question",
+        "models_pooled": False,
+        "current_model": current_model,
+        "prior_model": prior_model,
+        "classification_transition": f"{prior_classification}->{current_classification}",
+        "scale_rescue": current_classification in {"A", "B"},
+        "metrics": {metric: _metric_summary(delta_rows, metric) for metric in SCALE_METRICS},
+        "stability": {
+            "prior_gradient_stable_domains": prior_stability["64"]["gradient"][
+                "stable_domain_count"
+            ],
+            "current_gradient_stable_domains": current_stability["64"]["gradient"][
+                "stable_domain_count"
+            ],
+            "prior_activation_stable_domains": prior_stability["64"]["activation"][
+                "stable_domain_count"
+            ],
+            "current_activation_stable_domains": current_stability["64"]["activation"][
+                "stable_domain_count"
+            ],
+        },
+        "rows": delta_rows,
     }
 
 

@@ -35,7 +35,7 @@ def domain_selectivity(
 def select_blocks(
     scores: FloatArray, mapping: BlockMapping, *, highest: bool = True
 ) -> dict[int, list[int]]:
-    if scores.shape != (28, mapping.blocks_per_layer):
+    if scores.shape != (mapping.layer_count, mapping.blocks_per_layer):
         raise ValueError(f"ranking shape does not match block mapping: {scores.shape}")
     indices = np.arange(mapping.blocks_per_layer)
     selected: dict[int, list[int]] = {}
@@ -211,6 +211,8 @@ def build_masks(rankings: dict[str, FloatArray], mapping: BlockMapping) -> list[
                     ),
                     mapping_sha256=mapping.mapping_hash,
                     quota_pattern_sha256=mapping.quota_pattern_hash,
+                    layer_count=mapping.layer_count,
+                    intermediate_size=mapping.intermediate_size,
                 )
             )
         global_scores = rankings[f"{method}_global_importance"]
@@ -225,6 +227,8 @@ def build_masks(rankings: dict[str, FloatArray], mapping: BlockMapping) -> list[
                     selected_blocks_by_layer=select_blocks(global_scores, mapping, highest=highest),
                     mapping_sha256=mapping.mapping_hash,
                     quota_pattern_sha256=mapping.quota_pattern_hash,
+                    layer_count=mapping.layer_count,
+                    intermediate_size=mapping.intermediate_size,
                 )
             )
     for seed in range(42, 47):
@@ -246,6 +250,8 @@ def build_masks(rankings: dict[str, FloatArray], mapping: BlockMapping) -> list[
                 mapping_sha256=mapping.mapping_hash,
                 quota_pattern_sha256=mapping.quota_pattern_hash,
                 seed=seed,
+                layer_count=mapping.layer_count,
+                intermediate_size=mapping.intermediate_size,
             )
         )
     masks.append(
@@ -258,6 +264,8 @@ def build_masks(rankings: dict[str, FloatArray], mapping: BlockMapping) -> list[
             selected_blocks_by_layer={},
             mapping_sha256=mapping.mapping_hash,
             quota_pattern_sha256=mapping.quota_pattern_hash,
+            layer_count=mapping.layer_count,
+            intermediate_size=mapping.intermediate_size,
         )
     )
     for mask in masks:
@@ -274,7 +282,11 @@ def build_discovery(
 ) -> dict[str, Any]:
     if len(cases) != 48 or any(case.split != "discovery" for case in cases):
         raise ValueError("discovery requires the immutable 48-case split")
-    expected = (48, 28, 8960)
+    geometries = {(mapping.layer_count, mapping.intermediate_size) for mapping in mappings}
+    if len(geometries) != 1:
+        raise ValueError("both block mappings must describe the same model geometry")
+    layer_count, intermediate_size = next(iter(geometries))
+    expected = (48, layer_count, intermediate_size)
     if set(channel_summaries) != {
         "activation",
         "gradient_absolute",

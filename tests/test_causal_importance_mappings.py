@@ -47,12 +47,31 @@ def test_mapping_and_quota_hashes_are_stable() -> None:
     assert first.mapping_hash == second.mapping_hash
     assert first.quota_pattern_hash == second.quota_pattern_hash
     assert first.to_dict()["mapping_sha256"] == first.mapping_hash
+    assert build_mapping(64).mapping_hash == (
+        "c7d55beae21124b7b3e3d96857ad9aec5d92ddc03d616e829d15bcd8d3b8bb73"
+    )
+    assert first.mapping_hash == "540d63699a469a54b86d9bd5d07df9110fc1266791b0c8c1b1636412d0c1018a"
     json.dumps(first.to_dict(), sort_keys=True)
+
+
+def test_qwen3b_mappings_use_frozen_nearest_five_percent_footprint() -> None:
+    mapping64 = build_mapping(64, intermediate_size=11_008, layer_count=36)
+    mapping128 = build_mapping(128, intermediate_size=11_008, layer_count=36)
+
+    expected64 = tuple(((layer + 1) * 310) // 36 - (layer * 310) // 36 for layer in range(36))
+    expected128 = tuple(((layer + 1) * 155) // 36 - (layer * 155) // 36 for layer in range(36))
+    assert mapping64.per_layer_quota == expected64
+    assert mapping128.per_layer_quota == expected128
+    assert mapping64.blocks_per_layer == 172
+    assert mapping128.blocks_per_layer == 86
+    assert mapping64.total_selected_channels == mapping128.total_selected_channels == 19_840
+    assert mapping64.total_layer_channels == mapping128.total_layer_channels == 396_288
+    assert mapping64.to_dict()["total_fraction"] == pytest.approx(0.05006459948320414)
 
 
 def test_modified_quota_is_rejected() -> None:
     mapping = build_mapping(128)
     invalid = BlockMapping(mapping.block_size, mapping.blocks, (3,) * 28)
 
-    with pytest.raises(ValueError, match="four in even"):
+    with pytest.raises(ValueError, match="preregistered model geometry"):
         validate_mapping(invalid)

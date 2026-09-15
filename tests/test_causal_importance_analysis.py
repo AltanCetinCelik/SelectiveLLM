@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from selectivellm.causal_importance.analysis import apply_primary_gate
+import pytest
+
+from selectivellm.causal_importance.analysis import analyze_scale_comparison, apply_primary_gate
 
 
 def _metric(mean: float, low: float = 0.01) -> dict[str, float]:
@@ -77,3 +79,54 @@ def test_unstable_result_is_c() -> None:
     result = apply_primary_gate(_primary(), stability, {"passed": True})
 
     assert result["classification"] == "C"
+
+
+def test_scale_comparison_pairs_cases_without_pooling_models() -> None:
+    domains = ("code", "mathematics", "science", "general")
+    prior: list[dict[str, Any]] = []
+    current: list[dict[str, Any]] = []
+    for index in range(32):
+        base = {
+            "case_id": f"case-{index:02d}",
+            "domain": domains[index // 8],
+            "block_size": 64,
+            "discovery_method": "gradient",
+            "same_damage": 0.1,
+            "same_minus_random": 0.05,
+            "same_minus_wrong": 0.04,
+            "same_minus_global_high": 0.03,
+            "gradient_same_minus_activation_same": 0.02,
+        }
+        prior.append(base)
+        current.append(
+            {
+                **base,
+                "same_damage": 0.2,
+                "same_minus_random": 0.15,
+                "same_minus_wrong": 0.14,
+                "same_minus_global_high": 0.13,
+                "gradient_same_minus_activation_same": 0.12,
+            }
+        )
+    stability = {
+        "64": {
+            "gradient": {"stable_domain_count": 3},
+            "activation": {"stable_domain_count": 1},
+        }
+    }
+
+    result = analyze_scale_comparison(
+        current,
+        prior,
+        stability,
+        stability,
+        current_model="3B",
+        prior_model="1.5B",
+        current_classification="A",
+        prior_classification="C",
+    )
+
+    assert result["models_pooled"] is False
+    assert result["classification_transition"] == "C->A"
+    assert result["scale_rescue"] is True
+    assert result["metrics"]["same_damage"]["mean"] == pytest.approx(0.1)

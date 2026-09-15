@@ -8,7 +8,7 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from selectivellm.causal_importance.mappings import LAYER_COUNT, BlockMapping
+from selectivellm.causal_importance.mappings import INTERMEDIATE_SIZE, LAYER_COUNT, BlockMapping
 
 DiscoveryMethod = Literal["activation", "gradient", "shared_control"]
 MaskSource = Literal[
@@ -32,6 +32,8 @@ class BlockMask:
     quota_pattern_sha256: str
     mask_semantics: Literal["ABLATE_SELECTED"] = "ABLATE_SELECTED"
     seed: int | None = None
+    layer_count: int = LAYER_COUNT
+    intermediate_size: int = INTERMEDIATE_SIZE
 
     @property
     def selected_block_count(self) -> int:
@@ -57,16 +59,21 @@ class BlockMask:
             },
             "per_layer_counts": {
                 str(layer): len(self.selected_blocks_by_layer.get(layer, []))
-                for layer in range(LAYER_COUNT)
+                for layer in range(self.layer_count)
             },
             "selected_block_count": self.selected_block_count,
             "selected_channel_count": self.selected_channel_count,
-            "total_fraction": self.selected_channel_count / (LAYER_COUNT * 8960),
+            "total_fraction": self.selected_channel_count
+            / (self.layer_count * self.intermediate_size),
             "mapping_sha256": self.mapping_sha256,
             "quota_pattern_sha256": self.quota_pattern_sha256,
             "mask_semantics": self.mask_semantics,
             "seed": self.seed,
         }
+        if (self.layer_count, self.intermediate_size) != (LAYER_COUNT, INTERMEDIATE_SIZE):
+            payload["layer_count"] = self.layer_count
+            payload["intermediate_size"] = self.intermediate_size
+            payload["total_layer_channels"] = self.layer_count * self.intermediate_size
         payload["mask_sha256"] = hashlib.sha256(
             json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
         ).hexdigest()
@@ -80,16 +87,21 @@ def validate_block_mask(mask: BlockMask, mapping: BlockMapping) -> None:
         raise ValueError(f"mask {mask.name} mapping hash does not match")
     if mask.quota_pattern_sha256 != mapping.quota_pattern_hash:
         raise ValueError(f"mask {mask.name} quota hash does not match")
+    if (mask.layer_count, mask.intermediate_size) != (
+        mapping.layer_count,
+        mapping.intermediate_size,
+    ):
+        raise ValueError(f"mask {mask.name} model geometry does not match mapping")
     if mask.mask_semantics != "ABLATE_SELECTED":
         raise ValueError(f"mask {mask.name} has ambiguous semantics")
     if mask.source == "noop":
         if mask.selected_blocks_by_layer or mask.selected_channel_count:
             raise ValueError("no-op mask must select zero blocks")
         return
-    if set(mask.selected_blocks_by_layer) != set(range(LAYER_COUNT)):
-        raise ValueError(f"mask {mask.name} must specify all 28 layers")
+    if set(mask.selected_blocks_by_layer) != set(range(mapping.layer_count)):
+        raise ValueError(f"mask {mask.name} must specify all {mapping.layer_count} layers")
     observed_quota = tuple(
-        len(mask.selected_blocks_by_layer[layer]) for layer in range(LAYER_COUNT)
+        len(mask.selected_blocks_by_layer[layer]) for layer in range(mapping.layer_count)
     )
     if observed_quota != mapping.per_layer_quota:
         raise ValueError(f"mask {mask.name} violates the frozen per-layer quota")
@@ -98,8 +110,8 @@ def validate_block_mask(mask: BlockMask, mapping: BlockMapping) -> None:
             raise ValueError(f"mask {mask.name} repeats a block in layer {layer}")
         if any(block < 0 or block >= mapping.blocks_per_layer for block in blocks):
             raise ValueError(f"mask {mask.name} has an invalid block in layer {layer}")
-    if mask.selected_channel_count != 12_544:
-        raise ValueError(f"mask {mask.name} does not select exactly five percent")
+    if mask.selected_channel_count != mapping.total_selected_channels:
+        raise ValueError(f"mask {mask.name} does not match mapping capacity")
 
 
 def expanded_channels(mask: BlockMask, mapping: BlockMapping, layer: int) -> list[int]:
@@ -120,7 +132,10 @@ class BlockIntervention(AbstractContextManager["BlockIntervention"]):
 
     def __enter__(self) -> BlockIntervention:
         validate_block_mask(self.mask, self.mapping)
-        for layer_index, layer in enumerate(self.model.model.layers):
+        layers = self.model.model.layers
+        if len(layers) != self.mapping.layer_count:
+            raise ValueError("model layer count does not match the block mapping")
+        for layer_index, layer in enumerate(layers):
             channels = expanded_channels(self.mask, self.mapping, layer_index)
             self.handles.append(
                 layer.mlp.down_proj.register_forward_pre_hook(self._hook(layer_index, channels))
@@ -139,8 +154,8 @@ class BlockIntervention(AbstractContextManager["BlockIntervention"]):
             if not channels:
                 return None
             tensor = args[0]
-            if tensor.shape[-1] != 8960:
-                raise ValueError("MLP intervention target width is not 8,960")
+            if tensor.shape[-1] != self.mapping.intermediate_size:
+                raise ValueError("MLP intervention target width does not match the block mapping")
             indices = tensor.new_tensor(channels).long()
             masked = tensor.index_fill(-1, indices, 0)
             self.events.append(
