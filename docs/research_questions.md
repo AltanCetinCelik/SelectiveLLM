@@ -10,7 +10,7 @@
 
 **RQ4:** Under which locality and budget regimes can caching recover that latency?
 
-**RQ5 (future research):** Does task specialization permit useful parameter-level paging inside dense transformers?
+**RQ5:** Is prompt-dependent dense-model capacity stable and causally useful enough to justify a later paging prototype?
 
 ## Hypothesis matrix
 
@@ -19,9 +19,9 @@
 | A semantic router can select independently defined adapters reliably | Testable now | Hero routing precision/recall/F1 versus keyword and random |
 | Dynamic adapter loading reduces resident accelerator memory | Requires real backend | Falsified if compatible real runs show no peak-memory reduction versus all-resident |
 | Cache reuse reduces swap overhead | Testable now; physical magnitude requires real backend | Mixed-domain repeated workload, cold/warm load latency, hits, and swaps |
-| Better routing improves generation quality | Requires real backend for model claim | Oracle/semantic quality versus base, random, and keyword; falsified if routing gains do not transfer to task quality |
+| Better routing improves generation quality | Not established in the current adapter pool | Oracle/semantic quality versus base, random, and keyword; current semantic labels do not reliably predict the empirical winner |
 | Multi-domain composition retains quality within budget | Partially testable | Three-capability cases, budget rejections, composition compatibility, and quality loss |
-| Dense-model knowledge cleanly maps to parameter blocks | Unknown | Future causal localization, mask stability, overlap, and sparse execution experiments |
+| Dense-model knowledge cleanly maps to parameter blocks | Failed the frozen 1.5B and 3B feasibility gates at tested granularities | Discovery-only rankings, held-out equal-size logical ablations, matched controls, and case-bootstrap intervals |
 | 70B-quality can run at 7B memory cost | Unsupported | Not claimed; would require broad quality parity and measured physical memory across representative workloads |
 
 ## Central falsification experiment
@@ -29,3 +29,5 @@
 Use a held-out, pre-registered multi-domain benchmark and a real shared base model with independently validated compatible adapters. Compare semantic, keyword, random, oracle, base-only, all-resident, and standard offload under equal generation settings and a fixed physical memory budget. Repeat across seeds and workload orders.
 
 The central routing hypothesis is falsified for that setup if semantic routing does not improve held-out routing metrics over keyword/random, does not retain quality relative to oracle/all-resident, or incurs enough load and transfer latency that no useful quality-memory-latency operating point remains.
+
+The dense-capacity hypothesis is not supported for the tested Qwen2.5-1.5B/3B models, approximately 5% contiguous MLP block masks, and 32-question held-out set. Both preregistered studies returned Outcome C. This does not establish impossibility at other scales, model families, granularities, or intervention semantics.

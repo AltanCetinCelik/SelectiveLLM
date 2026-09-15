@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import tomllib
 from pathlib import Path
 
 from typer.testing import CliRunner
 
+from selectivellm import __version__
 from selectivellm.benchmarking import BenchmarkRunner
 from selectivellm.cli import app
 from selectivellm.config import SelectiveLLMConfig
@@ -65,6 +67,11 @@ def test_cli_inspect_and_registry_are_cpu_safe() -> None:
     assert "Device Class" in inspected.stdout
     assert listed.exit_code == 0
     assert "Declared MB is registry metadata" in listed.stdout
+
+
+def test_public_version_matches_package_metadata() -> None:
+    metadata = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+    assert __version__ == metadata["project"]["version"]
 
 
 def test_single_method_report_marks_relative_metrics_unavailable(

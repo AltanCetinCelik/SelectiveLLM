@@ -4,11 +4,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- Preregistered 108-generation expert-quality diagnostic with case-bootstrap uncertainty, empirical-oracle opportunity, label-mismatch analysis, and a separate evaluator sensitivity audit.
+- Dense Qwen2.5-1.5B activation/head/layer feasibility study with held-out logical interventions and structurally matched controls.
+- Objective-aware contiguous-MLP-block causal experiment on Qwen2.5-1.5B plus a strict same-family Qwen2.5-3B scale replication.
+- Clean-source provenance, immutable-input verification, mapping hashes, signed Taylor diagnostics, failure artifacts, and paired model-scale comparison.
+
+### Research result
+
+- The expert pool has measurable empirical response diversity, but robust domain specialization and a semantic-router quality gain were not established.
+- Both dense causal experiments returned preregistered Outcome C. The 3B model increased several causal point estimates but did not rescue discovery stability or matched-control confidence intervals.
+- No dense experiment unloaded parameters or measured physical-memory reduction; semantic parameter paging remains unimplemented.
+
 ## [0.1.1] - 2026-09-05
 
 ### Added
 
-- Completed pinned Qwen2.5-1.5B-Instruct real-model validation with public same-base code, math, and science LoRI adapters on Apple M4/MPS.
+- Completed pinned Qwen2.5-1.5B-Instruct real-model validation with public same-base code, math, and science LoRA adapters on Apple M4/MPS.
 - Programmatic adapter compatibility and license preflight with exact revisions, PEFT configuration hashes, tokenizer checks, and archived registry/benchmark inputs.
 - 396-observation hostile policy matrix plus an 18-observation RLC multi-adapter matrix, fixed deterministic answer rubrics, raw responses, lifecycle telemetry, failure analysis, statistics, and plots.
 - Real adapter residency, loading, unloading, activation, synchronization, first-token, generation, cache, host RSS, MPS live allocation, and Metal driver allocation measurements.

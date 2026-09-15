@@ -1,4 +1,10 @@
 .DS_Store
+.env
+.env.*
+!.env.example
+.direnv/
+.idea/
+.vscode/
 .venv/
 __pycache__/
 *.py[cod]
@@ -7,9 +13,16 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .coverage
+coverage.xml
 htmlcov/
 dist/
 build/
+.cache/
+.huggingface/
+*.pem
+*.key
+*.p12
+*.pfx
 results/*
 !results/.gitkeep
 !results/README.md
@@ -22,6 +35,7 @@ results/real/*
 !results/real/latest/**
 !results/real/expert_quality/
 results/real/expert_quality/*
+!results/real/expert_quality/README.md
 !results/real/expert_quality/latest/
 !results/real/expert_quality/latest/**
 !results/real/dense_capacity/
@@ -44,3 +58,5 @@ results/real/causal_scale_qwen3b/*
 *.pt
 *.pth
 *.gguf
+*.ckpt
+*.onnx

@@ -2,7 +2,13 @@
 
 ## Status
 
-Semantic parameter paging is a research direction, not a v0.1 implementation. The current system routes independently defined adapters or experts. It does not discover or page semantic regions of arbitrary dense checkpoints.
+Semantic parameter paging is a research direction, not a v0.1 implementation. The current system routes independently defined adapters or experts. Follow-up experiments discover and logically mask candidate internal components in dense Qwen2.5 models, but they do not move, unload, or page those parameters. Both the 1.5B and 3B preregistered studies returned Outcome C: weak or unstable specialization.
+
+## Current feasibility result
+
+The 1.5B and 3B experiments used discovery-only activation and objective-aware rankings, fixed approximately 5% contiguous MLP block masks, 32 held-out four-option questions, and equal-size random, wrong-domain, global-high, and global-low controls. Gradient-derived selections were stable in 0/4 domains at 1.5B and 1/4 at 3B. The 3B point estimates were larger, but decisive matched-control intervals crossed zero. Nearby scale did not rescue the frozen gate.
+
+This is evidence against proceeding to a pager under the tested setup. It is not evidence that semantic capacity localization is impossible in every model or at every granularity.
 
 ## Candidate workflow
 

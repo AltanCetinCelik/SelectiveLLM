@@ -2,7 +2,6 @@
 
 **Semantic Model Paging and Dynamic Expert Routing for Memory-Constrained LLM Inference**
 
-[![CI](https://github.com/selectivellm/selectivellm/actions/workflows/ci.yml/badge.svg)](https://github.com/selectivellm/selectivellm/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2C7A7B)](LICENSE)
 [![Status: Research prototype](https://img.shields.io/badge/status-research%20prototype-B45309)](docs/paper.md)
@@ -14,7 +13,7 @@ SelectiveLLM is an experimental inference framework exploring **retrieval over m
 > [!IMPORTANT]
 > SelectiveLLM does NOT currently turn a dense 70B model into a 7B-memory model.
 >
-> v0.1.1 includes a real Qwen2.5/PEFT run on Apple M4 alongside the deterministic control. It demonstrates real adapter residency and swapping, but it did **not** establish that better routing reliably improves generated answers. MPS measurements are unified-memory allocator signals, never labeled discrete VRAM.
+> v0.1.1 includes a real Qwen2.5/PEFT run on Apple M4 alongside the deterministic control. It demonstrates real adapter residency and swapping, but it did **not** establish that better routing reliably improves generated answers. Follow-up dense Qwen2.5-1.5B and 3B logical-masking experiments both returned preregistered **Outcome C: weak or unstable specialization**. MPS measurements are unified-memory allocator signals, never labeled discrete VRAM.
 
 ## The experiment
 
@@ -57,7 +56,7 @@ The hero experiment compares base-only, random, keyword, oracle, embedding, sema
 
 Backend: **`transformers-peft`** | Model: **Qwen2.5-1.5B-Instruct** | Hardware: **Apple M4 / 16 GB unified memory / MPS** | Benchmark: **9 cases, 396 primary observations + 18 RLC observations**
 
-The pinned run used independently produced code, math, and science LoRI adapters. Semantic routing reached 0.830 multi-label F1 versus 0.611 keyword and 0.278 random. Dynamic semantic routing averaged 3125.732 MB of MPS live tensor allocation versus 3412.159 MB all-resident, a measured 286.427 MB reduction. This is real live-tensor residency on Apple unified memory, not simulated capacity and not discrete VRAM.
+The pinned run used independently produced code, math, and science LoRA adapters. Semantic routing reached 0.830 multi-label F1 versus 0.611 keyword and 0.278 random. Dynamic semantic routing averaged 3125.732 MB of MPS live tensor allocation versus 3412.159 MB all-resident, a measured 286.427 MB reduction. This is real live-tensor residency on Apple unified memory, not simulated capacity and not discrete VRAM.
 
 The model-quality result was negative: semantic and oracle averaged about 0.370 to 0.378 fixed-rubric quality, but random also scored 0.370. On the RLC case, base and code-only scored 0.400 while code-plus-science scored 0.067 and three-expert oracle scored 0.000. Better routing did not produce a reliable aggregate quality advantage.
 
@@ -74,6 +73,29 @@ The model-quality result was negative: semantic and oracle averaged about 0.370 
 | All resident, semantic active | 0.370 | 0.830 | 3.000 | 3412.159 | 0.000 | 100.0% |
 
 Values are warm means over 27 observations per policy. The full [real-model analysis](docs/real_model_evidence.md) documents uncertainty, lifecycle memory, cache locality, RLC composition, token-cap failures, and every evidence boundary. See the [run report](results/real/latest/report.md), [manifest](results/real/latest/manifest.json), [raw responses](results/real/latest/raw_responses.jsonl), and [failure analysis](results/real/latest/failure_analysis.md).
+
+## Expert-Pool Diagnostic
+
+A preregistered follow-up reused the pinned base and three adapters for 108 generations: 9 fixed prompts x 4 direct conditions x 3 technical repetitions at a fixed 384-token ceiling. The empirical oracle scored **0.748 [0.543, 0.933]** versus **0.406 [0.156, 0.672]** for base, giving a routing opportunity of **0.343 [0.111, 0.611]**. The labeled specialist appeared in the best tie set for 5/7 labeled cases, but was the sole winner only 1/7 times; specialist lift and specialization margin both had intervals spanning zero.
+
+The frozen `expert_pool_viable` gate passed, but the correct reading is narrow: this pool has measurable response diversity that an empirical selector could exploit; it does not show clean domain specialization or validate the current semantic router. A post-hoc evaluator sensitivity audit changed nine rubric scores but preserved that broad conclusion. Truncation fell to 21/108 generations, and technical repetitions were score-identical within every cell.
+
+See the [diagnostic report](results/real/expert_quality/latest/report.md), [evaluator sensitivity audit](results/real/expert_quality/latest/evaluator_sensitivity_audit.md), and [raw generations](results/real/expert_quality/latest/raw_generations.jsonl).
+
+## Dense-Capacity Feasibility
+
+Two preregistered experiments tested prompt-conditioned capacity inside single dense Qwen models, without adapters. Discovery masks were learned only from 48 discovery questions and evaluated through paired correct-answer NLL damage on 32 held-out questions. Every intervention logically zeroed the same approximately 5% MLP capacity; no parameters were unloaded and no physical-memory reduction was measured.
+
+| Model | Full accuracy | Stable gradient domains | Same-domain damage | Same - random | Same - wrong | Frozen result |
+|---|---:|---:|---:|---:|---:|---|
+| Qwen2.5-1.5B | 65.6% | 0/4 | -0.6041 [-1.1517, -0.0668] | -0.3561 [-0.7998, 0.0528] | -0.3579 [-0.8056, 0.0203] | C |
+| Qwen2.5-3B | 78.1% | 1/4 | 1.3016 [-0.0077, 2.9763] | 0.7227 [-0.3634, 2.0460] | 0.9913 [-0.0164, 2.1970] | C |
+
+The 3B replication produced larger point estimates, including a paired 3B-minus-1.5B same-domain-damage change of **1.9057 [0.4973, 3.6474]**, but it did not rescue the hypothesis: discovery stability stayed below the 3/4-domain requirement and the primary matched-control intervals crossed zero. The classification transition is **C -> C**.
+
+![Qwen2.5-3B held-out causal controls](results/real/causal_scale_qwen3b/latest/plots/causal_comparison_block64.png)
+
+Read the [1.5B report](results/real/causal_importance/latest/report.md), [3B report](results/real/causal_scale_qwen3b/latest/report.md), and [paired scale comparison](results/real/causal_scale_qwen3b/latest/scale_comparison.json). These are logical masking studies, not parameter paging.
 
 ## Deterministic Control Evidence
 
@@ -105,6 +127,8 @@ These numbers demonstrate that the implemented router, planner, cache, metrics, 
 - CUDA -> MPS -> CPU detection, with no CUDA assumption in the default path.
 - Reproducible benchmark directories containing versioned configuration, environment, raw JSONL, summaries, CSV, report, routing decisions, failures, and evidence plots.
 - Compatibility guards using hashes of benchmark content, registry content, routing configuration, model/adapter identity, seed policy, device class, and measurement semantics.
+- Discovery-only activation and `gradient * activation` rankings with held-out, structurally matched logical-ablation controls for dense Qwen models.
+- Immutable positive, null, negative, and contradictory evidence artifacts with case-level bootstrap intervals and clean-source provenance.
 
 ## What this is not
 
@@ -112,6 +136,7 @@ These numbers demonstrate that the implemented router, planner, cache, metrics, 
 - It is not a newly trained Mixture-of-Experts architecture.
 - v0.1.x is adapter/expert routing as a testable proxy for a broader capacity-routing hypothesis.
 - It does not show that dense-model knowledge can be separated into clean semantic parameter blocks.
+- The included 1.5B and 3B dense experiments specifically failed their frozen stable-causal-specialization gates.
 - It does not bundle model weights or make claims across incompatible backends.
 
 ## Quickstart
@@ -119,8 +144,6 @@ These numbers demonstrate that the implemented router, planner, cache, metrics, 
 Python 3.11 or newer is required.
 
 ```bash
-git clone https://github.com/selectivellm/selectivellm.git
-cd selectivellm
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -244,15 +267,15 @@ Read the full [benchmark methodology](docs/benchmarking.md) before comparing run
 
 **RQ4:** Can caching recover most of that latency on realistic mixed-domain workloads?
 
-**RQ5 (future research):** Does task specialization eventually permit useful parameter-level paging inside dense transformers?
+**RQ5:** Is prompt-dependent dense-model capacity stable and causally useful enough to justify a later paging prototype?
 
 ## Limitations and falsification
 
-The current analyzer is a transparent deterministic feature-hash/keyword hybrid, not a learned semantic encoder. The real workload is small and authored, policies were not counterbalanced, and 45.8% of warm responses reached the fixed 96-token cap. The real run validates adapter residency and cache mechanics, but random tied oracle quality and RLC composition degraded output, so the central quality-preservation hypothesis remains unproven.
+The current analyzer is a transparent deterministic feature-hash/keyword hybrid, not a learned semantic encoder. The original real workload was small and authored, policies were not counterbalanced, and 45.8% of warm responses reached its fixed 96-token cap. The later 384-token expert diagnostic reduced but did not eliminate truncation and found diversity without robust label alignment. The dense experiments used only 32 held-out questions per model and showed highly skewed effects with weak discovery stability. The central quality-preservation and dense-capacity-localization hypotheses therefore remain unproven.
 
 A strong falsification test uses a pre-registered held-out workload, a real shared base and validated adapters, repeated workload orders, and equal decoding settings. The hypothesis is weakened or falsified for that setup if semantic routing does not beat keyword/random routing, does not retain quality relative to oracle/all-resident, or incurs enough transfer latency that no useful quality-memory-latency point remains.
 
-Parameter-level semantic paging becomes credible only after causal importance masks are stable across held-out tasks and paraphrases, beat random/pruning baselines, compose across domains, map to hardware-efficient blocks, and produce measured physical memory or compute savings after routing and transfer overhead.
+Parameter-level semantic paging becomes credible only after causal importance masks are stable across held-out tasks and paraphrases, beat random/pruning baselines, compose across domains, map to hardware-efficient blocks, and produce measured physical memory or compute savings after routing and transfer overhead. The current 1.5B and 3B results do not pass that gate.
 
 ## Documentation
 
@@ -264,8 +287,12 @@ Parameter-level semantic paging becomes credible only after causal importance ma
 - [Semantic parameter paging research agenda](docs/research/semantic_parameter_paging.md)
 - [Living technical report](docs/paper.md)
 - [v0.1.1 real-model evidence](docs/real_model_evidence.md)
+- [Expert-pool diagnostic](results/real/expert_quality/latest/report.md)
+- [Dense 1.5B causal report](results/real/causal_importance/latest/report.md)
+- [Dense 3B scale-replication report](results/real/causal_scale_qwen3b/latest/report.md)
 - [Hostile review and falsification criteria](docs/hostile_review.md)
 - [Roadmap](docs/roadmap.md)
+- [Public release audit](docs/public_release.md)
 - [v0.1.0 release notes](docs/releases/v0.1.0.md)
 - [v0.1.1 release notes](docs/releases/v0.1.1.md)
 
@@ -276,7 +303,7 @@ pip install -e ".[dev]"
 ruff format --check .
 ruff check .
 mypy selectivellm
-pytest --cov=selectivellm --cov-report=term-missing
+pytest --cov=selectivellm --cov-report=term-missing --cov-fail-under=70
 python -m build
 ```
 
@@ -284,7 +311,7 @@ Tests are network-free and do not download models. Optional real-backend integra
 
 ## Roadmap
 
-The next evidence milestone is a pre-registered held-out validation of adapter specialization with a generation budget that avoids systematic truncation, followed by interference-aware composition. Learned routing, activation tracing, causal importance masks, and hardware-aligned parameter paging remain later evidence gates. See the [evidence-gated roadmap](docs/roadmap.md).
+The next dense-capacity study must change a controlled variable other than nearby Qwen scale, such as model family or substantially larger scale on suitable hardware, and must be preregistered before inspecting outcomes. The LoRA line remains paused at evidence of exploitable diversity without robust semantic alignment. Hardware-aligned parameter paging is not justified by the current results. See the [evidence-gated roadmap](docs/roadmap.md).
 
 ## Citation
 

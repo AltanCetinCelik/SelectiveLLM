@@ -6,7 +6,7 @@ SelectiveLLM studies whether model capacity can be treated as a dynamically retr
 
 The primary hypothesis is that many requests do not require every independently available specialization to be resident or active simultaneously. The secondary hypothesis is that, when capability has been decomposed into sufficiently independent reusable components, a router can select a useful subset under a memory constraint.
 
-The major open problem is that knowledge and reasoning in dense transformers are highly distributed. Semantic concepts may not map cleanly to contiguous weights, neurons, heads, channels, or layers. SelectiveLLM v0.1 therefore uses adapters and expert modules as an experimentally tractable proxy. It does not claim that arbitrary dense checkpoints can be split by domain.
+The major open problem is that knowledge and reasoning in dense transformers are highly distributed. Semantic concepts may not map cleanly to contiguous weights, neurons, heads, channels, or layers. SelectiveLLM v0.1 therefore uses adapters and expert modules as an experimentally tractable proxy. Follow-up logical-masking studies tested dense internal components directly but failed their frozen stable-causal-specialization gates. The project does not claim that arbitrary dense checkpoints can be split by domain.
 
 ## Retrieval over model capacity
 
@@ -21,7 +21,8 @@ This description is conceptual. The retrieved object in v0.1 is registry-defined
 | Established technique | Demonstrated in prior work | LoRA, MoE routing, CPU/GPU offload |
 | Implemented experiment | Executable and measured here | Multi-label routing and declared-capacity LRU caching |
 | Hypothesis | Falsifiable but not yet established | Semantic routing can retain real-model quality under a tighter resident-memory budget |
-| Future research | Requires new evidence and engineering | Prompt-conditioned paging of parameter blocks inside a dense transformer |
+| Feasibility experiment | Real dense model, logical masking only | Qwen2.5-1.5B and 3B causal studies; both Outcome C |
+| Future research | Requires positive causal evidence and new systems engineering | Physical prompt-conditioned paging of parameter blocks inside a dense transformer |
 
 ## What v0.1 measures
 

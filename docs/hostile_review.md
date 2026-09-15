@@ -1,6 +1,8 @@
-# Hostile review of v0.1.1
+# Hostile review of current evidence
 
 This review leads with the completed real-model run in `results/real/latest`. Its compatibility fingerprint is `a24ac14e5122d5681ddf091602c57777897c6a637d578ce6407dc8031fe51b03`. The deterministic-control run remains separate in `results/latest` and is never used as physical-memory or model-quality evidence.
+
+Subsequent immutable evidence adds a 108-generation expert-pool diagnostic, a dense Qwen2.5-1.5B causal experiment, and a strict Qwen2.5-3B scale replication. The expert pool has measurable empirical response diversity but weak semantic alignment. Both dense studies are Outcome C. None of the dense results measures memory reduction.
 
 ## Is this merely adapter routing?
 
@@ -31,6 +33,12 @@ Oracle specialization improved binary search, MOSFET, RC filter, and proof respo
 
 The fixed 96-token cap reached 45.8% of warm responses and often truncated the dice answer before its exact fraction. The score remains reproducible under the registered contract, but a longer-decoding replication is required before judging adapter specialization cleanly.
 
+That replication has now been performed as a focused diagnostic with 384-token outputs. Empirical oracle reached 0.748 [0.543, 0.933] versus 0.406 [0.156, 0.672] base, but label oracle and the frozen semantic router reached only 0.443. The pool contains exploitable diversity; the current semantic labels do not reliably identify it. A sensitivity evaluator preserved this broad conclusion.
+
+## Does the dense model contain routable domain capacity?
+
+Not under the tested protocols. The 1.5B objective-aware experiment was stable in 0/4 domains and the 3B replication in 1/4. The 3B primary same-domain damage was 1.3016 [-0.0077, 2.9763], same-minus-random was 0.7227 [-0.3634, 2.0460], and same-minus-wrong was 0.9913 [-0.0164, 2.1970]. Larger point estimates did not meet the frozen stability or confidence requirements. Both models classify C.
+
 ## What happens when prompts require multiple experts?
 
 The analyzer and router preserve multiple labels. Semantic routing selected code plus science for the RLC prompt and missed math under the configured two-expert limit. PEFT direct list activation was unsupported, so the backend constructed a weighted-linear derived adapter from compatible source adapters.
@@ -59,6 +67,8 @@ Cache size 3 reached 100% warm hits and zero warm loads, but it retained all sou
 - Cache and latency: request hits/misses, loads, evictions, stage timings, synchronization, first token, generation, and throughput in raw results and `summary.json`.
 - Multi-domain behavior: 18 preserved observations in `rlc_matrix.jsonl`.
 - Negative evidence: misroutes, unnecessary activation, no-improvement cases, oracle regressions, random wins, low confidence, and token-cap diagnostics in `failure_analysis.md`.
+- Expert-pool diversity: the 108-generation matrix, case-bootstrap intervals, evaluator sensitivity audit, and label mismatches in `results/real/expert_quality/latest`.
+- Dense causality: discovery rankings, fixed masks, paired NLL effects, matched controls, bootstrap intervals, signed diagnostics, and failure cases in `results/real/causal_importance/latest` and `results/real/causal_scale_qwen3b/latest`.
 
 ## What experiment would falsify the central hypothesis?
 
@@ -77,6 +87,8 @@ The hypothesis is falsified for that adapter family and workload if semantic rou
 
 Until those gates pass, parameter paging is a research agenda.
 
+The current dense experiments explicitly tested the first causal/stability gate and failed it twice. Physical paging is therefore not the next justified implementation step.
+
 ## Review fixes incorporated
 
 - Registry and metric-schema content now participate in the real-run fingerprint, and the exact benchmark/registry inputs are archived.
@@ -84,4 +96,6 @@ Until those gates pass, parameter paging is a research agenda.
 - Failure analysis now records low-confidence and token-cap diagnostics, candidate scores, evaluator details, and completed-but-degraded RLC composition.
 - Completed run directories no longer publish redundant partial checkpoints.
 - README and release documentation state the negative quality result before future-looking claims.
-- The recommended next step changed from finer-grained routing to expert-quality validation and composition diagnosis.
+- The expert-quality diagnostic and evaluator sensitivity audit were completed without altering the frozen result.
+- Dense logical-masking evidence was added for Qwen2.5-1.5B and 3B; both Outcome C results remain explicit.
+- The recommended next step excludes nearby Qwen scale escalation and physical paging under the current evidence.

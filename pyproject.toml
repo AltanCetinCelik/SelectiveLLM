@@ -52,11 +52,6 @@ dev = [
 [project.scripts]
 selectivellm = "selectivellm.cli:app"
 
-[project.urls]
-Homepage = "https://github.com/selectivellm/selectivellm"
-Documentation = "https://github.com/selectivellm/selectivellm/tree/main/docs"
-Issues = "https://github.com/selectivellm/selectivellm/issues"
-
 [tool.hatch.build.targets.wheel]
 packages = ["selectivellm"]
 
@@ -90,7 +85,21 @@ markers = ["hf: optional tests requiring user-supplied Hugging Face assets"]
 [tool.coverage.run]
 source = ["selectivellm"]
 branch = true
+# Model-backed experiment orchestration and report paths are exercised by
+# optional real runs whose manifests preserve their invariant checks. The
+# default CI suite measures the portable, network-free core.
 omit = [
   "selectivellm/backends/transformers.py",
+  "selectivellm/causal_importance/gradient.py",
+  "selectivellm/causal_importance/report.py",
+  "selectivellm/causal_importance/runner.py",
+  "selectivellm/dense_capacity/interventions.py",
+  "selectivellm/dense_capacity/report.py",
+  "selectivellm/dense_capacity/runner.py",
+  "selectivellm/dense_capacity/scoring.py",
+  "selectivellm/dense_capacity/tracing.py",
+  "selectivellm/real_validation/assets.py",
+  "selectivellm/real_validation/expert_quality_runner.py",
+  "selectivellm/real_validation/report.py",
   "selectivellm/real_validation/runner.py",
 ]
