@@ -1,0 +1,162 @@
+{
+  "adapter_set": [],
+  "artifact_sha256": {
+    "benchmark.yaml": "2404e2f96f32d0e8d58fb992b144c4bfc762e085705ac678763336a1912f261c",
+    "causal_analysis.json": "4749df3c0640a15f46048e20f3dfea596833db091456cbbc44c85d6ab4160435",
+    "causal_progress.json": "cb97e37b05793766b1211ddf07d2ead9598eaacfde1ee43fea74d0e33d2881c0",
+    "causal_scores.jsonl": "d0b9f6cc2decaf611e7e1f796ae1096146995194a914a4dd213123b49acb44d5",
+    "config.yaml": "d213c779941da61837aa0066c0d4ab98eab19296a42441a3c5f5efe690edb342",
+    "discovery_channel_summaries.npz": "ea9eed95b0562afb9748af47f8bd8634344173359173cc889dbfcf18c9a45668",
+    "discovery_gradient_metadata.jsonl": "4c4bf2ca873b66df0e6cc43a9a41d968ea52737788cd89a7f79fa9d41bbb5dd2",
+    "discovery_progress.json": "bf32405453f241f32d3a2f33476d501094e1d343a90f37e85a2d2027aabdda37",
+    "environment.json": "6882c1f80b7a07aabab2bc9d3d1c9123b3e0152af6f6d7b1f4cb38a9fd1ff3d6",
+    "failure_analysis.md": "c388f5574babcad2b72dd43d8c4bfb9040ce24717114cef87f03d5d44d8fdfcd",
+    "full_model_scores.jsonl": "7f50e85871bbb882b501bc54eddfd22d5fdb1428082b0f57ce048173a3ef120c",
+    "gradient_preflight.json": "cfc7fb855ce0046b070851f7bee027f3a2f1f1dd24a20c4a5e48f137dae0de36",
+    "heldout_gradient_metadata.jsonl": "380b05c65e36b52678de2cdb2024019b519fee2b86a6dcb17d764eb812fd3cc0",
+    "heldout_signed_channel_summaries.npz": "4c0951515a786bfe3916cd31604a3df3c6883b51ef29da00595e71b563d8c8fa",
+    "immutable_input_validation.json": "349af3884e9db4ac6a837a1a8ea890b629995b7517b71077f9940af78b751e59",
+    "mapping_block128.json": "5839cee3986425634f1dee4de87f9377ad7175685a2983c7ed8d6397206c1f95",
+    "mapping_block64.json": "a36c79ff39b80d907b65abcae2b384caa7f221867c021f63c2331641e2543653",
+    "masks.jsonl": "2630372ae22fa70dc2724ed850d03bfafd80af072fee7cbcf9ba8e25057377a7",
+    "normalized_blocks_128.npz": "49febe5ef00c9ce13318eb40ba9abb02ef084459a98c0de7b9b8f4feaac6b7e3",
+    "normalized_blocks_64.npz": "55ea50c98ddf1dc8851bbcc585b94b65d9c24f18365564878af1a6f05dfc66c6",
+    "numerical_stability.json": "184be69b1e89870c714ca06bfca3024748e117ac8397d4874c06715802e9a528",
+    "paired_causal_effects.jsonl": "57992b245801924533262ccf03eae18fefacafce946c981d69bac6117ecae1c2",
+    "plots/causal_comparison_block128.png": "40593595433f8b9e1168da51f7d7cae2037279358230c57819393812c1677582",
+    "plots/causal_comparison_block64.png": "e5bcc281855b8d80e725f5c605e03d12ce54af6cc70550d9896ab54e35a2b216",
+    "plots/stability_block128.png": "684035423d106749b22e62dd86b78bcd9a65fd8134923f3abe06a74dcd8a397e",
+    "plots/stability_block64.png": "3f2e9ba0d878c6262de3dc91f76a7b72f5388db8fc4938524589cd3cf1cba0ad",
+    "rankings_128.npz": "729add0ab7f9297ef35ae7f9be05e5cf3ae1b9a14cb054321d72c2015a612216",
+    "rankings_64.npz": "92e837cb189b8ec2a2f1fbf9a90a2a1fefa1581e7f1ab4473977ba0ffff42777",
+    "raw_blocks_128.npz": "2676ddf34e9388360654cfa31e37cbf6918a76add7b3e84b69d9ccd177a3baed",
+    "raw_blocks_64.npz": "d62fb3089cd0d0d5516c4fa08ca77180b5245d003dee882539a080011587fe41",
+    "report.md": "51f83cf41d3a6be79059dccad99417e4fafaf8973f1dba41d3c02943dde44c5e",
+    "scale_comparison.json": "48714b97371b6bed5fe8dbfdf0ca34833574b6a93ca648cf397b2706b9ee9b87",
+    "signed_analysis.json": "2673065edccae9901e4480f03f84bb1f68a4b63439f3471a7d13c20b801d34b5",
+    "signed_diagnostics.jsonl": "21ae64a06a159e85983bd6be1b03314caed12c14f6254e2c6ef2922176ef176c",
+    "signed_progress.json": "0a4ee43e01612af69da55819c0aacf31d558612be727b7f9752c864157d16e44",
+    "split_assignments.json": "ba20164046700a31c749d8836d7011b19d3913c504b7b7b145460fed46dc8b4a",
+    "stability.json": "8229c7b40908b10412ca072981a39450b75b098446fa56aab7a55b49b693c6e7",
+    "tokenizer_validation.json": "6a8465600e6a45b152ddc716ccdc9b16617d1e6e44c372e2892a7194c85cc25c",
+    "validity.json": "a9d55abf35b98b09d257c43390b3a8bc48d7306c66356ddf870cc25f8ddbc409"
+  },
+  "backend": "transformers_dense_real",
+  "backend_kind": "real",
+  "benchmark_fingerprint": "fa813bb82317eb1a17a0fddcb6714a7db3f5f2dcd8c3c07acf9b1967673c987d",
+  "benchmark_hash": "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0",
+  "benchmark_version": "dense-capacity-mcq-1.0.0",
+  "block_sizes": {
+    "128": "corroborative",
+    "64": "primary"
+  },
+  "canonical_latest_eligible": true,
+  "completed": true,
+  "completed_at": "2026-09-15T11:05:40.688584+00:00",
+  "created_at": "2026-09-15T10:37:33.215973+00:00",
+  "dirty": false,
+  "discovery_schema_version": "mlp-block-discovery-1.0.0",
+  "experiment_version": "causal-importance-scale-qwen3b-1.0.0",
+  "final_memory": {
+    "mps_current_allocated_mb": 5900.46142578125,
+    "mps_driver_allocated_mb": 8201.703125
+  },
+  "git_commit": "43efe65c34cc54d89fb6089a6a08b14923b644f6",
+  "git_status_porcelain": "",
+  "logical_masking_only": true,
+  "mapping_hashes": {
+    "128": "1410cf061ced863bf3e511702c6562e1b207cdf58f60b23633210d758cf245b1",
+    "64": "b2de56331b0d03b197aafa7917f19404999ab73f0ca2f21d0ec0a02b6f03d577"
+  },
+  "mapping_schema_version": "mlp-contiguous-block-map-1.0.0",
+  "measured_vram_reduction": false,
+  "measurement_semantics": {
+    "causal": "logical zeroing at MLP down_proj input",
+    "memory": "real unified-memory allocation; no parameters unloaded",
+    "normalized_signed_attribution": "token-mean signed attribution",
+    "predicted_taylor_damage": "token-summed signed first-order estimate",
+    "scoring_execution": "frozen parameters; detached input embeddings; gradient-enabled forward; no backward outside discovery and held-out signed diagnostics"
+  },
+  "metric_schema_version": "dense-block-causal-nll-1.0.0",
+  "model_identity": "Qwen/Qwen2.5-3B-Instruct",
+  "model_revision": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
+  "model_runtime": {
+    "adapter_wrapper_detected": false,
+    "attention_implementation": "sdpa",
+    "class": "transformers.models.qwen2.modeling_qwen2.Qwen2ForCausalLM",
+    "device": "mps:0",
+    "dtype": "torch.float16",
+    "hidden_size": 2048,
+    "intermediate_size": 11008,
+    "kv_heads": 2,
+    "layers": 36,
+    "memory_after_load": {
+      "mps_current_allocated_mb": 5900.46142578125,
+      "mps_driver_allocated_mb": 6864.453125
+    },
+    "parameters_frozen": true,
+    "query_heads": 16,
+    "use_cache": false
+  },
+  "packages": {
+    "accelerate": "1.14.0",
+    "numpy": "2.2.6",
+    "safetensors": "0.8.0",
+    "torch": "2.14.0",
+    "transformers": "5.16.1"
+  },
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "primary_decision": {
+    "a_checks": {
+      "gradient_minus_activation_ci_positive": false,
+      "gradient_minus_activation_threshold": true,
+      "gradient_stable_at_least_three_domains": false,
+      "improved_stability": false,
+      "same_damage_at_least_0_10": true,
+      "same_exceeds_all_controls_in_three_domains": true,
+      "same_minus_global_high_ci_positive": false,
+      "same_minus_global_high_positive": true,
+      "same_minus_random_ci_positive": false,
+      "same_minus_random_threshold": true,
+      "same_minus_wrong_ci_positive": false,
+      "same_minus_wrong_threshold": true,
+      "validity_passed": true
+    },
+    "b_checks": {
+      "gradient_stable_at_least_three_domains": false,
+      "outcome_a_failed": true,
+      "same_damage_at_least_0_10": true,
+      "same_minus_random_ci_positive": false,
+      "same_minus_random_threshold": true,
+      "shared_core_indicator": false,
+      "validity_passed": true
+    },
+    "classification": "C",
+    "label": "still_weak_or_unstable",
+    "qualifier": null
+  },
+  "publishable": true,
+  "quota_pattern_hashes": {
+    "128": "7603f71b900d0aa6c87cffd6c8a8983de594decab5d64ffb64fba2dd8d28dcd6",
+    "64": "ec952966379177a8f619fc59c4d814856720d08e3f206b94211da396efd06325"
+  },
+  "run_id": "20260915T103733Z",
+  "source_dirty": false,
+  "status": "completed",
+  "tokenizer_validation": {
+    "case_count": 80,
+    "distinct_option_token_ids": true,
+    "option_token_ids": {
+      "A": 32,
+      "B": 33,
+      "C": 34,
+      "D": 35
+    },
+    "prefix_retokenization_observed": false,
+    "prompt_template_sha256": "91c4e5516b3957c4817b9095c2643dfd21d2c25b1c05d9da6746aa83e149ff74",
+    "rendered_prompts_sha256": "b7075a568e99ebc506e1f847ad9cfb8814fede720744f90a8769101be29affac",
+    "rendered_suffix_count": 1,
+    "single_token_at_scored_position": true,
+    "status": "valid"
+  }
+}

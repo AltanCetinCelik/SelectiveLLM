@@ -1,0 +1,18 @@
+{
+  "adapter_wrapper_detected": false,
+  "attention_implementation": "sdpa",
+  "class": "transformers.models.qwen2.modeling_qwen2.Qwen2ForCausalLM",
+  "device": "mps:0",
+  "dtype": "torch.float16",
+  "hidden_size": 2048,
+  "intermediate_size": 11008,
+  "kv_heads": 2,
+  "layers": 36,
+  "memory_after_load": {
+    "mps_current_allocated_mb": 5900.46142578125,
+    "mps_driver_allocated_mb": 6864.453125
+  },
+  "parameters_frozen": true,
+  "query_heads": 16,
+  "use_cache": false
+}

@@ -1,0 +1,34 @@
+experiment_version: causal-importance-scale-qwen3b-1.0.0
+discovery_schema_version: mlp-block-discovery-1.0.0
+mapping_schema_version: mlp-contiguous-block-map-1.0.0
+metric_schema_version: dense-block-causal-nll-1.0.0
+scoring_execution: detached_inputs_embeds_gradient_enabled
+results_root: results/real/causal_scale_qwen3b
+model:
+  repo_id: Qwen/Qwen2.5-3B-Instruct
+  revision: aa8e72537993ba99e69dfaafa59ed015b17504d1
+  dtype: float16
+  device: mps
+  use_cache: false
+  adapters: forbidden
+  architecture:
+    layers: 36
+    intermediate_size: 11008
+    hidden_size: 2048
+    query_heads: 16
+    kv_heads: 2
+benchmark:
+  path: selectivellm/resources/dense_capacity_mcq_v1.yaml
+  version: dense-capacity-mcq-1.0.0
+mappings:
+  64: selectivellm/resources/causal_scale_qwen3b_block64_v1.json
+  128: selectivellm/resources/causal_scale_qwen3b_block128_v1.json
+immutable_prior:
+  path: results/real/causal_importance/latest
+  classification: C
+statistics:
+  experimental_unit: held_out_question
+  bootstrap_repetitions: 10000
+  bootstrap_seed: 42
+  pooled_bootstrap: stratified_by_domain
+random_control_seeds: [42, 43, 44, 45, 46]

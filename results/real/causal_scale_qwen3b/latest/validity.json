@@ -1,0 +1,28 @@
+{
+  "causal_rows": 1152,
+  "checks": {
+    "all_probability_sums_valid": true,
+    "all_values_finite": true,
+    "answer_positions_balanced": true,
+    "complete_causal_matrix": true,
+    "complete_full_matrix": true,
+    "complete_signed_matrix": true,
+    "full_model_accuracy_at_least_50_percent": true,
+    "gradient_preflight_passed": true,
+    "mapping_and_mask_structure_valid": true,
+    "noop_equivalent": true,
+    "repeated_scoring_stable": true,
+    "signed_diagnostics_excluded_from_masks": true
+  },
+  "correct_answer_position_counts": {
+    "A": 8,
+    "B": 8,
+    "C": 8,
+    "D": 8
+  },
+  "full_model_accuracy": 0.78125,
+  "noop_max_nll_difference": 0.0,
+  "noop_rows": 64,
+  "passed": true,
+  "signed_rows": 1088
+}

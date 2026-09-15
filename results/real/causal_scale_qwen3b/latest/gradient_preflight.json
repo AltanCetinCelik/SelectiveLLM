@@ -1,0 +1,51 @@
+{
+  "activation_gradient_shapes_identical": true,
+  "all_finite": true,
+  "block_aggregate_shapes": {
+    "128": {
+      "activation": [
+        36,
+        86
+      ],
+      "gradient_absolute": [
+        36,
+        86
+      ],
+      "gradient_signed_mean": [
+        36,
+        86
+      ],
+      "gradient_signed_sum": [
+        36,
+        86
+      ]
+    },
+    "64": {
+      "activation": [
+        36,
+        172
+      ],
+      "gradient_absolute": [
+        36,
+        172
+      ],
+      "gradient_signed_mean": [
+        36,
+        172
+      ],
+      "gradient_signed_sum": [
+        36,
+        172
+      ]
+    }
+  },
+  "captured_layer_count": 36,
+  "case_id": "dense_code_discovery_01",
+  "channel_dimension": 11008,
+  "correct_nll_difference": 0.0,
+  "max_option_logit_difference": 0.0,
+  "passed": true,
+  "prediction_identical": true,
+  "scientific_values_inspected": false,
+  "tolerance": 0.0001
+}

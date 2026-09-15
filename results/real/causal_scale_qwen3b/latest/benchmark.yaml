@@ -1,0 +1,736 @@
+schema_version: "1.0.0"
+benchmark_version: "dense-capacity-mcq-1.0.0"
+name: Dense Capacity Four-Domain Feasibility Benchmark
+description: Frozen discovery and held-out forced-choice questions for dense internal-capacity tracing and causal intervention.
+cases:
+  - id: dense_code_discovery_01
+    split: discovery
+    domain: code
+    question: What does `list(range(1, 7, 2))` evaluate to in Python?
+    options: {A: "[1, 3, 5]", B: "[1, 3, 5, 7]", C: "[2, 4, 6]", D: "[1, 2, 3, 4, 5, 6]"}
+    correct_label: A
+    rationale: Range starts at 1, advances by 2, and excludes the stop value 7, producing 1, 3, and 5.
+    template_family: py_range_exclusive_step
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_02
+    split: discovery
+    domain: code
+    question: 'A Python function is defined as `def add(x, items=[]): items.append(x); return items`. What does the second call return after calling `add(1)` and then `add(2)`?'
+    options: {A: "[2]", B: "[1, 2]", C: "[1]", D: "It raises TypeError"}
+    correct_label: B
+    rationale: The default list is created once and reused, so the second call observes both appended values.
+    template_family: py_mutable_default_state
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_03
+    split: discovery
+    domain: code
+    question: 'What value is returned by `{"a": 1}.get("b", 4)` in Python?'
+    options: {A: "None", B: "1", C: "4", D: "KeyError"}
+    correct_label: C
+    rationale: The key b is absent, so dict.get returns the supplied default value 4.
+    template_family: py_dict_get_default
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_04
+    split: discovery
+    domain: code
+    question: 'A Python function executes `try: return 1` followed by `finally: return 2`. What does the function return?'
+    options: {A: "1", B: "The tuple (1, 2)", C: "It raises RuntimeError", D: "2"}
+    correct_label: D
+    rationale: A return executed in finally overrides the pending return from the try block.
+    template_family: py_finally_return_override
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_05
+    split: discovery
+    domain: code
+    question: What is the result of `sorted(["10", "2", "1"])` using Python's default ordering?
+    options: {A: "['1', '10', '2']", B: "['1', '2', '10']", C: "['10', '1', '2']", D: "A TypeError"}
+    correct_label: A
+    rationale: Strings are sorted lexicographically, placing 1 before 10 before 2.
+    template_family: py_lexicographic_sort
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_06
+    split: discovery
+    domain: code
+    question: What is the average-case time complexity of checking membership in a Python set?
+    options: {A: "O(log n)", B: "O(1)", C: "O(n)", D: "O(n log n)"}
+    correct_label: B
+    rationale: Python sets use hash tables, giving average constant-time membership checks.
+    template_family: py_set_membership_complexity
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_07
+    split: discovery
+    domain: code
+    question: How many pairs are produced by `list(zip([1, 2, 3], ["a", "b"]))` in Python?
+    options: {A: "0", B: "1", C: "2", D: "3"}
+    correct_label: C
+    rationale: Zip stops when the shortest input is exhausted, so it produces two pairs.
+    template_family: py_zip_shortest_input
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_08
+    split: discovery
+    domain: code
+    question: What Boolean value does the Python expression `bool([]) or bool("0")` produce?
+    options: {A: "None", B: "0", C: "False", D: "True"}
+    correct_label: D
+    rationale: An empty list is false, but the nonempty string containing zero is true.
+    template_family: py_truthiness_or
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_09
+    split: discovery
+    domain: code
+    question: Which Python keyword allows an inner function to rebind a variable from its nearest enclosing function scope?
+    options: {A: "nonlocal", B: "global", C: "static", D: "mutable"}
+    correct_label: A
+    rationale: Nonlocal targets a binding in the nearest enclosing function scope rather than module scope.
+    template_family: py_nonlocal_scope
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_10
+    split: discovery
+    domain: code
+    question: In a Python context manager, what happens when `__exit__` returns `True` after an exception occurs inside the `with` block?
+    options: {A: "The process exits", B: "The exception is suppressed", C: "The block is retried", D: "The exception is always re-raised"}
+    correct_label: B
+    rationale: A truthy return from __exit__ tells the runtime that the exception was handled.
+    template_family: py_context_exception_suppression
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_11
+    split: discovery
+    domain: code
+    question: By default, how does a Python `@dataclass` determine equality between two instances of the same generated class?
+    options: {A: "Only by object identity", B: "By hashing their addresses", C: "By comparing declared field values in order", D: "Dataclasses cannot be compared"}
+    correct_label: C
+    rationale: The generated equality method compares the tuple of declared fields for instances of the same class.
+    template_family: py_dataclass_equality
+    correctness: {status: verified, method: manual}
+  - id: dense_code_discovery_12
+    split: discovery
+    domain: code
+    question: What is produced immediately when a Python `async def` function is called without awaiting it?
+    options: {A: "Its final return value", B: "A new operating-system thread", C: "None", D: "A coroutine object"}
+    correct_label: D
+    rationale: Calling an async function constructs a coroutine object; execution requires awaiting or scheduling it.
+    template_family: py_async_call_result
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_01
+    split: evaluation
+    domain: code
+    question: Given `values = [10, 20, 30, 40, 50]`, what does `values[-3:-1]` return in Python?
+    options: {A: "[30, 40]", B: "[20, 30]", C: "[30, 40, 50]", D: "[20, 30, 40]"}
+    correct_label: A
+    rationale: Index -3 identifies 30 and the exclusive stop at -1 omits the final element 50.
+    template_family: py_negative_slice_bounds
+    stability_sentinel: true
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_02
+    split: evaluation
+    domain: code
+    question: What is the first pair yielded by `enumerate(["x", "y"], start=1)`?
+    options: {A: "(0, 'x')", B: "(1, 'x')", C: "(1, 'y')", D: "('x', 1)"}
+    correct_label: B
+    rationale: The start argument makes the first index 1 while the first sequence value remains x.
+    template_family: py_enumerate_custom_start
+    stability_sentinel: true
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_03
+    split: evaluation
+    domain: code
+    question: After `g = (x * x for x in range(3))` and `sum(g)` have executed, what does `list(g)` return?
+    options: {A: "[0, 1, 4]", B: "[1, 4]", C: "[]", D: "It raises ValueError"}
+    correct_label: C
+    rationale: Sum exhausts the generator, so converting the same generator to a list afterward produces an empty list.
+    template_family: py_generator_exhaustion
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_04
+    split: evaluation
+    domain: code
+    question: What does `isinstance(True, int)` return in standard Python?
+    options: {A: "None", B: "It raises TypeError", C: "False", D: "True"}
+    correct_label: D
+    rationale: Bool is a subclass of int in Python, so True is an instance of int.
+    template_family: py_bool_integer_subclass
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_05
+    split: evaluation
+    domain: code
+    question: 'What dictionary results from `{x % 2: x for x in [1, 2, 3]}`?'
+    options: {A: "{1: 3, 0: 2}", B: "{1: 1, 0: 2}", C: "{0: 2, 1: [1, 3]}", D: "{1: 1, 0: 2, 1: 3}"}
+    correct_label: A
+    rationale: Duplicate key 1 is overwritten by the later value 3, while key 0 maps to 2.
+    template_family: py_comprehension_duplicate_key
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_06
+    split: evaluation
+    domain: code
+    question: On a POSIX system, what path string is represented by `Path("logs") / "today.txt"` from Python's pathlib module?
+    options: {A: "logstoday.txt", B: "logs/today.txt", C: "logs::today.txt", D: "today.txt/logs"}
+    correct_label: B
+    rationale: Path's division operator joins path components using the platform separator, which is a slash on POSIX.
+    template_family: py_pathlib_join_operator
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_07
+    split: evaluation
+    domain: code
+    question: What behavior does Python's `@property` decorator primarily provide?
+    options: {A: "Automatic class inheritance", B: "Memoization of every function call", C: "Method-controlled attribute access", D: "Conversion to a static method"}
+    correct_label: C
+    rationale: Property exposes getter, setter, and deleter methods through attribute-access syntax.
+    template_family: py_property_descriptor_access
+    correctness: {status: verified, method: manual}
+  - id: dense_code_eval_08
+    split: evaluation
+    domain: code
+    question: 'Inside a Python function declared as `def collect(*args): ...`, what type is `args`?'
+    options: {A: "list", B: "dictionary", C: "set", D: "tuple"}
+    correct_label: D
+    rationale: Positional arguments captured by *args are stored in a tuple.
+    template_family: py_variadic_args_container
+    correctness: {status: verified, method: manual}
+
+  - id: dense_math_discovery_01
+    split: discovery
+    domain: mathematics
+    question: Solve the equation `3x + 5 = 20` for x.
+    options: {A: "5", B: "3", C: "15", D: "25/3"}
+    correct_label: A
+    rationale: Subtracting 5 gives 3x = 15, and division by 3 gives x = 5.
+    template_family: math_linear_isolation
+    correctness: {status: verified, method: numeric_expression, expression: "(20 - 5) / 3", expected_numeric: 5}
+  - id: dense_math_discovery_02
+    split: discovery
+    domain: mathematics
+    question: What is the derivative of `x^3` evaluated at `x = 2`?
+    options: {A: "6", B: "12", C: "8", D: "4"}
+    correct_label: B
+    rationale: The derivative is 3x squared, which equals 12 at x = 2.
+    template_family: math_polynomial_derivative_value
+    correctness: {status: verified, method: numeric_expression, expression: "3 * 2**2", expected_numeric: 12}
+  - id: dense_math_discovery_03
+    split: discovery
+    domain: mathematics
+    question: Two fair coins are flipped. What is the probability of obtaining exactly one head?
+    options: {A: "1/4", B: "3/4", C: "1/2", D: "1/3"}
+    correct_label: C
+    rationale: HT and TH are two favorable outcomes among four equally likely outcomes, giving one half.
+    template_family: math_coin_exactly_one
+    correctness: {status: verified, method: numeric_expression, expression: "2 / 4", expected_numeric: 0.5}
+  - id: dense_math_discovery_04
+    split: discovery
+    domain: mathematics
+    question: What is the determinant of the matrix with rows `[2, 1]` and `[4, 3]`?
+    options: {A: "10", B: "-2", C: "5", D: "2"}
+    correct_label: D
+    rationale: The determinant is 2 times 3 minus 1 times 4, which equals 2.
+    template_family: math_two_by_two_determinant
+    correctness: {status: verified, method: numeric_expression, expression: "2 * 3 - 1 * 4", expected_numeric: 2}
+  - id: dense_math_discovery_05
+    split: discovery
+    domain: mathematics
+    question: What is the sum of the integers from 1 through 20 inclusive?
+    options: {A: "210", B: "200", C: "190", D: "220"}
+    correct_label: A
+    rationale: The arithmetic-series formula gives 20 times 21 divided by 2, which is 210.
+    template_family: math_finite_integer_sum
+    correctness: {status: verified, method: numeric_expression, expression: "20 * 21 / 2", expected_numeric: 210}
+  - id: dense_math_discovery_06
+    split: discovery
+    domain: mathematics
+    question: What is `log base 2 of 32`?
+    options: {A: "4", B: "5", C: "16", D: "6"}
+    correct_label: B
+    rationale: Two raised to the fifth power is 32, so the logarithm is 5.
+    template_family: math_integer_logarithm
+    correctness: {status: verified, method: numeric_expression, expression: "5", expected_numeric: 5}
+  - id: dense_math_discovery_07
+    split: discovery
+    domain: mathematics
+    question: Which pair gives all real solutions to `x^2 - 9 = 0`?
+    options: {A: "0 and 9", B: "3 only", C: "-3 and 3", D: "-9 and 9"}
+    correct_label: C
+    rationale: Factoring as `(x - 3)(x + 3)` gives roots 3 and -3.
+    template_family: math_difference_squares_roots
+    correctness: {status: verified, method: manual}
+  - id: dense_math_discovery_08
+    split: discovery
+    domain: mathematics
+    question: What is the arithmetic mean of 4, 7, 9, and 10?
+    options: {A: "6.5", B: "8", C: "7", D: "7.5"}
+    correct_label: D
+    rationale: The values sum to 30, and 30 divided by four is 7.5.
+    template_family: math_arithmetic_mean
+    correctness: {status: verified, method: numeric_expression, expression: "(4 + 7 + 9 + 10) / 4", expected_numeric: 7.5}
+  - id: dense_math_discovery_09
+    split: discovery
+    domain: mathematics
+    question: What is the definite integral of `2x` from 0 to 3?
+    options: {A: "9", B: "6", C: "3", D: "18"}
+    correct_label: A
+    rationale: An antiderivative is x squared, and evaluating from zero to three gives 9.
+    template_family: math_linear_definite_integral
+    correctness: {status: verified, method: numeric_expression, expression: "3**2 - 0**2", expected_numeric: 9}
+  - id: dense_math_discovery_10
+    split: discovery
+    domain: mathematics
+    question: What remainder is obtained when 17 is divided by 5?
+    options: {A: "1", B: "2", C: "3", D: "4"}
+    correct_label: B
+    rationale: Seventeen equals three times five plus two, so the remainder is 2.
+    template_family: math_integer_remainder
+    correctness: {status: verified, method: numeric_expression, expression: "17 - 3 * 5", expected_numeric: 2}
+  - id: dense_math_discovery_11
+    split: discovery
+    domain: mathematics
+    question: A right triangle has legs of length 6 and 8. What is the hypotenuse length?
+    options: {A: "12", B: "14", C: "10", D: "7"}
+    correct_label: C
+    rationale: The Pythagorean theorem gives the square root of 36 plus 64, which is 10.
+    template_family: math_pythagorean_triple
+    correctness: {status: verified, method: numeric_expression, expression: "(6**2 + 8**2)**0.5", expected_numeric: 10}
+  - id: dense_math_discovery_12
+    split: discovery
+    domain: mathematics
+    question: What is the sum of the first four terms `3, 6, 12, 24` of this geometric sequence?
+    options: {A: "36", B: "42", C: "48", D: "45"}
+    correct_label: D
+    rationale: Adding the four listed terms gives 3 + 6 + 12 + 24 = 45.
+    template_family: math_geometric_partial_sum
+    correctness: {status: verified, method: numeric_expression, expression: "3 + 6 + 12 + 24", expected_numeric: 45}
+  - id: dense_math_eval_01
+    split: evaluation
+    domain: mathematics
+    question: What is `3/4 + 1/8` expressed as a reduced fraction?
+    options: {A: "7/8", B: "4/12", C: "1/2", D: "5/8"}
+    correct_label: A
+    rationale: Three quarters is six eighths, and adding one eighth gives seven eighths.
+    template_family: math_fraction_addition
+    stability_sentinel: true
+    correctness: {status: verified, method: numeric_expression, expression: "3 / 4 + 1 / 8", expected_numeric: 0.875}
+  - id: dense_math_eval_02
+    split: evaluation
+    domain: mathematics
+    question: What is the derivative of `sin(x)` evaluated at `x = 0`?
+    options: {A: "0", B: "1", C: "-1", D: "Undefined"}
+    correct_label: B
+    rationale: The derivative of sine is cosine, and cosine of zero is one.
+    template_family: math_trigonometric_derivative
+    stability_sentinel: true
+    correctness: {status: verified, method: numeric_expression, expression: "1", expected_numeric: 1}
+  - id: dense_math_eval_03
+    split: evaluation
+    domain: mathematics
+    question: Two fair six-sided dice are rolled. What is the probability that their sum is 7?
+    options: {A: "1/12", B: "5/36", C: "1/6", D: "1/4"}
+    correct_label: C
+    rationale: Six ordered pairs sum to seven among 36 outcomes, so the probability is one sixth.
+    template_family: math_dice_target_sum
+    correctness: {status: verified, method: numeric_expression, expression: "6 / 36", expected_numeric: 0.16666666666666666}
+  - id: dense_math_eval_04
+    split: evaluation
+    domain: mathematics
+    question: How many unordered pairs can be selected from five distinct objects?
+    options: {A: "5", B: "20", C: "25", D: "10"}
+    correct_label: D
+    rationale: Five choose two equals 5 times 4 divided by 2, giving 10 pairs.
+    template_family: math_combination_pairs
+    correctness: {status: verified, method: numeric_expression, expression: "5 * 4 / 2", expected_numeric: 10}
+  - id: dense_math_eval_05
+    split: evaluation
+    domain: mathematics
+    question: What is the median of the ordered values 2, 4, 9, 11, and 15?
+    options: {A: "9", B: "8", C: "11", D: "7"}
+    correct_label: A
+    rationale: With five ordered values, the third value is the median, so it is 9.
+    template_family: math_odd_sample_median
+    correctness: {status: verified, method: numeric_expression, expression: "9", expected_numeric: 9}
+  - id: dense_math_eval_06
+    split: evaluation
+    domain: mathematics
+    question: Which value of x satisfies `2^x = 16`?
+    options: {A: "8", B: "4", C: "2", D: "16"}
+    correct_label: B
+    rationale: Two raised to the fourth power equals 16.
+    template_family: math_exponential_equation
+    correctness: {status: verified, method: numeric_expression, expression: "4", expected_numeric: 4}
+  - id: dense_math_eval_07
+    split: evaluation
+    domain: mathematics
+    question: What is the area of a circle with radius 3?
+    options: {A: "6 pi", B: "3 pi", C: "9 pi", D: "18 pi"}
+    correct_label: C
+    rationale: Circle area is pi times radius squared, so the area is 9 pi.
+    template_family: math_circle_area
+    correctness: {status: verified, method: numeric_expression, expression: "pi * 3**2", expected_numeric: 28.274333882308138}
+  - id: dense_math_eval_08
+    split: evaluation
+    domain: mathematics
+    question: The sequence begins 2, 6, 18 and multiplies by the same factor each step. What is the next term?
+    options: {A: "24", B: "36", C: "48", D: "54"}
+    correct_label: D
+    rationale: Each term is multiplied by three, so 18 times three is 54.
+    template_family: math_geometric_next_term
+    correctness: {status: verified, method: numeric_expression, expression: "18 * 3", expected_numeric: 54}
+
+  - id: dense_science_discovery_01
+    split: discovery
+    domain: science
+    question: Two resistors of 10 ohms and 15 ohms are connected in series. What is their equivalent resistance?
+    options: {A: "25 ohms", B: "6 ohms", C: "150 ohms", D: "5 ohms"}
+    correct_label: A
+    rationale: Series resistances add directly, so 10 plus 15 gives 25 ohms.
+    template_family: science_series_resistance
+    correctness: {status: verified, method: numeric_expression, expression: "10 + 15", expected_numeric: 25}
+  - id: dense_science_discovery_02
+    split: discovery
+    domain: science
+    question: How does an ideal capacitor behave in a DC circuit after steady state has been reached?
+    options: {A: "As a voltage source", B: "As an open circuit", C: "As a short circuit", D: "As a constant current source"}
+    correct_label: B
+    rationale: At DC steady state the capacitor voltage is constant, so its current is zero and it behaves as an open circuit.
+    template_family: science_capacitor_dc_steady_state
+    correctness: {status: verified, method: manual}
+  - id: dense_science_discovery_03
+    split: discovery
+    domain: science
+    question: A 12-volt source is applied across a 6-ohm resistor. What current flows through it?
+    options: {A: "0.5 amperes", B: "6 amperes", C: "2 amperes", D: "72 amperes"}
+    correct_label: C
+    rationale: Ohm's law gives current as voltage divided by resistance, which is 12 divided by 6 or 2 amperes.
+    template_family: science_ohms_law_current
+    correctness: {status: verified, method: numeric_expression, expression: "12 / 6", expected_numeric: 2}
+  - id: dense_science_discovery_04
+    split: discovery
+    domain: science
+    question: An ideal transformer has 120 turns on its primary and 12 turns on its secondary. What is the primary-to-secondary turns ratio?
+    options: {A: "1 to 10", B: "12 to 1", C: "100 to 1", D: "10 to 1"}
+    correct_label: D
+    rationale: Dividing 120 primary turns by 12 secondary turns gives a ratio of 10 to 1.
+    template_family: science_transformer_turns_ratio
+    correctness: {status: verified, method: numeric_expression, expression: "120 / 12", expected_numeric: 10}
+  - id: dense_science_discovery_05
+    split: discovery
+    domain: science
+    question: If two photons are compared, which photon has greater energy?
+    options: {A: "The photon with higher frequency", B: "The photon with lower frequency", C: "They always have equal energy", D: "The photon traveling more slowly in vacuum"}
+    correct_label: A
+    rationale: Photon energy equals Planck's constant times frequency, so higher frequency means greater energy.
+    template_family: science_photon_frequency_energy
+    correctness: {status: verified, method: manual}
+  - id: dense_science_discovery_06
+    split: discovery
+    domain: science
+    question: What expression gives the time constant of a resistor-capacitor circuit?
+    options: {A: "R divided by C", B: "R times C", C: "C divided by R", D: "1 divided by R times C"}
+    correct_label: B
+    rationale: The RC time constant is the product of resistance and capacitance.
+    template_family: science_rc_time_constant
+    correctness: {status: verified, method: manual}
+  - id: dense_science_discovery_07
+    split: discovery
+    domain: science
+    question: For an ideal operational amplifier with stable negative feedback, what relationship approximately holds between its two input voltages?
+    options: {A: "Their sum is the supply voltage", B: "The inverting input is always zero", C: "They are approximately equal", D: "They differ by the output voltage"}
+    correct_label: C
+    rationale: Very high open-loop gain under negative feedback drives the differential input voltage close to zero.
+    template_family: science_opamp_virtual_short
+    correctness: {status: verified, method: manual}
+  - id: dense_science_discovery_08
+    split: discovery
+    domain: science
+    question: What is the shape of the magnetic field lines around a long straight wire carrying current?
+    options: {A: "Parallel straight lines", B: "Radial lines pointing outward", C: "A uniform field", D: "Concentric circles around the wire"}
+    correct_label: D
+    rationale: The right-hand rule gives magnetic field lines that form concentric circles around the current-carrying wire.
+    template_family: science_wire_magnetic_geometry
+    correctness: {status: verified, method: manual}
+  - id: dense_science_discovery_09
+    split: discovery
+    domain: science
+    question: A device has 12 volts across it and draws 2 amperes. How much electrical power does it consume?
+    options: {A: "24 watts", B: "6 watts", C: "14 watts", D: "144 watts"}
+    correct_label: A
+    rationale: Electrical power is voltage times current, so 12 times 2 equals 24 watts.
+    template_family: science_electric_power
+    correctness: {status: verified, method: numeric_expression, expression: "12 * 2", expected_numeric: 24}
+  - id: dense_science_discovery_10
+    split: discovery
+    domain: science
+    question: Which physical quantity does an ideal inductor directly resist changing abruptly?
+    options: {A: "Resistance", B: "Current", C: "Capacitance", D: "Charge"}
+    correct_label: B
+    rationale: Inductor voltage is proportional to the rate of change of current, so current cannot jump instantaneously in an ideal inductor.
+    template_family: science_inductor_current_continuity
+    correctness: {status: verified, method: manual}
+  - id: dense_science_discovery_11
+    split: discovery
+    domain: science
+    question: A wave travels at speed v and has frequency f. Which expression gives its wavelength?
+    options: {A: "v times f", B: "f divided by v", C: "v divided by f", D: "1 divided by v times f"}
+    correct_label: C
+    rationale: The wave relation v = f times wavelength rearranges to wavelength = v divided by f.
+    template_family: science_wave_speed_relation
+    correctness: {status: verified, method: manual}
+  - id: dense_science_discovery_12
+    split: discovery
+    domain: science
+    question: Why does an enhancement-mode MOSFET gate ideally draw negligible steady DC current?
+    options: {A: "The source blocks all current", B: "The drain is reverse biased", C: "The channel has zero resistance", D: "The gate is insulated by an oxide"}
+    correct_label: D
+    rationale: The insulating gate oxide prevents steady conduction into the gate apart from leakage.
+    template_family: science_mosfet_gate_insulation
+    correctness: {status: verified, method: manual}
+  - id: dense_science_eval_01
+    split: evaluation
+    domain: science
+    question: A 6-ohm resistor and a 3-ohm resistor are connected in parallel. What is their equivalent resistance?
+    options: {A: "2 ohms", B: "9 ohms", C: "4.5 ohms", D: "1 ohm"}
+    correct_label: A
+    rationale: Parallel conductances add, giving one sixth plus one third equals one half, so the resistance is 2 ohms.
+    template_family: science_parallel_resistance
+    stability_sentinel: true
+    correctness: {status: verified, method: numeric_expression, expression: "1 / (1 / 6 + 1 / 3)", expected_numeric: 2}
+  - id: dense_science_eval_02
+    split: evaluation
+    domain: science
+    question: Approximately what is the cutoff frequency of an RC low-pass filter with R = 1000 ohms and C = 1 microfarad?
+    options: {A: "1000 hertz", B: "159 hertz", C: "6.28 hertz", D: "1 hertz"}
+    correct_label: B
+    rationale: One divided by 2 pi RC is approximately 159 hertz for the stated resistance and capacitance.
+    template_family: science_rc_cutoff_numeric
+    stability_sentinel: true
+    correctness: {status: verified, method: numeric_expression, expression: "1 / (2 * pi * 1000 * 0.000001)", expected_numeric: 159.15494309189535}
+  - id: dense_science_eval_03
+    split: evaluation
+    domain: science
+    question: What does Kirchhoff's current law state for currents meeting at an electrical node?
+    options: {A: "All branch voltages are equal", B: "Node resistance is always zero", C: "The algebraic sum of currents is zero", D: "Power entering the node is constant"}
+    correct_label: C
+    rationale: Conservation of charge requires total current entering a node to equal total current leaving it.
+    template_family: science_kirchhoff_current_node
+    correctness: {status: verified, method: manual}
+  - id: dense_science_eval_04
+    split: evaluation
+    domain: science
+    question: What qualitative response does an underdamped second-order RLC circuit show after a transient excitation?
+    options: {A: "An instantaneous step with no transient", B: "A monotonic rise with no overshoot", C: "A permanently growing exponential", D: "Decaying oscillation"}
+    correct_label: D
+    rationale: Complex conjugate poles with negative real parts produce oscillation whose envelope decays over time.
+    template_family: science_rlc_underdamped_response
+    correctness: {status: verified, method: manual}
+  - id: dense_science_eval_05
+    split: evaluation
+    domain: science
+    question: What is the primary purpose of a series resistor connected to a light-emitting diode from a fixed voltage source?
+    options: {A: "Limit the diode current", B: "Increase the source voltage", C: "Reverse the diode polarity", D: "Store magnetic energy"}
+    correct_label: A
+    rationale: The resistor drops excess voltage and limits current to a safe value for the LED.
+    template_family: science_led_current_limit
+    correctness: {status: verified, method: manual}
+  - id: dense_science_eval_06
+    split: evaluation
+    domain: science
+    question: How is the RMS voltage of an ideal sine wave related to its peak voltage?
+    options: {A: "Peak voltage times 2", B: "Peak voltage divided by square root of 2", C: "Peak voltage squared", D: "Peak voltage divided by pi"}
+    correct_label: B
+    rationale: Integrating the squared sine over a cycle gives an RMS value equal to peak divided by square root of two.
+    template_family: science_sine_rms_relation
+    correctness: {status: verified, method: manual}
+  - id: dense_science_eval_07
+    split: evaluation
+    domain: science
+    question: For an enhancement-mode n-channel MOSFET, what gate condition normally creates a conducting channel?
+    options: {A: "Gate tied below the source indefinitely", B: "Drain current forced to zero", C: "Gate-to-source voltage above threshold", D: "Gate current equal to drain current"}
+    correct_label: C
+    rationale: A sufficiently positive gate-to-source voltage above threshold induces the n-channel.
+    template_family: science_nmos_threshold_condition
+    correctness: {status: verified, method: manual}
+  - id: dense_science_eval_08
+    split: evaluation
+    domain: science
+    question: In the conventional direction, where do electric field lines point between separated positive and negative charges?
+    options: {A: "From negative to positive", B: "In closed circles", C: "Perpendicular to both charges", D: "From positive to negative"}
+    correct_label: D
+    rationale: Electric field direction is defined by the force on a positive test charge, so lines leave positive charge and enter negative charge.
+    template_family: science_electric_field_direction
+    correctness: {status: verified, method: manual}
+
+  - id: dense_general_discovery_01
+    split: discovery
+    domain: general
+    question: Which city is the capital of Australia?
+    options: {A: "Canberra", B: "Sydney", C: "Melbourne", D: "Perth"}
+    correct_label: A
+    rationale: Canberra is the national capital of Australia.
+    template_family: general_australia_capital
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_02
+    split: discovery
+    domain: general
+    question: At standard atmospheric pressure, at what Celsius temperature does pure water freeze?
+    options: {A: "100 degrees", B: "0 degrees", C: "32 degrees", D: "-100 degrees"}
+    correct_label: B
+    rationale: Pure water freezes at zero degrees Celsius under standard atmospheric pressure.
+    template_family: general_water_freezing_celsius
+    correctness: {status: verified, method: numeric_expression, expression: "0", expected_numeric: 0}
+  - id: dense_general_discovery_03
+    split: discovery
+    domain: general
+    question: Who wrote the novel `1984`?
+    options: {A: "Aldous Huxley", B: "Virginia Woolf", C: "George Orwell", D: "Ernest Hemingway"}
+    correct_label: C
+    rationale: George Orwell wrote the dystopian novel 1984.
+    template_family: general_nineteen_eighty_four_author
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_04
+    split: discovery
+    domain: general
+    question: Which planet is the largest in the Solar System?
+    options: {A: "Earth", B: "Saturn", C: "Neptune", D: "Jupiter"}
+    correct_label: D
+    rationale: Jupiter has the greatest diameter and mass of the Solar System's planets.
+    template_family: general_largest_planet
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_05
+    split: discovery
+    domain: general
+    question: In traditional subtractive color mixing for paint, what color is commonly produced by mixing red and blue?
+    options: {A: "Purple", B: "Green", C: "Orange", D: "Yellow"}
+    correct_label: A
+    rationale: Red and blue pigments are conventionally described as producing purple.
+    template_family: general_paint_color_mixing
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_06
+    split: discovery
+    domain: general
+    question: Which word is the best antonym of `ancient`?
+    options: {A: "Historic", B: "Modern", C: "Old", D: "Ruined"}
+    correct_label: B
+    rationale: Modern denotes the present or recent period and is the direct contrast to ancient.
+    template_family: general_ancient_antonym
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_07
+    split: discovery
+    domain: general
+    question: On a standard analog clock showing exactly 3:00, where does the minute hand point?
+    options: {A: "At 3", B: "At 6", C: "At 12", D: "At 9"}
+    correct_label: C
+    rationale: At an exact hour the minute hand indicates zero minutes and points to 12.
+    template_family: general_clock_minute_hand
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_08
+    split: discovery
+    domain: general
+    question: What is the primary official language of Brazil?
+    options: {A: "Spanish", B: "French", C: "English", D: "Portuguese"}
+    correct_label: D
+    rationale: Portuguese is Brazil's official and predominant language.
+    template_family: general_brazil_language
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_09
+    split: discovery
+    domain: general
+    question: Which of these animals is a mammal?
+    options: {A: "Dolphin", B: "Trout", C: "Octopus", D: "Crocodile"}
+    correct_label: A
+    rationale: Dolphins breathe air, nurse young, and belong to the mammalian order Cetacea.
+    template_family: general_animal_classification
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_10
+    split: discovery
+    domain: general
+    question: Which day comes immediately after Monday?
+    options: {A: "Sunday", B: "Tuesday", C: "Wednesday", D: "Friday"}
+    correct_label: B
+    rationale: Tuesday follows Monday in the standard seven-day week.
+    template_family: general_weekday_sequence
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_11
+    split: discovery
+    domain: general
+    question: On which continent is the Sahara Desert primarily located?
+    options: {A: "Asia", B: "South America", C: "Africa", D: "Australia"}
+    correct_label: C
+    rationale: The Sahara spans a large region of northern Africa.
+    template_family: general_sahara_continent
+    correctness: {status: verified, method: manual}
+  - id: dense_general_discovery_12
+    split: discovery
+    domain: general
+    question: What is the standard English plural of the noun `analysis`?
+    options: {A: "Analysises", B: "Analysies", C: "Analysis", D: "Analyses"}
+    correct_label: D
+    rationale: Analysis changes its -is ending to -es, producing analyses.
+    template_family: general_analysis_plural
+    correctness: {status: verified, method: manual}
+  - id: dense_general_eval_01
+    split: evaluation
+    domain: general
+    question: Which material is strongly attracted to an ordinary magnet?
+    options: {A: "Iron", B: "Glass", C: "Dry wood", D: "Paper"}
+    correct_label: A
+    rationale: Iron is ferromagnetic and is strongly attracted to ordinary magnets.
+    template_family: general_magnetic_material
+    stability_sentinel: true
+    correctness: {status: verified, method: manual}
+  - id: dense_general_eval_02
+    split: evaluation
+    domain: general
+    question: What is the chemical symbol for gold?
+    options: {A: "Ag", B: "Au", C: "Gd", D: "Go"}
+    correct_label: B
+    rationale: The chemical symbol for the element gold is Au, derived from the Latin aurum.
+    template_family: general_gold_symbol
+    stability_sentinel: true
+    correctness: {status: verified, method: manual}
+  - id: dense_general_eval_03
+    split: evaluation
+    domain: general
+    question: In the sentence `Birds migrate south`, which word is the verb?
+    options: {A: "Birds", B: "the implied article", C: "migrate", D: "south"}
+    correct_label: C
+    rationale: Migrate expresses the action performed by the subject birds, so it is the verb.
+    template_family: general_sentence_verb
+    correctness: {status: verified, method: manual}
+  - id: dense_general_eval_04
+    split: evaluation
+    domain: general
+    question: Which number is the smallest prime number?
+    options: {A: "0", B: "1", C: "3", D: "2"}
+    correct_label: D
+    rationale: Two is the smallest integer greater than one with exactly two positive divisors.
+    template_family: general_smallest_prime
+    correctness: {status: verified, method: numeric_expression, expression: "2", expected_numeric: 2}
+  - id: dense_general_eval_05
+    split: evaluation
+    domain: general
+    question: In the usual Northern Hemisphere sequence, which season follows spring?
+    options: {A: "Summer", B: "Winter", C: "Autumn", D: "Spring"}
+    correct_label: A
+    rationale: Summer follows spring in the conventional seasonal cycle.
+    template_family: general_season_sequence
+    correctness: {status: verified, method: manual}
+  - id: dense_general_eval_06
+    split: evaluation
+    domain: general
+    question: Which musical instrument normally has keys, pedals, and strings struck by internal hammers?
+    options: {A: "Violin", B: "Piano", C: "Flute", D: "Trumpet"}
+    correct_label: B
+    rationale: A piano uses keys and pedals, and its keys actuate hammers that strike strings.
+    template_family: general_piano_mechanism
+    correctness: {status: verified, method: manual}
+  - id: dense_general_eval_07
+    split: evaluation
+    domain: general
+    question: Which ocean borders the east coast of the continental United States?
+    options: {A: "Pacific Ocean", B: "Indian Ocean", C: "Atlantic Ocean", D: "Arctic Ocean"}
+    correct_label: C
+    rationale: The Atlantic Ocean lies along the eastern coastline of the continental United States.
+    template_family: general_us_east_coast_ocean
+    correctness: {status: verified, method: manual}
+  - id: dense_general_eval_08
+    split: evaluation
+    domain: general
+    question: What is the standard English past tense of the verb `teach`?
+    options: {A: "Teached", B: "Teaching", C: "Teachen", D: "Taught"}
+    correct_label: D
+    rationale: Teach is irregular and forms its past tense as taught.
+    template_family: general_teach_past_tense
+    correctness: {status: verified, method: manual}

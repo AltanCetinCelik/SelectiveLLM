@@ -1,0 +1,144 @@
+{
+  "benchmark_validation": {
+    "answer_position_counts": {
+      "code/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "code/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      },
+      "general/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "general/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      },
+      "mathematics/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "mathematics/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      },
+      "science/discovery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3
+      },
+      "science/evaluation": {
+        "A": 2,
+        "B": 2,
+        "C": 2,
+        "D": 2
+      }
+    },
+    "benchmark_sha256": "f4cf067de00d490a036488520768c82a5e0ea7bd0a126946b887fc5fd679d5e0",
+    "benchmark_version": "dense-capacity-mcq-1.0.0",
+    "case_count": 80,
+    "cross_split_template_family_overlap": [],
+    "domain_split_counts": {
+      "code/discovery": 12,
+      "code/evaluation": 8,
+      "general/discovery": 12,
+      "general/evaluation": 8,
+      "mathematics/discovery": 12,
+      "mathematics/evaluation": 8,
+      "science/discovery": 12,
+      "science/evaluation": 8
+    },
+    "errors": [],
+    "excluded_smoke_test_topic_present": false,
+    "manual_correctness_reviews": 80,
+    "maximum_cross_split_five_gram_jaccard": 0.05,
+    "maximum_similarity_pair": [
+      "dense_general_discovery_12",
+      "dense_general_eval_08"
+    ],
+    "numeric_expression_checks": 27,
+    "schema_version": "1.0.0",
+    "stability_sentinels": [
+      "dense_code_eval_01",
+      "dense_code_eval_02",
+      "dense_general_eval_01",
+      "dense_general_eval_02",
+      "dense_math_eval_01",
+      "dense_math_eval_02",
+      "dense_science_eval_01",
+      "dense_science_eval_02"
+    ],
+    "status": "valid",
+    "unique_id_count": 80,
+    "unique_template_family_count": 80
+  },
+  "mapping_hashes": {
+    "128": "1410cf061ced863bf3e511702c6562e1b207cdf58f60b23633210d758cf245b1",
+    "64": "b2de56331b0d03b197aafa7917f19404999ab73f0ca2f21d0ec0a02b6f03d577"
+  },
+  "prior_artifact_hashes": {
+    "benchmark.yaml": "2404e2f96f32d0e8d58fb992b144c4bfc762e085705ac678763336a1912f261c",
+    "causal_analysis.json": "38c9f8761533f3e329a4db75fa862d70574973eee3959da9bbb6b03823b4f10c",
+    "causal_progress.json": "1ac9a788927178ddba89f8fa9eba04ee78825eb2c8338ba559812241784f67a9",
+    "causal_scores.jsonl": "d39e793689b1b96e663a627858bcb87c97cab23054394daf16b4524657e6a042",
+    "config.yaml": "3aa6218aee6e9fb82486b54af3b77c2f2739e7ca2602fecd4e02670bf33d2965",
+    "discovery_channel_summaries.npz": "54f5bf0311fa52e78ea3735dee1c622e710c43e7b22865a005e816304d17cf81",
+    "discovery_gradient_metadata.jsonl": "0e89421dde6f6752e64e2c18eed2713e4910344d3c60daf8b63e91e4ffdb0cd4",
+    "discovery_progress.json": "2db6a26bcaacf968527161ebe6a37bee7b26eded6e8e6dc810e500500c02335d",
+    "environment.json": "cf988cc113c4bf7a77888c83447fcff801f18faf632f91c7034682340a113f21",
+    "failure_analysis.md": "69422831ac7e82ee6ca0bc40e7b6cfcce7c9eddbf50a8b5da64a7d67e428d8c1",
+    "full_model_scores.jsonl": "ad3aa5501b3aa680831a3455bb83e72fa9eaa310d99d8e5ce97f07f480688c90",
+    "gradient_preflight.json": "2d9fa299348dbd775ad67224454bc4640b724d446d2dd9d9b04c5f4e27d6eebd",
+    "heldout_gradient_metadata.jsonl": "3cef4d103dc827d1adf4ba34f0a1813e551e00920d248daa4206a3472f2e7701",
+    "heldout_signed_channel_summaries.npz": "d121135db017eae29298e8c4bc16298883ce7c47e51f0060adcf0bc99f8489ea",
+    "immutable_input_validation.json": "53d345a9ea3df70fb4718c3ac3b3e0f27e8f1e712e93fdf7f667316182f372b1",
+    "mapping_block128.json": "c1cc448a02a57c978a8f369a1f0af2bf0ebe60526893d334f295267608aebd15",
+    "mapping_block64.json": "4b9a2f501a9152eb0e113c7ef1bdaaf52f4b96f74528447b920f8528f2f0c877",
+    "masks.jsonl": "7548f9b93b570ba0104260265d56167f75754fe30bd575378acb5a220518413b",
+    "normalized_blocks_128.npz": "06ed0e694bb01e6a3c754492fa057727e60ec3c96d8a3860b55882844cb3cc93",
+    "normalized_blocks_64.npz": "f96266de96163a602cf1a1ae8d155f4aa6b419e7931b9a3847d1b5c84d3cfdf1",
+    "numerical_stability.json": "b2f4b669c1dca63d7d9db273e854114a36a1c756427f76f31efb0c59672bbdf0",
+    "paired_causal_effects.jsonl": "3f754fcaf5fa65a0f991510221df39fbfee008f80edb7aba66cb4ee06a7af5df",
+    "plots/causal_comparison_block128.png": "405994afc3640c8d0ce86ac8976a707dd1d8cd15ad4c8fd1a62432add6be113d",
+    "plots/causal_comparison_block64.png": "e1f03cc2784b75feb5892af984246eefcfc310e16b7496df8ffa18f811da82ce",
+    "plots/stability_block128.png": "4d3b966c2e9115bdce1465567e550c0cee1fd906d8258af244e448c9492a4bb5",
+    "plots/stability_block64.png": "efc40098369e99afa1aba5f58e528063ae977d453db70c0643ae73d845d34322",
+    "rankings_128.npz": "d3a54dbfec598c35c078235266972e094183de459055f7a8e8035a66de531ed5",
+    "rankings_64.npz": "83f9cb5a225be80170c7e262155dd5abd51f044a25da79e0aba85ae6276b501d",
+    "raw_blocks_128.npz": "558f3a01a58c7f36ac097a10bdef1938c12d4732dc26d26da22a71784b6f4fa0",
+    "raw_blocks_64.npz": "3ea212bc32fa5fe6968d09abaf9c24c97f54e66940a9e0a4fb02c9d133d82c97",
+    "report.md": "054804e478ae575aafd0902125d3d3cc804ea92c2bd0918cc59dddee0d6f9609",
+    "signed_analysis.json": "859d91fcfbcc505ade487d9cdddfc1e5943d853c26a5aa2b21e5504eeb87ebb9",
+    "signed_diagnostics.jsonl": "4acdb8f07312d386f1094e47c8ba66b3a9dd5dcfc5c6b92739a2659efed60d5b",
+    "signed_progress.json": "f33819b0161b498bc70fd31ea13924f3669773170afbd6aa0627b7c8f268e32f",
+    "split_assignments.json": "ba20164046700a31c749d8836d7011b19d3913c504b7b7b145460fed46dc8b4a",
+    "stability.json": "2b193a22f20f4a1b3f17d3a677f82d17571a2f38d0906e093b0d5d761c659286",
+    "tokenizer_validation.json": "6a8465600e6a45b152ddc716ccdc9b16617d1e6e44c372e2892a7194c85cc25c",
+    "validity.json": "e2dc1134f241c8fb6140710627c40b9266d4803397d7e573fccf169af6d381e4"
+  },
+  "prior_classification": "C",
+  "prior_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "prior_model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "prior_run_id": "20260905T145129Z",
+  "quota_pattern_hashes": {
+    "128": "7603f71b900d0aa6c87cffd6c8a8983de594decab5d64ffb64fba2dd8d28dcd6",
+    "64": "ec952966379177a8f619fc59c4d814856720d08e3f206b94211da396efd06325"
+  },
+  "status": "valid"
+}
