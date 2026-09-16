@@ -7,7 +7,6 @@ import pytest
 
 from selectivellm.backends.transformers import TransformersPeftBackend
 from selectivellm.benchmarking.evaluation import routing_scores
-from selectivellm.config import BackendConfig
 from selectivellm.real_validation.assets import validate_compatibility_report
 from selectivellm.real_validation.evaluation import (
     RealBenchmarkCase,
@@ -208,10 +207,11 @@ def test_transformers_backend_unwraps_when_last_adapter_is_evicted() -> None:
         def unload(self) -> Base:
             return base
 
-    backend = TransformersPeftBackend(BackendConfig(device="cpu"))
+    backend = object.__new__(TransformersPeftBackend)
     backend.model = Wrapped()
     backend.loaded_adapters = {"code_expert"}
     backend.active_adapters = ["code_expert"]
+    backend._composition_adapter = None
 
     backend.unload_component(_component("code_expert"))
 
