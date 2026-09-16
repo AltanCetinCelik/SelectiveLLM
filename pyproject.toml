@@ -52,6 +52,11 @@ dev = [
 [project.scripts]
 selectivellm = "selectivellm.cli:app"
 
+[project.urls]
+Homepage = "https://github.com/AltanCetinCelik/SelectiveLLM"
+Documentation = "https://github.com/AltanCetinCelik/SelectiveLLM/tree/main/docs"
+Issues = "https://github.com/AltanCetinCelik/SelectiveLLM/issues"
+
 [tool.hatch.build.targets.wheel]
 packages = ["selectivellm"]
 

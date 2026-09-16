@@ -2,6 +2,7 @@
 
 **Semantic Model Paging and Dynamic Expert Routing for Memory-Constrained LLM Inference**
 
+[![CI](https://github.com/AltanCetinCelik/SelectiveLLM/actions/workflows/ci.yml/badge.svg)](https://github.com/AltanCetinCelik/SelectiveLLM/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2C7A7B)](LICENSE)
 [![Status: Research prototype](https://img.shields.io/badge/status-research%20prototype-B45309)](docs/paper.md)
@@ -144,6 +145,8 @@ These numbers demonstrate that the implemented router, planner, cache, metrics, 
 Python 3.11 or newer is required.
 
 ```bash
+git clone https://github.com/AltanCetinCelik/SelectiveLLM.git
+cd SelectiveLLM
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -e .

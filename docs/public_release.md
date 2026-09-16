@@ -1,11 +1,11 @@
 # Public release audit
 
-Audit date: 2026-09-15
+Audit date: 2026-09-16
 
 ## Status
 
-The tracked repository is ready to publish as an Apache-2.0 research prototype.
-No remote repository or hosted release is created by this audit.
+The tracked repository is published as an Apache-2.0 research prototype at
+<https://github.com/AltanCetinCelik/SelectiveLLM>.
 
 The public claim is deliberately narrower than the project name:
 
@@ -61,13 +61,7 @@ the corresponding runtime, invariant, completeness, and provenance checks.
 
 ## Publication
 
-After creating an empty GitHub repository, publish this committed history with:
-
-```bash
-git remote add origin <repository-url>
-git push -u origin main
-```
-
-Repository-specific package URLs and a CI badge can be added after the canonical
-remote URL exists. Do not upload the ignored Hugging Face cache or timestamped
-local run directories.
+The canonical remote is `origin`, the default branch is `main`, and the GitHub
+repository is public. Repository URLs and the CI badge are part of the tracked
+metadata. Ignored Hugging Face caches and timestamped local run directories were
+not uploaded.
