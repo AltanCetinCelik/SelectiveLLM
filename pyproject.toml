@@ -79,8 +79,22 @@ warn_unreachable = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["torch", "torch.*", "transformers", "transformers.*", "peft", "peft.*"]
+module = [
+  "torch",
+  "torch.*",
+  "transformers",
+  "transformers.*",
+  "peft",
+  "peft.*",
+  "huggingface_hub",
+  "huggingface_hub.*",
+]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["selectivellm.backends.transformers"]
+# Optional Transformers symbols are Any when the `hf` extra is not installed.
+disable_error_code = ["misc"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
