@@ -9,7 +9,7 @@
 
 **SelectiveLLM explores a simple question: why activate or keep all available model capacity when a request may need only part of it?**
 
-Instead of treating a language model stack as one fixed block of computation, SelectiveLLM treats model capacity as a runtime resource that can be **selected, loaded, cached, rejected, evicted, or expanded depending on the request and the available budget**.
+Instead of treating a language-model stack as one fixed block of computation, SelectiveLLM treats model capacity as a runtime resource that can be **selected, loaded, cached, rejected, evicted, or expanded depending on the request and the available budget**.
 
 Today the framework supports real PEFT/LoRA capacity routing, runtime residency management, memory-aware planning, caching, and multiple routing strategies.
 
@@ -453,10 +453,7 @@ selectivellm benchmark \
 from selectivellm import SelectiveLLM
 
 engine = SelectiveLLM.from_config("configs/default.yaml")
-
-result = engine.generate(
-    "Use Python to simulate an RLC circuit and plot the transient response"
-)
+result = engine.generate("Use Python to simulate an RLC circuit and plot the transient response")
 
 print(result.text)
 
@@ -541,7 +538,6 @@ selectivellm profile \
 
 # Inspect available capacity
 selectivellm registry list
-
 selectivellm registry inspect python_expert
 ```
 
@@ -709,8 +705,8 @@ See [docs/related_work.md](docs/related_work.md).
 ```bash
 pip install -e ".[dev]"
 
-ruff format --check .
 ruff check .
+ruff format --check selectivellm tests experiments examples
 mypy selectivellm
 
 pytest \
