@@ -1,17 +1,19 @@
 # SelectiveLLM
 
-### Adaptive Compute and Capacity Routing for Language Models
+### Adaptive Model-Capacity Orchestration
 
 [![CI](https://github.com/AltanCetinCelik/SelectiveLLM/actions/workflows/ci.yml/badge.svg)](https://github.com/AltanCetinCelik/SelectiveLLM/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2C7A7B)](LICENSE)
-[![Status: Research prototype](https://img.shields.io/badge/status-research%20prototype-B45309)](docs/paper.md)
+[![Status: Research Prototype](https://img.shields.io/badge/status-research%20prototype-B45309)](docs/paper.md)
 
-**SelectiveLLM explores a simple question: why activate or keep all available model capacity when a request may need only a small part of it?**
+**SelectiveLLM explores a simple question: why activate or keep all available model capacity when a request may need only part of it?**
 
-Instead of treating an LLM as one fixed block of compute, SelectiveLLM treats model capacity as a runtime resource that can be **selected, loaded, cached, rejected, or expanded depending on the request and the available budget**.
+Instead of treating a language model stack as one fixed block of computation, SelectiveLLM treats model capacity as a runtime resource that can be **selected, loaded, cached, rejected, evicted, or expanded depending on the request and the available budget**.
 
-Today the framework supports real PEFT/LoRA capacity routing and runtime residency management. The broader research direction is **task-conditioned adaptive computation** across adapters, experts, models, and eventually hardware-efficient parameter blocks.
+Today the framework supports real PEFT/LoRA capacity routing, runtime residency management, memory-aware planning, caching, and multiple routing strategies.
+
+The broader research direction is **task-conditioned adaptive computation** across adapters, experts, models, and eventually hardware-efficient internal model capacity.
 
 ```text
                          Prompt
@@ -22,40 +24,40 @@ Today the framework supports real PEFT/LoRA capacity routing and runtime residen
                   │    Controller   │
                   └────────┬────────┘
                            │
-               What capacity is useful?
+                What capacity is useful?
                            │
-             ┌─────────────┼─────────────┐
-             ▼             ▼             ▼
-          Adapter        Expert        Model
-             │             │             │
-             └─────────────┼─────────────┘
+            ┌──────────────┼──────────────┐
+            ▼              ▼              ▼
+         Adapter         Expert         Model
+            │              │              │
+            └──────────────┼──────────────┘
                            ▼
                   Budget-aware planner
                            │
-              memory / latency / locality
+               memory / latency / locality
                            │
                            ▼
-                 Selected computation
+                  Selected computation
                            │
                            ▼
                        Inference
 ```
 
-> **Long-term goal:** execute the **minimum sufficient computation** required for each request while preserving output quality.
+> **Long-term goal:** execute the **minimum sufficient computation** required for each request while preserving useful output quality.
 
 ---
 
 ## Why SelectiveLLM?
 
-Most inference systems start with a fixed assumption:
+Most inference systems begin with a fixed assumption:
 
-> Load the model and run the available capacity.
+> Load the available model capacity and run it.
 
 SelectiveLLM investigates a different assumption:
 
-> Determine what capacity the request needs first, then spend memory and compute selectively.
+> Determine which capacity is likely to help first, then spend memory and computation selectively.
 
-That creates a general optimization problem:
+That creates a general runtime optimization problem:
 
 ```text
 request
@@ -69,11 +71,13 @@ memory cost
 load latency
    +
 cache locality
+   +
+uncertainty
    ↓
 runtime capacity plan
 ```
 
-The current implementation focuses on adapters and independently loadable experts because they provide a measurable testbed for this idea.
+The current implementation focuses on independently loadable adapters and experts because they provide a practical and measurable testbed for this idea.
 
 The architecture is deliberately broader than LoRA routing.
 
@@ -84,11 +88,11 @@ The architecture is deliberately broader than LoRA routing.
 | Memory-budget planning | ✅ Implemented |
 | Dependency-aware cache / eviction | ✅ Implemented |
 | Multiple routing policies | ✅ Implemented |
-| Real accelerator memory telemetry | ✅ MPS / CUDA where available |
+| Accelerator memory telemetry | ✅ MPS / CUDA where available |
 | Learned capacity router | 🔬 Planned |
 | Calibrated uncertainty / abstention | 🔬 Planned |
 | Multi-model capacity routing | 🔬 Planned |
-| Utility-aware compute optimization | 🔬 Planned |
+| Utility-aware capacity optimization | 🔬 Planned |
 | Dense parameter-block selection | 🧪 Research |
 | Physical semantic parameter paging | ❌ Not yet demonstrated |
 
@@ -115,7 +119,8 @@ The demo:
 - identifies candidate capabilities,
 - routes the request,
 - creates a memory-constrained capacity plan,
-- loads or reuses the selected components,
+- loads or reuses selected components,
+- reports selected and rejected capacity,
 - reports cache activity,
 - reports stage-level latency,
 - and records memory semantics explicitly.
@@ -151,7 +156,7 @@ Inference:
   base + selected capacity
 ```
 
-The default demo uses the deterministic control backend so it runs without downloading model weights.
+The default demo uses the deterministic control backend, so it can run without downloading model weights.
 
 ---
 
@@ -177,27 +182,9 @@ flowchart LR
     N --> X[Metrics + Provenance]
 ```
 
-SelectiveLLM separates the system into independent stages:
+Each stage is independently replaceable: routing policy, capacity planning, runtime residency, and inference backend can be evaluated without silently changing the others.
 
-```text
-Prompt
-  ↓
-Analyzer
-  ↓
-Router
-  ↓
-Capacity candidates
-  ↓
-Budget-aware planner
-  ↓
-Runtime loader / cache
-  ↓
-Inference backend
-  ↓
-Metrics + reproducibility metadata
-```
-
-This separation makes it possible to test routing policies without silently changing memory policy, backend behavior, or benchmark methodology.
+This makes routing quality, memory behavior, transfer cost, cache locality, and inference quality measurable as separate concerns.
 
 ---
 
@@ -211,19 +198,21 @@ SelectiveLLM currently includes:
 - random routing,
 - oracle routing,
 - local embedding routing,
-- threshold and top-k routing,
+- threshold routing,
+- top-k routing,
 - hybrid routing,
 - versioned capacity registries,
 - dependency-aware planning,
 - configurable memory budgets,
-- LRU-style expert lifecycle management,
+- runtime expert loading,
+- LRU-style capacity lifecycle management,
 - load / unload / transfer telemetry,
 - cache hit and miss tracking,
 - Transformers + PEFT inference,
 - deterministic offline controls,
 - CUDA → MPS → CPU device detection,
 - stage-separated latency metrics,
-- accelerator / host memory semantics,
+- accelerator and host memory telemetry,
 - benchmark manifests and fingerprints,
 - reproducible raw results,
 - negative-result preservation,
@@ -235,7 +224,7 @@ The CLI and Python API use the same underlying engine.
 
 ## Real-model evidence
 
-A pinned experiment was run using:
+A pinned real-model experiment was run using:
 
 ```text
 Base model: Qwen2.5-1.5B-Instruct
@@ -244,7 +233,7 @@ Experts:    code / math / science LoRA adapters
 Hardware:   Apple M4, 16 GB unified memory, MPS
 ```
 
-The semantic routing policy reached:
+The routing experiment produced:
 
 ```text
 Routing F1
@@ -255,7 +244,7 @@ Semantic     0.830
 Oracle       1.000
 ```
 
-Dynamic semantic routing used:
+Dynamic semantic routing averaged approximately:
 
 ```text
 3125.7 MB MPS live allocation
@@ -275,11 +264,11 @@ for a measured difference of approximately:
 
 in live MPS tensor allocation.
 
-The experiment therefore demonstrated that **runtime capacity selection changes real model residency**.
+This demonstrates that **runtime capacity selection changes real model residency**.
 
-It did **not** demonstrate a reliable answer-quality advantage from the existing routing policy.
+It does **not** demonstrate a reliable answer-quality advantage from the current routing policy.
 
-That distinction is important.
+That distinction is intentional and important.
 
 Full evidence:
 
@@ -308,7 +297,7 @@ SelectiveLLM intentionally separates demonstrated system behavior from open hypo
 
 ✅ Measurable load and swap latency
 
-✅ Semantic routing can outperform keyword/random routing on the current routing labels
+✅ Semantic routing can outperform keyword and random routing on the current routing labels
 
 ✅ Reproducible deterministic and real-model experiment pipelines
 
@@ -326,9 +315,9 @@ SelectiveLLM intentionally separates demonstrated system behavior from open hypo
 
 ❌ Physical parameter paging based on prompt semantics
 
-The dense Qwen2.5-1.5B and 3B causal-localization experiments both failed their preregistered stable-specialization gates.
+The dense Qwen2.5-1.5B and Qwen2.5-3B causal-localization experiments both failed their preregistered stable-specialization gates.
 
-Those negative results are preserved rather than removed.
+Those negative results are preserved rather than hidden or discarded.
 
 See:
 
@@ -356,6 +345,7 @@ adaptive compute controller
 │ How much capacity?          │
 │ What should stay resident?  │
 │ What should be loaded?      │
+│ What should be evicted?     │
 │ When should we fall back?   │
 └─────────────────────────────┘
       ↓
@@ -373,6 +363,7 @@ expected quality gain
     - memory cost
     - loading cost
     - latency cost
+    - cache miss cost
     - uncertainty penalty
 ```
 
@@ -400,11 +391,13 @@ It uses:
 
 It is **not yet a trained semantic encoder**.
 
-This keeps the v0.1 benchmark reproducible and offline, but it is not intended to be the final routing architecture.
+This keeps the current benchmark reproducible and offline, but it is not intended to be the final routing architecture.
 
-A planned learned routing stack will evaluate:
+A future learned routing stack will compare:
 
 ```text
+random
+vs
 keyword
 vs
 feature-hash
@@ -416,7 +409,7 @@ vs
 oracle
 ```
 
-with probability calibration and abstention.
+with probability calibration, uncertainty measurement, and abstention.
 
 ---
 
@@ -585,13 +578,17 @@ results/<run-id>/
 └── plots/
 ```
 
+The deterministic backend is a systems control for validating routing, planning, caching, telemetry, and reporting behavior without downloading model weights.
+
+It is **not** treated as evidence of real model-quality improvement.
+
 Read [docs/benchmarking.md](docs/benchmarking.md) for the full methodology.
 
 ---
 
 ## Research tracks
 
-SelectiveLLM is now best understood as two related research tracks.
+SelectiveLLM is best understood as two related but independent research tracks.
 
 ### Track A — Adaptive Runtime
 
@@ -602,9 +599,11 @@ Near-term engineering and evaluation:
 - uncertainty-aware fallback,
 - cost-aware planning,
 - larger expert pools,
-- model routing,
+- multi-model routing,
 - cache and prefetch policies,
 - quality-memory-latency Pareto optimization.
+
+This track already builds on working runtime infrastructure.
 
 ### Track B — Selective Dense Compute
 
@@ -617,7 +616,7 @@ Higher-risk research:
 - sparse execution,
 - eventual parameter paging.
 
-Track A does not depend on Track B succeeding.
+Track A does **not** depend on Track B succeeding.
 
 ---
 
@@ -629,14 +628,14 @@ Planned priorities:
 
 1. learned semantic capacity router,
 2. calibrated routing probabilities,
-3. abstention / full-model fallback,
-4. quality-cost-aware planning,
-5. larger held-out evaluation set,
-6. counterbalanced workloads,
-7. public benchmark tasks where possible,
-8. quality-memory-latency Pareto reporting,
-9. expanded model / expert capacity types,
-10. simplified installation and interactive demo.
+3. uncertainty-aware abstention,
+4. safe fallback policies,
+5. quality-cost-aware planning,
+6. larger held-out evaluation sets,
+7. counterbalanced workloads,
+8. public benchmark tasks where appropriate,
+9. quality-memory-latency Pareto reporting,
+10. expanded model and expert capacity types.
 
 Dense semantic parameter paging remains a separate experimental track and will not be claimed until physical savings and retained quality are demonstrated.
 
@@ -651,6 +650,7 @@ SelectiveLLM overlaps with several research areas:
 - Mixture-of-Experts,
 - model routing,
 - adapter routing,
+- semantic routing,
 - conditional computation,
 - contextual sparsity,
 - heterogeneous memory,
@@ -660,7 +660,23 @@ SelectiveLLM overlaps with several research areas:
 
 The project does **not** claim that these individual ideas are new.
 
-The intended contribution is the framing and runtime system for treating independently selectable model capacity as a **budgeted resource** and evaluating routing, residency, transfer cost, quality, and falsification together.
+The intended research framing is:
+
+> **Treat independently selectable model capacity as a budgeted runtime resource.**
+
+The framework evaluates that capacity across:
+
+```text
+relevance
+quality
+memory
+load latency
+cache locality
+runtime residency
+uncertainty
+```
+
+The longer-term research question is whether this abstraction can eventually extend from adapters and models to useful internal model capacity.
 
 See [docs/related_work.md](docs/related_work.md).
 
@@ -722,9 +738,9 @@ SelectiveLLM is not:
 - a replacement for quantization,
 - a replacement for conventional offloading.
 
-These techniques can be complementary.
+Those techniques can be complementary.
 
-SelectiveLLM focuses specifically on **request-conditioned capacity selection and runtime resource planning**.
+SelectiveLLM focuses specifically on **request-conditioned capacity selection and runtime resource orchestration**.
 
 ---
 
@@ -734,7 +750,7 @@ Use [CITATION.cff](CITATION.cff) when citing the project.
 
 When citing experimental results, include the relevant benchmark fingerprint and manifest.
 
-The SelectiveLLM software is licensed under Apache-2.0.
+SelectiveLLM is licensed under Apache-2.0.
 
 External models and adapters retain their original licenses.
 
