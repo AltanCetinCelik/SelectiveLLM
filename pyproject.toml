@@ -5,7 +5,8 @@ build-backend = "hatchling.build"
 [project]
 name = "selectivellm"
 version = "0.1.1"
-description = "Adaptive compute and capacity routing for language models"
+description = "Adaptive model-capacity orchestration for language models"
+readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
 authors = [{name = "Altan Cetin Celik"}]
@@ -21,7 +22,9 @@ keywords = [
   "mixture-of-experts",
   "model-selection",
   "memory-optimization",
+  "capacity-routing",
 ]
+
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: Apache Software License",
@@ -30,6 +33,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
 dependencies = [
   "matplotlib>=3.8",
   "numpy>=1.26,<2.3",
@@ -49,6 +53,7 @@ hf = [
   "torch>=2.2",
   "transformers>=4.44",
 ]
+
 dev = [
   "build>=1.2",
   "mypy>=1.11",
@@ -75,7 +80,10 @@ Issues = "https://github.com/AltanCetinCelik/SelectiveLLM/issues"
 packages = ["selectivellm"]
 
 [tool.hatch.build]
-include = ["selectivellm/**/*.py", "selectivellm/resources/*"]
+include = [
+  "selectivellm/**/*.py",
+  "selectivellm/resources/*",
+]
 
 [tool.ruff]
 target-version = "py311"
@@ -107,20 +115,18 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["selectivellm.backends.transformers"]
-# Optional Transformers symbols are Any when the `hf` extra is not installed.
 disable_error_code = ["misc"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
 testpaths = ["tests"]
-markers = ["hf: optional tests requiring user-supplied Hugging Face assets"]
+markers = [
+  "hf: optional tests requiring user-supplied Hugging Face assets",
+]
 
 [tool.coverage.run]
 source = ["selectivellm"]
 branch = true
-# Model-backed experiment orchestration and report paths are exercised by
-# optional real runs whose manifests preserve their invariant checks. The
-# default CI suite measures the portable, network-free core.
 omit = [
   "selectivellm/backends/transformers.py",
   "selectivellm/causal_importance/gradient.py",
