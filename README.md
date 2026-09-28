@@ -1,144 +1,424 @@
 # SelectiveLLM
 
-**Semantic Model Paging and Dynamic Expert Routing for Memory-Constrained LLM Inference**
+### Adaptive Compute and Capacity Routing for Language Models
 
 [![CI](https://github.com/AltanCetinCelik/SelectiveLLM/actions/workflows/ci.yml/badge.svg)](https://github.com/AltanCetinCelik/SelectiveLLM/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2C7A7B)](LICENSE)
 [![Status: Research prototype](https://img.shields.io/badge/status-research%20prototype-B45309)](docs/paper.md)
 
-**Can larger language-model capabilities be exposed under smaller memory budgets by loading only the capacity relevant to the current request?**
+**SelectiveLLM explores a simple question: why activate or keep all available model capacity when a request may need only a small part of it?**
 
-SelectiveLLM is an experimental inference framework exploring **retrieval over model capacity**: multi-label semantic routing, dynamic expert and PEFT/LoRA loading, budget-aware planning, memory-aware caching, and eventually parameter-level paging. This is not traditional RAG; the selected resource is model capacity rather than external documents.
+Instead of treating an LLM as one fixed block of compute, SelectiveLLM treats model capacity as a runtime resource that can be **selected, loaded, cached, rejected, or expanded depending on the request and the available budget**.
 
-> [!IMPORTANT]
-> SelectiveLLM does NOT currently turn a dense 70B model into a 7B-memory model.
->
-> v0.1.1 includes a real Qwen2.5/PEFT run on Apple M4 alongside the deterministic control. It demonstrates real adapter residency and swapping, but it did **not** establish that better routing reliably improves generated answers. Follow-up dense Qwen2.5-1.5B and 3B logical-masking experiments both returned preregistered **Outcome C: weak or unstable specialization**. MPS measurements are unified-memory allocator signals, never labeled discrete VRAM.
-
-## The experiment
-
-Traditional fixed-residency inference keeps all configured capacity available. SelectiveLLM analyzes each prompt, requests one or more capabilities, and lets a runtime planner fit those components under a declared budget.
-
-```mermaid
-flowchart TD
-    P[Prompt] --> A[Semantic Analyzer]
-    A --> R[Router]
-    R --> B[Budget-Aware Planner]
-    B --> C[Capacity Registry]
-    C --> M[Runtime Manager]
-    M --> G[GPU Resident]
-    M --> H[CPU Cached]
-    M --> D[Disk Available]
-    G --> I[Base Model + Selected Experts]
-    H --> I
-    D --> I
-    I --> N[Inference]
-    N --> X[Metrics + Reproducibility]
-    X -. future policy feedback .-> R
-```
+Today the framework supports real PEFT/LoRA capacity routing and runtime residency management. The broader research direction is **task-conditioned adaptive computation** across adapters, experts, models, and eventually hardware-efficient parameter blocks.
 
 ```text
-Prompt -> Analyzer -> Router -> Budget Planner -> Registry
-                                             |
-                         +-------------------+------------------+
-                         |                   |                  |
-                    GPU resident        CPU cached        Disk available
-                         +-------------------+------------------+
-                                             |
-                              Base model + selected experts
-                                             |
-                                    Inference -> Metrics
+                         Prompt
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │  SelectiveLLM   │
+                  │    Controller   │
+                  └────────┬────────┘
+                           │
+               What capacity is useful?
+                           │
+             ┌─────────────┼─────────────┐
+             ▼             ▼             ▼
+          Adapter        Expert        Model
+             │             │             │
+             └─────────────┼─────────────┘
+                           ▼
+                  Budget-aware planner
+                           │
+              memory / latency / locality
+                           │
+                           ▼
+                 Selected computation
+                           │
+                           ▼
+                       Inference
 ```
 
-The hero experiment compares base-only, random, keyword, oracle, embedding, semantic, cached, and all-resident controls on single-domain, ambiguous, irrelevant-domain, and multi-domain prompts. Every row carries its backend, model identity, versioned inputs, measurement semantics, and compatibility fingerprint.
+> **Long-term goal:** execute the **minimum sufficient computation** required for each request while preserving output quality.
 
-## Real Model Evidence
+---
 
-Backend: **`transformers-peft`** | Model: **Qwen2.5-1.5B-Instruct** | Hardware: **Apple M4 / 16 GB unified memory / MPS** | Benchmark: **9 cases, 396 primary observations + 18 RLC observations**
+## Why SelectiveLLM?
 
-The pinned run used independently produced code, math, and science LoRA adapters. Semantic routing reached 0.830 multi-label F1 versus 0.611 keyword and 0.278 random. Dynamic semantic routing averaged 3125.732 MB of MPS live tensor allocation versus 3412.159 MB all-resident, a measured 286.427 MB reduction. This is real live-tensor residency on Apple unified memory, not simulated capacity and not discrete VRAM.
+Most inference systems start with a fixed assumption:
 
-The model-quality result was negative: semantic and oracle averaged about 0.370 to 0.378 fixed-rubric quality, but random also scored 0.370. On the RLC case, base and code-only scored 0.400 while code-plus-science scored 0.067 and three-expert oracle scored 0.000. Better routing did not produce a reliable aggregate quality advantage.
+> Load the model and run the available capacity.
 
-![Real quality-memory tradeoff on Qwen2.5-1.5B-Instruct](results/real/latest/plots/real_quality_vs_memory.png)
+SelectiveLLM investigates a different assumption:
 
-| Policy | Quality | Routing F1 | Resident adapters | MPS live MB | Load ms | Request hit rate |
-|---|---:|---:|---:|---:|---:|---:|
-| Base only | 0.267 | 0.222 | 0.000 | 2968.777 | 0.000 | N/A |
-| Random | 0.370 | 0.278 | 1.000 | 3110.121 | 734.933 | 0.0% |
-| Keyword | 0.350 | 0.611 | 0.667 | 3063.006 | 582.213 | 0.0% |
-| Oracle | 0.370 | 1.000 | 1.111 | 3157.253 | 861.736 | 0.0% |
-| Semantic, dynamic | 0.378 | 0.830 | 1.000 | 3125.732 | 796.888 | 0.0% |
-| Semantic, cache 1, high locality | 0.378 | 0.830 | 1.111 | 3141.384 | 521.498 | 55.6% |
-| All resident, semantic active | 0.370 | 0.830 | 3.000 | 3412.159 | 0.000 | 100.0% |
+> Determine what capacity the request needs first, then spend memory and compute selectively.
 
-Values are warm means over 27 observations per policy. The full [real-model analysis](docs/real_model_evidence.md) documents uncertainty, lifecycle memory, cache locality, RLC composition, token-cap failures, and every evidence boundary. See the [run report](results/real/latest/report.md), [manifest](results/real/latest/manifest.json), [raw responses](results/real/latest/raw_responses.jsonl), and [failure analysis](results/real/latest/failure_analysis.md).
+That creates a general optimization problem:
 
-## Expert-Pool Diagnostic
+```text
+request
+   ↓
+capacity candidates
+   ↓
+expected usefulness
+   +
+memory cost
+   +
+load latency
+   +
+cache locality
+   ↓
+runtime capacity plan
+```
 
-A preregistered follow-up reused the pinned base and three adapters for 108 generations: 9 fixed prompts x 4 direct conditions x 3 technical repetitions at a fixed 384-token ceiling. The empirical oracle scored **0.748 [0.543, 0.933]** versus **0.406 [0.156, 0.672]** for base, giving a routing opportunity of **0.343 [0.111, 0.611]**. The labeled specialist appeared in the best tie set for 5/7 labeled cases, but was the sole winner only 1/7 times; specialist lift and specialization margin both had intervals spanning zero.
+The current implementation focuses on adapters and independently loadable experts because they provide a measurable testbed for this idea.
 
-The frozen `expert_pool_viable` gate passed, but the correct reading is narrow: this pool has measurable response diversity that an empirical selector could exploit; it does not show clean domain specialization or validate the current semantic router. A post-hoc evaluator sensitivity audit changed nine rubric scores but preserved that broad conclusion. Truncation fell to 21/108 generations, and technical repetitions were score-identical within every cell.
+The architecture is deliberately broader than LoRA routing.
 
-See the [diagnostic report](results/real/expert_quality/latest/report.md), [evaluator sensitivity audit](results/real/expert_quality/latest/evaluator_sensitivity_audit.md), and [raw generations](results/real/expert_quality/latest/raw_generations.jsonl).
+| Capacity type | Current status |
+|---|---|
+| PEFT / LoRA adapters | ✅ Implemented and measured |
+| Runtime expert loading | ✅ Implemented |
+| Memory-budget planning | ✅ Implemented |
+| Dependency-aware cache / eviction | ✅ Implemented |
+| Multiple routing policies | ✅ Implemented |
+| Real accelerator memory telemetry | ✅ MPS / CUDA where available |
+| Learned capacity router | 🔬 Planned |
+| Calibrated uncertainty / abstention | 🔬 Planned |
+| Multi-model capacity routing | 🔬 Planned |
+| Utility-aware compute optimization | 🔬 Planned |
+| Dense parameter-block selection | 🧪 Research |
+| Physical semantic parameter paging | ❌ Not yet demonstrated |
 
-## Dense-Capacity Feasibility
+---
 
-Two preregistered experiments tested prompt-conditioned capacity inside single dense Qwen models, without adapters. Discovery masks were learned only from 48 discovery questions and evaluated through paired correct-answer NLL damage on 32 held-out questions. Every intervention logically zeroed the same approximately 5% MLP capacity; no parameters were unloaded and no physical-memory reduction was measured.
+## 30-second demo
 
-| Model | Full accuracy | Stable gradient domains | Same-domain damage | Same - random | Same - wrong | Frozen result |
-|---|---:|---:|---:|---:|---:|---|
-| Qwen2.5-1.5B | 65.6% | 0/4 | -0.6041 [-1.1517, -0.0668] | -0.3561 [-0.7998, 0.0528] | -0.3579 [-0.8056, 0.0203] | C |
-| Qwen2.5-3B | 78.1% | 1/4 | 1.3016 [-0.0077, 2.9763] | 0.7227 [-0.3634, 2.0460] | 0.9913 [-0.0164, 2.1970] | C |
+Clone the repository and run the offline demo:
 
-The 3B replication produced larger point estimates, including a paired 3B-minus-1.5B same-domain-damage change of **1.9057 [0.4973, 3.6474]**, but it did not rescue the hypothesis: discovery stability stayed below the 3/4-domain requirement and the primary matched-control intervals crossed zero. The classification transition is **C -> C**.
+```bash
+git clone https://github.com/AltanCetinCelik/SelectiveLLM.git
+cd SelectiveLLM
 
-![Qwen2.5-3B held-out causal controls](results/real/causal_scale_qwen3b/latest/plots/causal_comparison_block64.png)
+python3.11 -m venv .venv
+source .venv/bin/activate
 
-Read the [1.5B report](results/real/causal_importance/latest/report.md), [3B report](results/real/causal_scale_qwen3b/latest/report.md), and [paired scale comparison](results/real/causal_scale_qwen3b/latest/scale_comparison.json). These are logical masking studies, not parameter paging.
+pip install -e .
+selectivellm demo
+```
 
-## Deterministic Control Evidence
+The demo:
 
-![Quality retention versus declared-capacity reduction from the deterministic-control run](results/latest/plots/quality_vs_memory.png)
+- analyzes each request,
+- identifies candidate capabilities,
+- routes the request,
+- creates a memory-constrained capacity plan,
+- loads or reuses the selected components,
+- reports cache activity,
+- reports stage-level latency,
+- and records memory semantics explicitly.
 
-Backend: **`deterministic-control`** | Benchmark: **`hero-1.0.0`** | 16 cases x 5 repetitions | Accelerator memory: **unavailable**
+Example workflow:
 
-| Method | Control score | Oracle retention | Routing F1 | Declared peak capacity | Reduction vs all-resident | Expert cache hit rate |
-|---|---:|---:|---:|---:|---:|---:|
-| Base only | 0.431 | 43.1% | 0.125 | 500.0 MB | 68.4% | 0.0% |
-| Random | 0.514 | 51.4% | 0.150 | 860.0 MB | 45.6% | 0.0% |
-| Keyword | 0.503 | 50.3% | 0.198 | 680.0 MB | 57.0% | 0.0% |
-| Oracle | 1.000 | 100.0% | 1.000 | 1019.8 MB | 35.5% | 0.0% |
-| Semantic | 0.801 | 80.1% | 0.696 | 857.8 MB | 45.7% | 0.0% |
-| Semantic + cache | 0.801 | 80.1% | 0.696 | 857.8 MB | 45.7% | 31.2% |
-| All resident | 0.963 | 96.3% | 0.368 | 1580.0 MB | 0.0% | 98.8% |
+```text
+Prompt:
+"Use Python to simulate an RLC circuit."
 
-These numbers demonstrate that the implemented router, planner, cache, metrics, and reporting pipeline respond quantitatively to independently defined capacity and workload locality. They do not establish equivalent behavior for real adapters. See the [complete report](results/latest/report.md), [raw observations](results/latest/raw_results.jsonl), [failure analysis](results/latest/routing_failures.md), and [manifest](results/latest/manifest.json).
+Detected capabilities:
+  python                  0.83
+  electrical_engineering  0.78
+  mathematics             0.45
 
-## What currently works
+Candidate capacity:
+  python_expert
+  electronics_expert
+  math_expert
 
-- Multi-label prompt profiles retaining Python, mathematics, electrical engineering, reasoning, software engineering, scientific writing, and general signals.
-- Static, keyword, random, oracle, embedding, top-k, threshold, and hybrid routers with scores, confidence, latency, and debug metadata.
-- Versioned YAML capacity registry with dependencies, declared memory, backend identity, paths, tasks, embeddings, priorities, and parameter counts.
-- Budget-aware planning that records rejected relevant capacity instead of silently dropping it.
-- Dependency-aware LRU lifecycle management with expert-only hit rates, misses, evictions, swaps, and load/unload latency.
-- Strict separation of simulated declared capacity, observed host RSS, and available accelerator allocation/reservation/peak metrics.
-- One backend contract for deterministic control and real Hugging Face Transformers + PEFT/LoRA operation.
-- CUDA -> MPS -> CPU detection, with no CUDA assumption in the default path.
-- Reproducible benchmark directories containing versioned configuration, environment, raw JSONL, summaries, CSV, report, routing decisions, failures, and evidence plots.
-- Compatibility guards using hashes of benchmark content, registry content, routing configuration, model/adapter identity, seed policy, device class, and measurement semantics.
-- Discovery-only activation and `gradient * activation` rankings with held-out, structurally matched logical-ablation controls for dense Qwen models.
-- Immutable positive, null, negative, and contradictory evidence artifacts with case-level bootstrap intervals and clean-source provenance.
+Budget:
+  850 MB
 
-## What this is not
+Selected:
+  base
+  python_expert
+  electronics_expert
 
-- It is not document retrieval or a RAG implementation.
-- It is not a newly trained Mixture-of-Experts architecture.
-- v0.1.x is adapter/expert routing as a testable proxy for a broader capacity-routing hypothesis.
-- It does not show that dense-model knowledge can be separated into clean semantic parameter blocks.
-- The included 1.5B and 3B dense experiments specifically failed their frozen stable-causal-specialization gates.
-- It does not bundle model weights or make claims across incompatible backends.
+Rejected:
+  math_expert -> memory_budget
+
+Inference:
+  base + selected capacity
+```
+
+The default demo uses the deterministic control backend so it runs without downloading model weights.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    P[Prompt] --> A[Analyzer]
+    A --> R[Router]
+    R --> B[Budget Planner]
+    B --> C[Capacity Registry]
+    C --> M[Runtime Manager]
+
+    M --> G[Accelerator Resident]
+    M --> H[Host / Cached]
+    M --> D[Disk Available]
+
+    G --> I[Selected Capacity]
+    H --> I
+    D --> I
+
+    I --> N[Inference]
+    N --> X[Metrics + Provenance]
+```
+
+SelectiveLLM separates the system into independent stages:
+
+```text
+Prompt
+  ↓
+Analyzer
+  ↓
+Router
+  ↓
+Capacity candidates
+  ↓
+Budget-aware planner
+  ↓
+Runtime loader / cache
+  ↓
+Inference backend
+  ↓
+Metrics + reproducibility metadata
+```
+
+This separation makes it possible to test routing policies without silently changing memory policy, backend behavior, or benchmark methodology.
+
+---
+
+## What works today
+
+SelectiveLLM currently includes:
+
+- multi-label prompt analysis,
+- static routing,
+- keyword routing,
+- random routing,
+- oracle routing,
+- local embedding routing,
+- threshold and top-k routing,
+- hybrid routing,
+- versioned capacity registries,
+- dependency-aware planning,
+- configurable memory budgets,
+- LRU-style expert lifecycle management,
+- load / unload / transfer telemetry,
+- cache hit and miss tracking,
+- Transformers + PEFT inference,
+- deterministic offline controls,
+- CUDA → MPS → CPU device detection,
+- stage-separated latency metrics,
+- accelerator / host memory semantics,
+- benchmark manifests and fingerprints,
+- reproducible raw results,
+- negative-result preservation,
+- dense causal-capacity research tooling.
+
+The CLI and Python API use the same underlying engine.
+
+---
+
+## Real-model evidence
+
+A pinned experiment was run using:
+
+```text
+Base model: Qwen2.5-1.5B-Instruct
+Backend:    Transformers + PEFT
+Experts:    code / math / science LoRA adapters
+Hardware:   Apple M4, 16 GB unified memory, MPS
+```
+
+The semantic routing policy reached:
+
+```text
+Routing F1
+──────────────
+Random       0.278
+Keyword      0.611
+Semantic     0.830
+Oracle       1.000
+```
+
+Dynamic semantic routing used:
+
+```text
+3125.7 MB MPS live allocation
+```
+
+versus:
+
+```text
+3412.2 MB all-resident
+```
+
+for a measured difference of approximately:
+
+```text
+286 MB
+```
+
+in live MPS tensor allocation.
+
+The experiment therefore demonstrated that **runtime capacity selection changes real model residency**.
+
+It did **not** demonstrate a reliable answer-quality advantage from the existing routing policy.
+
+That distinction is important.
+
+Full evidence:
+
+- [Real-model analysis](docs/real_model_evidence.md)
+- [Run report](results/real/latest/report.md)
+- [Raw responses](results/real/latest/raw_responses.jsonl)
+- [Manifest](results/real/latest/manifest.json)
+
+![Real quality-memory tradeoff](results/real/latest/plots/real_quality_vs_memory.png)
+
+---
+
+## Research status
+
+SelectiveLLM intentionally separates demonstrated system behavior from open hypotheses.
+
+### Demonstrated
+
+✅ Real adapter loading and unloading
+
+✅ Runtime capacity residency changes
+
+✅ Memory-budget-aware planning
+
+✅ Dependency-aware cache behavior
+
+✅ Measurable load and swap latency
+
+✅ Semantic routing can outperform keyword/random routing on the current routing labels
+
+✅ Reproducible deterministic and real-model experiment pipelines
+
+### Not yet demonstrated
+
+⚠️ Reliable output-quality improvement from semantic adapter routing
+
+⚠️ Robust domain specialization across the current expert pool
+
+⚠️ Generalization to large public held-out workloads
+
+⚠️ Learned calibrated capacity routing
+
+❌ Stable semantic decomposition of dense model parameters
+
+❌ Physical parameter paging based on prompt semantics
+
+The dense Qwen2.5-1.5B and 3B causal-localization experiments both failed their preregistered stable-specialization gates.
+
+Those negative results are preserved rather than removed.
+
+See:
+
+- [Dense 1.5B causal report](results/real/causal_importance/latest/report.md)
+- [Dense 3B replication](results/real/causal_scale_qwen3b/latest/report.md)
+- [Hostile review](docs/hostile_review.md)
+
+---
+
+## The broader research direction
+
+The current adapter experiments are a proxy for a more general problem.
+
+SelectiveLLM ultimately targets:
+
+```text
+state / request
+      ↓
+adaptive compute controller
+      ↓
+┌─────────────────────────────┐
+│ Which model?                │
+│ Which expert?               │
+│ Which adapter?              │
+│ How much capacity?          │
+│ What should stay resident?  │
+│ What should be loaded?      │
+│ When should we fall back?   │
+└─────────────────────────────┘
+      ↓
+minimum sufficient computation
+```
+
+The desired optimization target is not routing accuracy by itself.
+
+A future controller should optimize something closer to:
+
+```text
+expected utility
+    =
+expected quality gain
+    - memory cost
+    - loading cost
+    - latency cost
+    - uncertainty penalty
+```
+
+subject to runtime constraints such as:
+
+```text
+memory <= budget
+latency <= target
+quality >= acceptable threshold
+```
+
+This is the direction planned for the next generation of the framework.
+
+---
+
+## Current routing limitation
+
+The current default analyzer is intentionally transparent and deterministic.
+
+It uses:
+
+- lexical evidence,
+- feature hashing,
+- local similarity features.
+
+It is **not yet a trained semantic encoder**.
+
+This keeps the v0.1 benchmark reproducible and offline, but it is not intended to be the final routing architecture.
+
+A planned learned routing stack will evaluate:
+
+```text
+keyword
+vs
+feature-hash
+vs
+embedding encoder
+vs
+learned classifier
+vs
+oracle
+```
+
+with probability calibration and abstention.
+
+---
 
 ## Quickstart
 
@@ -147,43 +427,32 @@ Python 3.11 or newer is required.
 ```bash
 git clone https://github.com/AltanCetinCelik/SelectiveLLM.git
 cd SelectiveLLM
+
 python3.11 -m venv .venv
 source .venv/bin/activate
+
 pip install -e .
 selectivellm demo
 ```
 
-The demo runs offline in under five minutes, detects hardware, routes four prompts including a three-capability RLC request, displays selected and rejected capacity, shows cache events, and labels all control measurements.
-
-Run the full reproducible experiment:
+Run a prompt:
 
 ```bash
-selectivellm benchmark --report --repetitions 5 --seed 42
-open results/latest/report.md  # macOS; open the file normally elsewhere
+selectivellm run \
+  --prompt "Explain a MOSFET gate driver" \
+  --verbose
 ```
 
-## CLI
+Run the reproducible benchmark:
 
 ```bash
-# Route and generate with the default control backend
-selectivellm run --prompt "Explain a MOSFET gate driver" --verbose
-
-# Compare one method or the full method matrix
-selectivellm benchmark --router semantic --report
-selectivellm benchmark --report --repetitions 5
-
-# Inspect stage timing and memory semantics
-selectivellm profile --prompt "Write a Python FastAPI endpoint"
-selectivellm inspect
-
-# Inspect available capacity
-selectivellm registry list
-selectivellm registry inspect python_expert
-
-# Explicit execution modes
-selectivellm run --mode full_model --prompt "Summarize sparse inference"
-selectivellm run --mode offload --config configs/transformers_peft.example.yaml --prompt "Explain an RLC circuit"
+selectivellm benchmark \
+  --report \
+  --repetitions 5 \
+  --seed 42
 ```
+
+---
 
 ## Python API
 
@@ -191,135 +460,292 @@ selectivellm run --mode offload --config configs/transformers_peft.example.yaml 
 from selectivellm import SelectiveLLM
 
 engine = SelectiveLLM.from_config("configs/default.yaml")
-result = engine.generate("Use Python to simulate an RLC circuit and plot the transient response")
+
+result = engine.generate(
+    "Use Python to simulate an RLC circuit and plot the transient response"
+)
 
 print(result.text)
+
+print("Capabilities:")
 print(result.profile.capabilities)
+
+print("Selected capacity:")
 print(result.routing.selected)
+
+print("Rejected capacity:")
 print(result.plan.rejected)
+
+print("Memory:")
 print(result.memory)
+
+print("Metrics:")
 print(result.metrics)
 ```
 
-## Real Transformers and PEFT
+---
 
-Install the optional backend and edit the example registry with compatible local or explicitly trusted Hub paths:
+## Real Transformers + PEFT
+
+Install the optional Hugging Face backend:
 
 ```bash
 pip install -e ".[hf]"
+```
+
+Then configure compatible local or Hugging Face model and adapter paths.
+
+Example:
+
+```bash
 selectivellm run \
   --config configs/transformers_peft.example.yaml \
   --prompt "Explain a MOSFET gate driver"
 ```
 
-The real backend loads a causal language model, adds named PEFT adapters, activates selected adapters, deletes evicted adapters where supported, synchronizes accelerator timing, and reports actual memory telemetry where PyTorch exposes it. `trust_remote_code` defaults to `false`. Multi-adapter composition can fail when adapters are incompatible; this is reported explicitly.
+The real backend supports:
 
-Reproduce the pinned v0.1.1 experiment after installing the optional dependencies and downloading the external assets:
+- causal language models,
+- named PEFT adapters,
+- adapter activation,
+- adapter eviction where supported,
+- accelerator timing synchronization,
+- real memory telemetry where PyTorch exposes it.
+
+`trust_remote_code` defaults to `false`.
+
+Model and adapter licenses remain separate from the SelectiveLLM Apache-2.0 license.
+
+---
+
+## CLI
 
 ```bash
-selectivellm real-benchmark \
-  --config configs/real_v011.yaml \
-  --warm-repetitions 3 \
-  --output results/real
+# Demo
+selectivellm demo
+
+# Route and generate
+selectivellm run \
+  --prompt "Explain a MOSFET gate driver" \
+  --verbose
+
+# Benchmark one router
+selectivellm benchmark \
+  --router semantic \
+  --report
+
+# Benchmark the method matrix
+selectivellm benchmark \
+  --report \
+  --repetitions 5
+
+# Inspect runtime
+selectivellm inspect
+
+# Profile one request
+selectivellm profile \
+  --prompt "Write a Python FastAPI endpoint"
+
+# Inspect available capacity
+selectivellm registry list
+
+selectivellm registry inspect python_expert
 ```
 
-Model and adapter licenses are separate from the Apache-2.0 project license. SelectiveLLM does not redistribute weights.
+---
 
-## Experimental modes
+## Benchmark philosophy
 
-| Mode | Purpose | v0.1 status |
-|---|---|---|
-| Full model | Dense/base generation baseline | Implemented through the common backend |
-| CPU/GPU offload | Conventional placement baseline | Configured through Transformers + Accelerate `device_map`; real evidence pending |
-| Semantic expert routing | Shared base plus selected adapters/experts | Real MPS residency evidence; quality advantage not established |
-| Multi-model expert pool | Systems-level proxy, not parameter paging | Interface-compatible future experiment |
+SelectiveLLM treats routing, memory, latency, and quality as separate measurements.
 
-## Benchmark contract
-
-The latency decomposition is:
+The main latency decomposition is:
 
 ```text
-T_total = T_route + T_plan + T_load + T_inference + T_orchestration
+T_total =
+    T_route
+  + T_plan
+  + T_load
+  + T_inference
+  + T_orchestration
 ```
 
-Aggregates report count, mean, median, sample standard deviation, p50, p95, and a normal-approximation 95% confidence interval where meaningful. Missing hardware measurements remain `null`. A single-method run reports relative quality/memory metrics as `N/A` because it lacks oracle and all-resident denominators.
+Generated experiment directories include:
 
 ```text
 results/<run-id>/
-  config.yaml
-  environment.json
-  manifest.json
-  raw_results.jsonl
-  routing_decisions.jsonl
-  summary.json
-  summary.csv
-  report.md
-  routing_failures.md
-  plots/
+├── config.yaml
+├── environment.json
+├── manifest.json
+├── raw_results.jsonl
+├── routing_decisions.jsonl
+├── summary.json
+├── summary.csv
+├── report.md
+├── routing_failures.md
+└── plots/
 ```
 
-Read the full [benchmark methodology](docs/benchmarking.md) before comparing runs. Null and negative results are retained by policy.
+Read [docs/benchmarking.md](docs/benchmarking.md) for the full methodology.
 
-## Research questions
+---
 
-**RQ1:** Can semantic routing accurately predict which specialized model capacity a prompt requires?
+## Research tracks
 
-**RQ2:** How much memory can dynamic expert loading save compared with keeping all experts resident?
+SelectiveLLM is now best understood as two related research tracks.
 
-**RQ3:** What latency penalty is introduced by swapping capacity?
+### Track A — Adaptive Runtime
 
-**RQ4:** Can caching recover most of that latency on realistic mixed-domain workloads?
+Near-term engineering and evaluation:
 
-**RQ5:** Is prompt-dependent dense-model capacity stable and causally useful enough to justify a later paging prototype?
+- learned capacity routing,
+- calibrated probabilities,
+- uncertainty-aware fallback,
+- cost-aware planning,
+- larger expert pools,
+- model routing,
+- cache and prefetch policies,
+- quality-memory-latency Pareto optimization.
 
-## Limitations and falsification
+### Track B — Selective Dense Compute
 
-The current analyzer is a transparent deterministic feature-hash/keyword hybrid, not a learned semantic encoder. The original real workload was small and authored, policies were not counterbalanced, and 45.8% of warm responses reached its fixed 96-token cap. The later 384-token expert diagnostic reduced but did not eliminate truncation and found diversity without robust label alignment. The dense experiments used only 32 held-out questions per model and showed highly skewed effects with weak discovery stability. The central quality-preservation and dense-capacity-localization hypotheses therefore remain unproven.
+Higher-risk research:
 
-A strong falsification test uses a pre-registered held-out workload, a real shared base and validated adapters, repeated workload orders, and equal decoding settings. The hypothesis is weakened or falsified for that setup if semantic routing does not beat keyword/random routing, does not retain quality relative to oracle/all-resident, or incurs enough transfer latency that no useful quality-memory-latency point remains.
+- causal capacity localization,
+- stable parameter masks,
+- hardware-aligned block selection,
+- contextual sparsity,
+- sparse execution,
+- eventual parameter paging.
 
-Parameter-level semantic paging becomes credible only after causal importance masks are stable across held-out tasks and paraphrases, beat random/pruning baselines, compose across domains, map to hardware-efficient blocks, and produce measured physical memory or compute savings after routing and transfer overhead. The current 1.5B and 3B results do not pass that gate.
+Track A does not depend on Track B succeeding.
+
+---
+
+## Roadmap
+
+### v0.2 — Adaptive Compute Router
+
+Planned priorities:
+
+1. learned semantic capacity router,
+2. calibrated routing probabilities,
+3. abstention / full-model fallback,
+4. quality-cost-aware planning,
+5. larger held-out evaluation set,
+6. counterbalanced workloads,
+7. public benchmark tasks where possible,
+8. quality-memory-latency Pareto reporting,
+9. expanded model / expert capacity types,
+10. simplified installation and interactive demo.
+
+Dense semantic parameter paging remains a separate experimental track and will not be claimed until physical savings and retained quality are demonstrated.
+
+See [docs/roadmap.md](docs/roadmap.md).
+
+---
+
+## Related work
+
+SelectiveLLM overlaps with several research areas:
+
+- Mixture-of-Experts,
+- model routing,
+- adapter routing,
+- conditional computation,
+- contextual sparsity,
+- heterogeneous memory,
+- model offloading,
+- parameter-efficient fine-tuning,
+- knowledge localization.
+
+The project does **not** claim that these individual ideas are new.
+
+The intended contribution is the framing and runtime system for treating independently selectable model capacity as a **budgeted resource** and evaluating routing, residency, transfer cost, quality, and falsification together.
+
+See [docs/related_work.md](docs/related_work.md).
+
+---
 
 ## Documentation
 
-- [Concepts and scientific claims](docs/concepts.md)
-- [Architecture and extension contracts](docs/architecture.md)
-- [Benchmarking and validity](docs/benchmarking.md)
-- [Related work and novelty positioning](docs/related_work.md)
-- [Research questions and hypothesis matrix](docs/research_questions.md)
-- [Semantic parameter paging research agenda](docs/research/semantic_parameter_paging.md)
-- [Living technical report](docs/paper.md)
-- [v0.1.1 real-model evidence](docs/real_model_evidence.md)
+### Core
+
+- [Concepts](docs/concepts.md)
+- [Architecture](docs/architecture.md)
+- [Benchmark methodology](docs/benchmarking.md)
+- [Related work](docs/related_work.md)
+- [Research questions](docs/research_questions.md)
+- [Roadmap](docs/roadmap.md)
+
+### Experimental evidence
+
+- [Technical report](docs/paper.md)
+- [Real-model evidence](docs/real_model_evidence.md)
 - [Expert-pool diagnostic](results/real/expert_quality/latest/report.md)
 - [Dense 1.5B causal report](results/real/causal_importance/latest/report.md)
-- [Dense 3B scale-replication report](results/real/causal_scale_qwen3b/latest/report.md)
-- [Hostile review and falsification criteria](docs/hostile_review.md)
-- [Roadmap](docs/roadmap.md)
-- [Public release audit](docs/public_release.md)
-- [v0.1.0 release notes](docs/releases/v0.1.0.md)
-- [v0.1.1 release notes](docs/releases/v0.1.1.md)
+- [Dense 3B replication](results/real/causal_scale_qwen3b/latest/report.md)
+- [Hostile review](docs/hostile_review.md)
+
+---
 
 ## Development
 
 ```bash
 pip install -e ".[dev]"
+
 ruff format --check .
 ruff check .
 mypy selectivellm
-pytest --cov=selectivellm --cov-report=term-missing --cov-fail-under=70
+
+pytest \
+  --cov=selectivellm \
+  --cov-report=term-missing \
+  --cov-fail-under=70
+
 python -m build
 ```
 
-Tests are network-free and do not download models. Optional real-backend integration requires user-supplied compatible assets.
+The default test suite is network-free and does not download model weights.
 
-## Roadmap
+Optional real-model integration tests require user-supplied compatible assets.
 
-The next dense-capacity study must change a controlled variable other than nearby Qwen scale, such as model family or substantially larger scale on suitable hardware, and must be preregistered before inspecting outcomes. The LoRA line remains paused at evidence of exploitable diversity without robust semantic alignment. Hardware-aligned parameter paging is not justified by the current results. See the [evidence-gated roadmap](docs/roadmap.md).
+---
+
+## What SelectiveLLM is not
+
+SelectiveLLM is not:
+
+- a document RAG framework,
+- a claim that dense models already contain clean page-ready semantic blocks,
+- a newly trained Mixture-of-Experts architecture,
+- a claim that a 70B dense model can currently run with 7B-equivalent memory,
+- a replacement for quantization,
+- a replacement for conventional offloading.
+
+These techniques can be complementary.
+
+SelectiveLLM focuses specifically on **request-conditioned capacity selection and runtime resource planning**.
+
+---
 
 ## Citation
 
-Use [CITATION.cff](CITATION.cff) and include the exact benchmark fingerprint when citing a result. The v0.1 software is Apache-2.0 licensed; external model and adapter licenses still apply.
+Use [CITATION.cff](CITATION.cff) when citing the project.
+
+When citing experimental results, include the relevant benchmark fingerprint and manifest.
+
+The SelectiveLLM software is licensed under Apache-2.0.
+
+External models and adapters retain their original licenses.
+
+---
 
 ## Contributing
 
-Reproducible positive, null, and negative results are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the [Code of Conduct](CODE_OF_CONDUCT.md) before opening a contribution.
+Reproducible positive, null, contradictory, and negative results are welcome.
+
+Before contributing, see:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
