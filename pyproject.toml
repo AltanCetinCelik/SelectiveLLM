@@ -5,12 +5,23 @@ build-backend = "hatchling.build"
 [project]
 name = "selectivellm"
 version = "0.1.1"
-description = "Semantic model paging and dynamic expert routing for memory-constrained LLM inference"
-readme = "README.md"
+description = "Adaptive compute and capacity routing for language models"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
-authors = [{name = "SelectiveLLM contributors"}]
-keywords = ["llm", "routing", "peft", "lora", "inference", "memory"]
+authors = [{name = "Altan Cetin Celik"}]
+keywords = [
+  "llm",
+  "adaptive-compute",
+  "conditional-computation",
+  "model-routing",
+  "semantic-routing",
+  "inference",
+  "peft",
+  "lora",
+  "mixture-of-experts",
+  "model-selection",
+  "memory-optimization",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: Apache Software License",
@@ -54,7 +65,10 @@ selectivellm = "selectivellm.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/AltanCetinCelik/SelectiveLLM"
+Repository = "https://github.com/AltanCetinCelik/SelectiveLLM"
 Documentation = "https://github.com/AltanCetinCelik/SelectiveLLM/tree/main/docs"
+Research = "https://github.com/AltanCetinCelik/SelectiveLLM/blob/main/docs/paper.md"
+Changelog = "https://github.com/AltanCetinCelik/SelectiveLLM/blob/main/CHANGELOG.md"
 Issues = "https://github.com/AltanCetinCelik/SelectiveLLM/issues"
 
 [tool.hatch.build.targets.wheel]
